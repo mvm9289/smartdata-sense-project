@@ -42,12 +42,12 @@ static void sent(struct mesh_conn *c)
 {
     if (first_message == 1)
     {
-        printf("net_sent: sent hello message");
+        printf("net_sent: sent hello message\n");
         first_message = 0;
     }
     else
     {
-        printf("net_sent: current send file sended");
+        printf("net_sent: current send file sended\n");
     
         // Updating the current sending file
         send_file++; 
@@ -60,7 +60,7 @@ static void timedout(struct mesh_conn *c)
     attempts++;
 	if (attempts < MAX_ATTEMPTS) 
 	{
-	    printf("net_timedout: resending the current send file");
+	    printf("net_timedout: resending the current send file\n");
 	    
 		sink_addr.u8[0] = SINK_ADDR1;
 		sink_addr.u8[1] = SINK_ADDR2;
@@ -68,7 +68,7 @@ static void timedout(struct mesh_conn *c)
 	}
 	else
 	{
-	    printf("net_timedout: maximum number of attempts reached, message lost");
+	    printf("net_timedout: maximum number of attempts reached, message lost\n");
 	}
 }
 
@@ -106,7 +106,7 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 	            {
 	                printf("cfs_read: file read successful (%d)(%s)\n", read_bytes, read_buffer);
 	            
-	                printf("net_received: sending the current send file");
+	                printf("net_received: sending the current send file\n");
 	                
 	                // Sending the current sending file
 	                packetbuf_copyfrom(read_buffer, read_bytes);
@@ -170,7 +170,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	    
 		if (write_file >= MAX_FILES)
 		{
-		    printf("file: maximum number of files reached");
+		    printf("file: maximum number of files reached\n");
 		} 
 		else
 		{
