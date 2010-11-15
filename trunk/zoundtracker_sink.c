@@ -66,19 +66,24 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 {
 	if (!strcmp((char *)packetbuf_dataptr(), "hello"))
 	{
-		int j;
+		printf("Hello packet received from %d.%d\n\n", from->u8[0], from->u8[1]);
+		int j, firstEmptyPos = -1;
 		unsigned char exit = 0;
 		for (j = 0; j < NODE_TABLE_SIZE && !exit; j++)
 		{
-			if (nodeTable[j].empty)
-			{
-				nodeTable[j].empty = 0;
-				nodeTable[j].addr1 = from->u8[0];
-				nodeTable[j].addr2 = from->u8[1];
+			if (nodeTable[j].empty) firstEmptyPos = j;
+			else if (nodeTable[j].addr1 == from->u8[0] &&
+			  nodeTable[j].addr2 == from->u8[1])
 				exit = 1;
-			}
 		}
-		if (!exit) printf("NODE TABLE COMPLETE!\n\n");
+		if (firstEmptyPos == -1) printf("NODE TABLE COMPLETE!\n\n");
+		else if (exit) printf("This node already exists in node table\n\n");
+		else
+		{
+			nodeTable[firstEmptyPos].empty = 0;
+			nodeTable[firstEmptyPos].addr1 = from->u8[0];
+			nodeTable[firstEmptyPos].addr2 = from->u8[1];
+		}
 	}
 	else
 	{
@@ -128,16 +133,21 @@ PROCESS_THREAD(zoundtracker_sink_process, ev, data)
 				
 				isReceived = 0;
 				resends = 0;
-				printf("Sending packet\n\n");
+				printf("Sending poll packet\n\n");
 				mesh_send(&zoundtracker_conn, &addr_send);
 				
 				static struct etimer timer2;
-				etimer_set(&timer2, CLOCK_SECOND);
-				//while (!isReceived)
-				//{
-					PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer2));//Si no llega, quitarla de la tabla
-					//etimer_reset(&timer2);
-				//}
+				etimer_set(&timer2, CLOCK_SECOND*2);
+				while (!isReceived && resends < MAX_RESENDS)
+				{
+					PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer2));
+					etimer_reset(&timer2);
+				}
+				if (!isReceived)
+				{
+					printf("Answer packet not received. Entry %d of node table will be erased.\n\n", i);
+					nodeTable[i].empty = 1;
+				}
 			}
 		}
 		etimer_reset(&timer);
