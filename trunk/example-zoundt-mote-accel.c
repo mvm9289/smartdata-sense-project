@@ -19,7 +19,7 @@
 #define NUM_SECONDS 5
 
 // NET Defines
-#define MY_ADDR1 1
+#define MY_ADDR1 5
 #define MY_ADDR2 123
 #define SINK_ADDR1 111
 #define SINK_ADDR2 111
@@ -58,8 +58,7 @@ static void sent(struct mesh_conn *c)
         // Updating the current sending file
         send_file++; 
     }
-    
-    // Turn off 'poll' received
+    // 'Error' mode finished
     leds_off(LEDS_RED);
 }
 
@@ -78,6 +77,8 @@ static void timedout(struct mesh_conn *c)
 	else
 	{
 	    printf("[net] maximum number of attempts reached\n message lost\n\n");
+        // 'Error' mode started
+        leds_on(LEDS_RED);
 	}
 }
 
@@ -86,9 +87,11 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 	if (!memcmp(packetbuf_dataptr(), (void *)"poll", 4)) 
 	{    
 		printf("[net] 'poll' message received\n\n");
-		leds_on(LEDS_RED);
-		leds_off(LEDS_YELLOW);
+		// 'Hello' mode finished
 		leds_off(LEDS_GREEN);
+		// 'Poll' mode started
+		leds_on(LEDS_YELLOW);
+		
 		
 		if (send_file >= write_file)
 		{
@@ -125,8 +128,7 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 	                attempts = 0;			
 			        sink_addr.u8[0] = SINK_ADDR1;
 			        sink_addr.u8[1] = SINK_ADDR2;
-			        mesh_send(&zoundtracker_conn, &sink_addr);
-			        leds_on(LEDS_YELLOW);     
+			        mesh_send(&zoundtracker_conn, &sink_addr);     
                 }
                 
                 cfs_close(fd);
