@@ -3,6 +3,8 @@
 #include "net/rime.h"
 #include "net/rime/mesh.h"
 
+#include "leds.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -11,7 +13,7 @@
 #define CHANNEL 111
 
 #define NODE_TABLE_SIZE 200
-#define POLL_INTERVAL CLOCK_SECOND*30
+#define POLL_INTERVAL CLOCK_SECOND*15
 #define MAX_RESENDS 5
 
 
@@ -64,8 +66,9 @@ static void timedout(struct mesh_conn *c)
 
 static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 {
-	if (!strcmp((char *)packetbuf_dataptr(), "hello"))
+	if (!memcmp(packetbuf_dataptr(), (void *)"hello", 5))
 	{
+	    leds_on(LEDS_GREEN);
 		printf("Hello packet received from %d.%d\n\n", from->u8[0], from->u8[1]);
 		int j, firstEmptyPos = -1;
 		unsigned char exit = 0;
@@ -87,6 +90,8 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 	}
 	else
 	{
+	    leds_on(LEDS_RED);
+	    leds_off(LEDS_YELLOW);
 		printf("Packet received:\n From: %d.%d\n Data length: %d\n Data: %.*s\n Hops: %d\n\n",
 			from->u8[0], from->u8[1], packetbuf_datalen(),
 			packetbuf_datalen(), (char *)packetbuf_dataptr(), hops);
@@ -102,6 +107,7 @@ PROCESS_THREAD(zoundtracker_sink_process, ev, data)
 {
 	PROCESS_EXITHANDLER(mesh_close(&zoundtracker_conn);)
 	PROCESS_BEGIN();
+	
 	
 	int j;
 	for (j = 0; j < NODE_TABLE_SIZE; j++)
@@ -129,10 +135,13 @@ PROCESS_THREAD(zoundtracker_sink_process, ev, data)
 				rimeaddr_t addr_send;
 				addr_send.u8[0] = nodeTable[i].addr1;
 				addr_send.u8[1] = nodeTable[i].addr2;
-				packetbuf_copyfrom("poll", 4);
+				packetbuf_copyfrom((void *)"poll", 4);
 				
 				isReceived = 0;
 				resends = 0;
+				leds_off(LEDS_GREEN);
+				leds_off(LEDS_RED);
+				leds_on(LEDS_YELLOW);
 				printf("Sending poll packet\n\n");
 				mesh_send(&zoundtracker_conn, &addr_send);
 				
