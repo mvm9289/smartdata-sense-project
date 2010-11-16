@@ -1,4 +1,5 @@
 #include "contiki.h"
+#include "leds.h"
 #include "cfs/cfs.h"
 #include "net/rime.h"
 #include "net/rime/mesh.h"
@@ -11,14 +12,15 @@
 // CFS Defines
 #define FILE_NAME_SIZE 8
 #define READ_BUFFER_SIZE 80
-#define MAX_WRITES 6
-#define MAX_FILES 20
+#define ACCEL_BUFFER_SIZE 5
+#define MAX_WRITES 2
+#define MAX_FILES 50
 #define MAX_ATTEMPTS 3
 #define NUM_SECONDS 5
 
 // NET Defines
 #define MY_ADDR1 1
-#define MY_ADDR2 121
+#define MY_ADDR2 123
 #define SINK_ADDR1 111
 #define SINK_ADDR2 111
 #define CHANNEL 111
@@ -37,25 +39,28 @@ static rimeaddr_t sink_addr;
 static struct mesh_conn zoundtracker_conn;
 
 // Sensor variables
-static int16_t x;
+static int x, accel_bytes;
+static unsigned char accel_buffer[ACCEL_BUFFER_SIZE];
 
 //------------------------------------------------------------------------------
 
 // NET Functions
 static void sent(struct mesh_conn *c) 
 {
-    if (first_message == 1)
+    if (first_message == 0)
     {
-        printf("net_sent: sent hello message\n");
-        first_message = 0;
+        printf("[net] sent 'hello' message\n\n");
+        first_message = 1;
     }
     else
     {
-        printf("net_sent: current send file sended\n");
-    
+        printf("[net] sent current file\n filename: file%d\n\n", send_file);
         // Updating the current sending file
         send_file++; 
     }
+    
+    // Turn off 'poll' received
+    leds_off(LEDS_RED);
 }
 
 static void timedout(struct mesh_conn *c) 
@@ -64,7 +69,7 @@ static void timedout(struct mesh_conn *c)
     attempts++;
 	if (attempts < MAX_ATTEMPTS) 
 	{
-	    printf("net_timedout: resending the current send file\n");
+	    printf("[net] timeout resending the current file\n filename: file%d\n\n", send_file);
 	    
 		sink_addr.u8[0] = SINK_ADDR1;
 		sink_addr.u8[1] = SINK_ADDR2;
@@ -72,19 +77,22 @@ static void timedout(struct mesh_conn *c)
 	}
 	else
 	{
-	    printf("net_timedout: maximum number of attempts reached, message lost\n");
+	    printf("[net] maximum number of attempts reached\n message lost\n\n");
 	}
 }
 
 static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops) 
 {
-	if (!strcmp((char *)packetbuf_dataptr(), "poll")) 
+	if (!memcmp(packetbuf_dataptr(), (void *)"poll", 4)) 
 	{    
-		printf("net_received: poll received\n\n");
+		printf("[net] 'poll' message received\n\n");
+		leds_on(LEDS_RED);
+		leds_off(LEDS_YELLOW);
+		leds_off(LEDS_GREEN);
 		
 		if (send_file >= write_file)
 		{
-		    printf("net_received: all writed files are sended, no response");
+		    printf("[net] all pending files are sended\n no response\n\n");
 		}
 		else
 		{
@@ -95,29 +103,30 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 	        fd = cfs_open(filename, CFS_READ);
 	        if (fd < 0)
 	        {
-	            printf("cfs_open: error openning file (%s)\n", filename);
+	            printf("[cfs] error openning file\n filename: %s\n\n", filename);
 	        }
 	        else 
 	        {   
-	            printf("cfs_open: file open successful (%s)\n", filename);        
+	            //printf("[cfs] open: file open successful (%s)\n", filename);        
                 
                 read_bytes = cfs_read(fd, read_buffer, READ_BUFFER_SIZE);
                 if (read_bytes < 1)
 	            {
-	                printf("cfs_read: error reading from the file (%d)\n", write_bytes);
+	                printf("[cfs] error reading from the file\n num. bytes readed: %d\n\n", write_bytes);
 	            }
 	            else
 	            {
-	                printf("cfs_read: file read successful (%d)(%s)\n", read_bytes, read_buffer);
+	                //printf("[cfs] read: file read successful (%d)(%s)\n", read_bytes, read_buffer);
 	            
-	                printf("net_received: sending the current send file\n");
+	                printf("[net] sending the current file\n filename: file%d\n\n", send_file);
 	                
 	                // Sending the current sending file
-	                packetbuf_copyfrom(read_buffer, read_bytes);
+	                packetbuf_copyfrom((void*)read_buffer, read_bytes);
 	                attempts = 0;			
 			        sink_addr.u8[0] = SINK_ADDR1;
 			        sink_addr.u8[1] = SINK_ADDR2;
-			        mesh_send(&zoundtracker_conn, &sink_addr);     
+			        mesh_send(&zoundtracker_conn, &sink_addr);
+			        leds_on(LEDS_YELLOW);     
                 }
                 
                 cfs_close(fd);
@@ -146,8 +155,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	rimeaddr_set_node_addr(&my_addr);
 	       
     // CFS Initialization
-    write_file = send_file = write_num = 0;
-    first_message = 1;
+    write_file = send_file = write_num = first_message = 0;
     etimer_set(&write_timer, NUM_SECONDS*CLOCK_SECOND);
     
     // Sensor Initialization
@@ -156,11 +164,13 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     // Sending hello message to basestation
 	mesh_open(&zoundtracker_conn, CHANNEL, &zoundtracker_callbacks);
 	
-	packetbuf_copyfrom("hello", 5);
+	packetbuf_copyfrom((void *)"hello", 5);
 	attempts = 0;			
 	sink_addr.u8[0] = SINK_ADDR1;
 	sink_addr.u8[1] = SINK_ADDR2;
 	mesh_send(&zoundtracker_conn, &sink_addr);
+	leds_on(LEDS_GREEN);
+	//printf("[net] sending 'hello' message");
     
     
     // Erase all files
@@ -173,15 +183,15 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     while (1) 
     {
 	    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&write_timer));
-	    printf("write_timer: time has expired\n");
+	    //printf("[timer] time has expired\n");
 	    
 	    // Reading data from the accelerometer	
 	    x = accm_read_axis(X_AXIS);
-	    printf("accel: x axis readed (%d)\n", x);
+	    printf("[accel] x axis readed\n value: %d\n\n", x);
 	    
 		if (write_file >= MAX_FILES)
 		{
-		    printf("file: maximum number of files reached\n");
+		    printf("[file] maximum number of files reached\n don't take any measure\n\n");
 		} 
 		else
 		{
@@ -193,20 +203,20 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	        
 	        if (fd < 0) 
 	        {
-	            printf("cfs_open: error openning file (%s)\n", filename);
+	            printf("[cfs] error openning file\n filename: %s\n\n", filename);
 	        }
 	        else 
 	        {
-	            printf("cfs_open: file open successful (%s)\n", filename);
-	            
-	            write_bytes = cfs_write(fd, (const void *)x, sizeof(int16_t));
-	            if (write_bytes != sizeof(int16_t)) 
+	            //printf("[cfs] open: file open successful (%s)\n", filename);
+	            accel_bytes = sprintf(accel_buffer, "%d$", x);
+	            write_bytes = cfs_write(fd, accel_buffer, accel_bytes);
+	            if (write_bytes != accel_bytes) 
 	            {
-	                printf("cfs_write: error writing into the file (%d)\n", write_bytes);
+	                printf("[cfs] write: error writing into the file\n num. bytes writed: %d\n\n", write_bytes);
 	            }
 	            else 
 	            {
-	                printf("cfs_write: file write successful (%d)\n", write_bytes);
+	                //printf("[cfs] write: file write successful (%d)\n", write_bytes);
 	                cfs_close(fd);
                 }
             }
@@ -218,11 +228,11 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	            // Creating a new file
 	            write_file++;
 	            write_num = 0;
-	            printf("file: creating a new file\n");
+	            printf("[file] creating a new file\n\n");
 	        }
 	    }
         etimer_reset(&write_timer);
-        printf("write_timer: time reset\n");
+        //printf("[timer] time reset\n");
     }
     
     PROCESS_END(); 
