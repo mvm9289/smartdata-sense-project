@@ -150,6 +150,12 @@ PROCESS_THREAD(zoundtracker_sink_process, ev, data)
 				while (!isReceived && resends < MAX_RESENDS)
 				{
 					PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer2));
+					resends++;
+					leds_off(LEDS_GREEN);
+					leds_off(LEDS_RED);
+					leds_on(LEDS_YELLOW);
+					printf("Sending poll packet\n\n");
+					mesh_send(&zoundtracker_conn, &addr_send);
 					etimer_reset(&timer2);
 				}
 				if (!isReceived)
