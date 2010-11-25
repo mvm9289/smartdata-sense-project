@@ -127,7 +127,8 @@ PROCESS_THREAD(zoundtracker_sink_process, ev, data)
 
 	while (1)
 	{
-		PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
+		//PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
+		while(!etimer_expired(&timer));
 		for (i = 0; i < NODE_TABLE_SIZE; i++)
 		{
 			if (!nodeTable[i].empty)
@@ -149,7 +150,8 @@ PROCESS_THREAD(zoundtracker_sink_process, ev, data)
 				etimer_set(&timer2, CLOCK_SECOND*2);
 				while (!isReceived && resends < MAX_RESENDS)
 				{
-					PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer2));
+					//PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer2));
+					while (!etimer_expired(&timer2));
 					resends++;
 					leds_off(LEDS_GREEN);
 					leds_off(LEDS_RED);
