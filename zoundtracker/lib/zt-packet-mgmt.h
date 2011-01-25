@@ -1,11 +1,13 @@
-#define SINK_ADDR1
-#define SINK_ADDR2
+#define SINK_ADDR1 111
+#define SINK_ADDR2 111
+#define CHANNEL 111
 #define HELLO_BS
 #define HELLO_MN
 #define DATA
 #define ACK
 #define POLL
-
+#define PACKET_SIZE 64
+#define HELLO_MSG_SIZE 5
 
 typedef struct {
   unsigned char addr1;
