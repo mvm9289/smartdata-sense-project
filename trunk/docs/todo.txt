@@ -61,6 +61,8 @@ Nodos móviles
 - (Carlos)Función de envío de paquete, de respuesta a "poll" y, normal de datos cada 10 minutos, con todos los datos del fichero y 5 reintentos.
 - (Carlos)Función que al recibir un paquete "ack" de la "basestation" borra el fichero actual y abre uno nuevo.
 - (Carlos)Función de toma de datos del sensor cada 1 minuto.
+- Anadir conexion "broadcast" (solo escucha) para recibir "HELLO_BS" y enviar 
+"HELLO_MN" via conexión "mesh"
 
 maquina de estados
 --------------------------------------------------------------------------------
