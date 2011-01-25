@@ -79,3 +79,13 @@ Data Send | Poll
 Data Resend
 - Al cabo de 5 intentos -> Blocked
 
+
+Pruebas
+--------------------------------------------------------------------------------
+Realizar pruebas de simulación de entorno (si es necesario utilizaremos antenas)
+Utilizar parametros calidad de transmisión
+
+Comunicacion Gateway-Basestation
+--------------------------------------------------------------------------------
+A traves de "write", "printf" teniendo en cuenta la dificultad del Gateway al
+recibir la informacion
