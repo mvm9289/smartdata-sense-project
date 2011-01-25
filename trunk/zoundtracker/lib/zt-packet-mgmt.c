@@ -1,38 +1,20 @@
 #include "zt-packet-mgmt.h"
 
 unsigned short compute_checksum(Packet* my_packet) {
-    unsigned char ch[32];
-    ch[0] = my_packet->addr1 ^ my_packet->addr2 ^ my_packet->type ^
+    unsigned short ch = my_packet->addr1;
+    
+    ch = ch ^ my_packet->addr2 ^ my_packet->type ^
         my_packet->size ^ my_packet->counter;
-    ch[1] = (my_packet->size>>8) ^ (my_packet->counter>>8);
+
     int i = 0;
-    int j = 0;
-    while (i < 32) {
-        if(j < 23) {
-            ch[i] = ch[i] ^ my_packet->data[i] ^ my_packet->reserved[j];
-            j++;
-        }
-        else ch[i] = my_packet->data[i];
+    int max = (my_packet->size - my_packet->counter);
+    if(max > 32) max = 32;
+    while (i < max) {
+        ch = ch ^ my_packet->data[i];
         i++;
     }
     
-    i = 0;
-    j = 31;
-    
-    while (i < 16) {
-        ch[i] = ch[i] ^ ch[j];
-        ++i;
-        --j;
-    }
-    
-    unsigned short checksum;
-    i = 0;
-    while (i < 16) {
-        checksum = checksum << 1;
-        checksum = checksum + ch[i];
-    }
-    
-    return checksum;
+    return ch;
 }
 
 unsigned char * mount_packet(Packet * my_packet) {
