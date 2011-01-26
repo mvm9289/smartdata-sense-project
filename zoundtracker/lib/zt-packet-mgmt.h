@@ -7,6 +7,7 @@
 #define ACK
 #define POLL
 #define PACKET_SIZE 64
+#define DATA_SIZE 32
 #define HELLO_MSG_SIZE 5
 
 typedef struct {
