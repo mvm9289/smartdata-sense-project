@@ -70,7 +70,6 @@ static void hello_msg()
 	mesh_send(&zoundtracker_conn, &sink_addr);
 	
 	printf("[net] sending 'HELLO_MN' message\n\n");
-    leds_on(LEDS_GREEN);
 }
 
 static void data_msg() 
@@ -120,8 +119,9 @@ static void send_packet_from_file(void)
           packet_number = NO_NEXT_PACKET;
         else
         {  
+            // There's information to send
+            
             // 1. "Packet" sending
-            attempts = 0;
             data_msg();
             
             printf("[net] sending the 'WORKING_FILE' (packet number: %d)\n\n", packet_number);			
@@ -136,35 +136,41 @@ static void ack_received(void)
     // "Basestation" till the end of the file. When the end of the file is 
     // reached removes the "WORKING_FILE" and reopens it.
     
-    if (message_type == HELLO_MN)
-      printf("[net] 'HELLO_MN' 'ACK' received\n\n");
-    else 
+    if (message_type == HELLO_ACK)
+      printf("[net] 'HELLO_ACK' received\n\n");
+    else if (message_type == DATA_ACK)
     {
-      printf("[net] 'DATA' 'ACK' received\n\n");
+      printf("[net] 'DATA_ACK' received\n\n");
       
       if (packet_number != NO_NEXT_PACKET)
-      {
+      {        
         // 0. Sending the next packet from the "WORKING_FILE"
         packet_number++;
         send_packet_from_file();
       }
       else 
       {
+        // There's no more packets to send
+        
         // 1. 'WORKING_FILE' completely sended, removing it
         cfs_remove(WORKING_FILE);
       }
     }
 }
 
-
+//------------------------------------------------------------------------------
 static void sent(struct mesh_conn *c) 
 {
+    // Checksum comprobation needed on receiver
     if (message_type == HELLO_MN)
       printf("[net] sent 'HELLO_MN' message\n\n");
-    else
+    else if (message_type == DATA)
       printf("[net] sent 'DATA' message\n\n"); 
+    
+    leds_on(LEDS_GREEN);
 }
 
+//------------------------------------------------------------------------------
 static void timedout(struct mesh_conn *c) 
 {
     attempts++;
@@ -177,7 +183,7 @@ static void timedout(struct mesh_conn *c)
 	        
 	        printf("[net] timeout resending 'HELLO_MN' message\n\n");
 	    }
-	    else
+	    else if (message_type == DATA)
 	    {
 	        // 2. Resending "DATA" message
 	        send_packet_from_file();
@@ -191,7 +197,7 @@ static void timedout(struct mesh_conn *c)
 	    printf("[net] maximum number of attempts reached\n");
 	    if (message_type == HELLO_MN)
 	      printf(" 'HELLO_MN' message lost\n\n");
-	    else
+	    else if (message_type == DATA)
 	      printf(" 'DATA' message lost (packet number: %d)\n\n", packet_number);
         
         leds_on(LEDS_RED);
@@ -201,59 +207,37 @@ static void timedout(struct mesh_conn *c)
 // (!) Funcionalidades anteriores editadas (primera revision). Siguientes 
 // pendientes de adaptar 
 
+//------------------------------------------------------------------------------
 static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops) 
 {
-	if (!memcmp(packetbuf_dataptr(), (void *)"poll", 4)) 
-	{    
-		printf("[net] 'poll' message received\n\n");
-		// 'Hello' mode finished
-		leds_off(LEDS_GREEN);
-		// 'Poll' mode started
-		leds_on(LEDS_YELLOW);
-		
-		
-		if (send_file >= write_file)
-		{
-		    printf("[net] all pending files are sended\n no response\n\n");
-		}
-		else
-		{
-	        // Generating the filename of the current sending file
-	        sprintf(filename, "file%d", send_file);
-	    
-	        // Reading the current sending file
-	        fd = cfs_open(filename, CFS_READ);
-	        if (fd < 0)
-	        {
-	            printf("[cfs] error openning file\n filename: %s\n\n", filename);
-	        }
-	        else 
-	        {   
-	            //printf("[cfs] open: file open successful (%s)\n", filename);        
-                
-                read_bytes = cfs_read(fd, read_buffer, READ_BUFFER_SIZE);
-                if (read_bytes < 1)
-	            {
-	                printf("[cfs] error reading from the file\n num. bytes readed: %d\n\n", write_bytes);
-	            }
-	            else
-	            {
-	                //printf("[cfs] read: file read successful (%d)(%s)\n", read_bytes, read_buffer);
-	            
-	                printf("[net] sending the current file\n filename: file%d\n\n", send_file);
-	                
-	                // Sending the current sending file
-	                packetbuf_copyfrom((void*)read_buffer, read_bytes);
-	                attempts = 0;			
-			        sink_addr.u8[0] = SINK_ADDR1;
-			        sink_addr.u8[1] = SINK_ADDR2;
-			        mesh_send(&zoundtracker_conn, &sink_addr);     
-                }
-                
-                cfs_close(fd);
-	        } 
-	    }
-	}
+    // This function sends a "HELLO_MN" if "HELLO_BS" is received or sends the
+    // "WORKING_FILE" if the "Basestation" requests data. 
+    
+    attempts = 0; 
+    
+    // 0. Obtaining the "Packet"
+    Packet my_packet = mount(packetbuf_dataptr());
+    
+    // 1. Response depending on the "type" value
+    if (my_packet.type == HELLO_BS)
+    {
+        // 2. Sending "HELLO_MN" message
+        hello_msg()
+    }
+    else if (my_packet.type == POLL)
+    {
+        // 3. Sending "DATA" messages from "WORKING_FILE"
+        packet_number = 0;
+        send_packet_from_file()
+    }
+    else if (my_packet.type == ACK)
+    {
+        // 4. Sending the next packet or erasing data from "WORKING_FILE"
+        ack_received();
+    }
+    
+    leds_off(LEDS_GREEN)
+    leds_off(LEDS_RED)
 }
 
 const static struct mesh_callbacks zoundtracker_callbacks = {received, sent, timedout};

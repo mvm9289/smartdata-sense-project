@@ -68,6 +68,11 @@ Nodos móviles
     elimino el archivo (para posteriormente crear uno nuevo)
 
 - (Carlos)Función que al recibir un paquete "ack" de la "basestation" borra el fichero actual y abre uno nuevo.
+    
+  (!) Distincion de "Ack"
+  Modelo definido:
+    - Diferenciar "HELLO ACK" y "DATA ACK" como tipos diferentes de mensajes
+
 - (Carlos)Función de toma de datos del sensor cada 1 minuto.
 
 Maquina de estados
