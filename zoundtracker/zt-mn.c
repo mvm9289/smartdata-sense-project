@@ -198,6 +198,9 @@ static void timedout(struct mesh_conn *c)
 	}
 }
 
+// (!) Funcionalidades anteriores editadas (primera revision). Siguientes 
+// pendientes de adaptar 
+
 static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops) 
 {
 	if (!memcmp(packetbuf_dataptr(), (void *)"poll", 4)) 
