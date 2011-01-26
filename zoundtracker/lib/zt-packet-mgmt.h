@@ -4,7 +4,8 @@
 #define HELLO_BS
 #define HELLO_MN
 #define DATA
-#define ACK
+#define HELLO_ACK
+#define DATA_ACK
 #define POLL
 #define PACKET_SIZE 64
 #define DATA_SIZE 32
