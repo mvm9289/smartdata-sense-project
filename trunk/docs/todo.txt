@@ -59,6 +59,14 @@ Basestation
 Nodos móviles
 - (Carlos)Función de envío de paquete "hello" a la "basestation", al iniciarse y cuando recibe un paquete "hello" de la "basestation".
 - (Carlos)Función de envío de paquete, de respuesta a "poll" y, normal de datos cada 10 minutos, con todos los datos del fichero y 5 reintentos.
+
+  (!)Envio de un archivo
+  ¿Necesitamos confirmar cada paquete?
+  Modelo definido:
+    En estado 'Data Send' envio el primer paquete.
+    En estado 'Data Ack Received' envio el siguiente. Si no hay siguiente, 
+    elimino el archivo (para posteriormente crear uno nuevo)
+
 - (Carlos)Función que al recibir un paquete "ack" de la "basestation" borra el fichero actual y abre uno nuevo.
 - (Carlos)Función de toma de datos del sensor cada 1 minuto.
 
