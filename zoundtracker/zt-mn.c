@@ -6,7 +6,7 @@
 #include "adxl345.h"
 #include <stdio.h>
 #include <string.h>
-#include "zt-packet-mgmt.h"
+#include "lib/zt-packet-mgmt.h"
 
 //------------------------------------------------------------------------------
 
