@@ -17,9 +17,7 @@ unsigned short compute_checksum(Packet* my_packet) {
     return ch;
 }
 
-unsigned char * mount_packet(Packet * my_packet) {
-    unsigned char* packet;
-    
+void mount_packet(Packet * my_packet, unsigned char* packet) {
     packet[0] = my_packet->addr1;
     packet[1] = my_packet->addr2;
     packet[2] = my_packet->type;
