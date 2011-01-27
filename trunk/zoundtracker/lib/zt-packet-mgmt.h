@@ -1,12 +1,12 @@
 #define SINK_ADDR1 111
 #define SINK_ADDR2 111
 #define CHANNEL 111
-#define HELLO_BS
-#define HELLO_MN
-#define DATA
-#define HELLO_ACK
-#define DATA_ACK
-#define POLL
+#define HELLO_BS 1
+#define HELLO_MN 2
+#define DATA 3
+#define HELLO_ACK 4
+#define DATA_ACK 5
+#define POLL 6
 #define PACKET_SIZE 64
 #define DATA_SIZE 32
 #define HELLO_MSG_SIZE 5
