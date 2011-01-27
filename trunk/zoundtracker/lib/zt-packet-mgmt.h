@@ -9,7 +9,7 @@
 #define POLL 6
 #define PACKET_SIZE 64
 #define DATA_SIZE 32
-#define HELLO_MSG_SIZE 5
+#define HELLO_MSG_SIZE 0
 
 typedef struct {
   unsigned char addr1;
