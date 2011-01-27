@@ -58,6 +58,9 @@ Basestation
 
 Nodos móviles
 - (Carlos)Función de envío de paquete "hello" a la "basestation", al iniciarse y cuando recibe un paquete "hello" de la "basestation".
+  (!) Primer "HELLO_MN"
+  - Enviamos datos a pesar de no recibir "ACK"
+
 - (Carlos)Función de envío de paquete, de respuesta a "poll" y, normal de datos cada 10 minutos, con todos los datos del fichero y 5 reintentos.
 
   (!)Envio de un archivo
@@ -74,6 +77,17 @@ Nodos móviles
     - Diferenciar "HELLO ACK" y "DATA ACK" como tipos diferentes de mensajes
 
 - (Carlos)Función de toma de datos del sensor cada 1 minuto.
+
+  (!) Obtencion del dato del sensor
+  Modelo definido:
+    - Lo leemos y lo almacenamos en un "char" (ajustar cuando tengamos 
+    microfonos)
+    - No hay separador (tener encuenta gateway)
+
+- (Carlos) Funcion principal de control de estados
+  Modelo definido:
+    - Timer único control de "Data Collect" y "Data Send" (1 minuto)
+    - Suposicion: mensajes BS interrumpen y toman el control  
 
 Maquina de estados
 --------------------------------------------------------------------------------
