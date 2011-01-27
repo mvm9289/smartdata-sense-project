@@ -23,7 +23,7 @@ typedef struct {
 }Packet;
 
 unsigned short compute_checksum(Packet* my_packet);
-// PRE: packet must be an array of 64 Bytes
+// PRE: packet must be an array of PACKET_SIZE bytes
 void mount_packet(Packet * my_packet, unsigned char* packet) ;
 Packet unmount_packet(unsigned char* my_array);
 

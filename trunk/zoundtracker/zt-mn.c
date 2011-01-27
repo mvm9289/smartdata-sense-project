@@ -71,7 +71,8 @@ static void hello_msg()
     my_packet.checksum = compute_checksum(&my_packet);
     
     // 2. "Packet" transform
-    unsigned char[PACKET_SIZE] my_array = mount_packet(&my_packet);
+    unsigned char[PACKET_SIZE] my_array;
+    mount_packet(&my_packet, my_array);
     packetbuf_copyfrom((void *)my_array, PACKET_SIZE);
 	
 	// 3. "Packet" send
