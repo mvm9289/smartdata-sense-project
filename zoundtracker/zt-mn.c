@@ -13,7 +13,7 @@
 // CFS Defines
 #define MAX_ATTEMPTS 5
 #define NUM_SECONDS_SAMPLE 60
-#define WORKING_FILE 1
+#define WORKING_FILE "my_file"
 #define ERROR -1
 #define NO_NEXT_PACKET -1
 
@@ -32,19 +32,16 @@
 //------------------------------------------------------------------------------
 
 // CFS variables
-static int write_bytes, read_bytes, fd, i, message_type, sample_number;
+static int write_bytes, read_bytes, fd, message_type, sample_number, packet_number;
 static struct etimer control_timer;
-static unsigned char read_buffer[DATA_SIZE], packet_number;
+static unsigned char read_buffer[DATA_SIZE];
     
 // NET variables
 static int attempts;
-static struct ctimer hello_timer;
 static rimeaddr_t sink_addr;
 static struct mesh_conn zoundtracker_conn;
 
 // Sensor variables
-static int accel_bytes, sensor_sample;
-static unsigned char accel_buffer[ACCEL_BUFFER_SIZE];
 static char sensor_sample;
 
 // State variables
@@ -67,11 +64,10 @@ static void hello_msg()
     my_packet.type = HELLO_MN;
     my_packet.size = HELLO_MSG_SIZE;    
     my_packet.counter = 0;
-    my_packet.data = {'h', 'e', 'l', 'l', 'o'};
     my_packet.checksum = compute_checksum(&my_packet);
     
     // 2. "Packet" transform
-    unsigned char[PACKET_SIZE] my_array;
+    unsigned char my_array[PACKET_SIZE];
     mount_packet(&my_packet, my_array);
     packetbuf_copyfrom((void *)my_array, PACKET_SIZE);
 	
@@ -95,13 +91,14 @@ static void data_msg()
     my_packet.addr1 = MY_ADDR1;
     my_packet.addr2 = MY_ADDR2;
     my_packet.type = DATA;
-    my_packet.size = (sizeof)read_buffer;    
+    my_packet.size = read_bytes;    
     my_packet.counter = (packet_number-1)*DATA_SIZE + my_packet.size; // File offset
-    my_packet.data = read_buffer; // File fragmentation (!)
+    memcpy(my_packet.data, read_buffer, read_bytes); // File fragmentation (!)
     my_packet.checksum = compute_checksum(&my_packet);
     
     // 2. "Packet" transform
-    unsigned char[PACKET_SIZE] my_array = mount_packet(&my_packet);
+    unsigned char my_array[PACKET_SIZE];
+    mount_packet(&my_packet, my_array);
     packetbuf_copyfrom((void *)my_array, PACKET_SIZE);
 	
 	// 3. "Packet" send
@@ -227,28 +224,29 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
     attempts = 0; 
     
     // 0. Obtaining the "Packet"
-    Packet my_packet = mount(packetbuf_dataptr());
+    Packet my_packet;
+    my_packet = unmount_packet(packetbuf_dataptr());
     
     // 1. Response depending on the "type" value
     if (my_packet.type == HELLO_BS)
     {
         // 2. Sending "HELLO_MN" message
-        hello_msg()
+        hello_msg();
     }
     else if (my_packet.type == POLL)
     {
         // 3. Sending "DATA" messages from "WORKING_FILE"
         packet_number = 1;
-        send_packet_from_file()
+        send_packet_from_file();
     }
-    else if (my_packet.type == ACK)
+    else if (my_packet.type == DATA_ACK || my_packet.type == HELLO_ACK)
     {
         // 4. Sending the next packet or erasing data from "WORKING_FILE"
         ack_received();
     }
     
-    leds_off(LEDS_GREEN)
-    leds_off(LEDS_RED)
+    leds_off(LEDS_GREEN);
+    leds_off(LEDS_RED);
 }
 
 const static struct mesh_callbacks zoundtracker_callbacks = {received, sent, timedout};
@@ -260,14 +258,14 @@ void get_sensor_sample(void)
     // This functions reads data of the x axis from the accelerometer	
 	
 	// 0. Reading data from sensor
-	sensor_sample = accm_read_axis(X_AXIS);
+	sensor_sample = (char)accm_read_axis(X_AXIS);
 	
-	printf("[accel] x axis readed\n value: %d\n\n", x);
+	printf("[accel] x axis readed\n value: %d\n\n", sensor_sample);
 
     // 1. Writing data into the "WORKING_FILE"
 	fd = cfs_open(WORKING_FILE, CFS_WRITE | CFS_APPEND);       
     if (fd == ERROR) 
-      printf("[cfs] error openning the 'WORKING_FILE'\n\n", filename);
+      printf("[cfs] error openning the 'WORKING_FILE'\n\n");
     else 
     {
         write_bytes = cfs_write(fd, &sensor_sample, SAMPLE_SIZE);
@@ -304,7 +302,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     accm_init();
 
     // State Initialization
-    state = BLOCKED
+    state = BLOCKED;
     
     // 0. Send first "HELLO_MN"
     hello_msg();
@@ -345,4 +343,6 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
         // 4. Reseting the timer 
         etimer_set(&control_timer, NUM_SECONDS_SAMPLE*CLOCK_SECOND);
     }
-    
+        
+    PROCESS_END(); 
+}
