@@ -129,6 +129,11 @@ Pruebas
 Realizar pruebas de simulación de entorno (si es necesario utilizaremos antenas)
 Utilizar parametros calidad de transmisión
 
+He añadido los siguientes tests funcionales (falta revisar)
+- "zt-mn-sensor-test.c": Prueba de lectura del sensor y escritura en fichero
+- "zt-mn-ack-test.c", "zt-sink-ack-test": Prueba de envio de "HELLO_MN" y 
+recepcion de "HELLO_ACK" (Discover/hanshake)
+
 --------------------------------------------------------------------------------
 Comunicacion Gateway-Basestation
 --------------------------------------------------------------------------------
