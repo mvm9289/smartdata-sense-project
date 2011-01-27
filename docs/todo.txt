@@ -1,5 +1,6 @@
+--------------------------------------------------------------------------------
 Trabajo
-
+--------------------------------------------------------------------------------
 Datagrama aplicación
 - (Bea)Estructura datos "packet"" con tipos básicos:
 1. ID mota (2B)
@@ -18,7 +19,8 @@ Datagrama aplicación
 - (Bea)Función que construye un "array" preparado para RIME a partir de una estructura "packet".
 - (Bea)Función que construye la estructura "packet" a partir de un "array" proporcionado por RIME.
 
-libreria
+--------------------------------------------------------------------------------
+Libreria
 --------------------------------------------------------------------------------
 zt-packet-mt.h
 
@@ -45,9 +47,24 @@ struct Packet {
 unsigned short compute_checksum((struct Packet *)my_packet);
 unsigned char * mount_packet((struct Packet *)my_packet);
 struct Packet unmount_packet((unsigned char*)my_array);
---------------------------------------------------------------------------------
-(!) En libreria importable
 
+--------------------------------------------------------------------------------
+Compilacion
+--------------------------------------------------------------------------------
+Modificaciones realizadas:
+1. Fichero "contiki/Makefile.include"
+   Seccion: LIBS
+   Anadido "zt-packet-mgmt.c"
+   
+2. Directorio "contiki/core/lib/"
+   Copiados los ficheros "zt-packet-mgmt.h" y "zt-packet-mgmt.c"
+
+3. Fichero "zt-packet-mgmt.h"
+   Añadida definicion del fichero de cabezeras (ifndef __ZT_PACKET_MGMT_H ...)
+   
+--------------------------------------------------------------------------------
+Funcionalidades
+--------------------------------------------------------------------------------
 Basestation
 - (MA)Añadir "timestamp" estructura de la tabla de nodos.
 - (MA)Función que actualiza el "timestamp" y comprueba si debe eliminarla de la tabla (timeout).
@@ -89,9 +106,9 @@ Nodos móviles
     - Timer único control de "Data Collect" y "Data Send" (1 minuto)
     - Suposicion: mensajes BS interrumpen y toman el control  
 
-Maquina de estados
 --------------------------------------------------------------------------------
-
+Maquina de estados (MN)
+--------------------------------------------------------------------------------
 Blocked
 - Al inicio -> Data Send ("hello" packet)
 - Timer de 1 segundo
@@ -106,13 +123,16 @@ Data Send | Poll
 Data Resend
 - Al cabo de 5 intentos -> Blocked
 
-
+--------------------------------------------------------------------------------
 Pruebas
 --------------------------------------------------------------------------------
 Realizar pruebas de simulación de entorno (si es necesario utilizaremos antenas)
 Utilizar parametros calidad de transmisión
 
+--------------------------------------------------------------------------------
 Comunicacion Gateway-Basestation
 --------------------------------------------------------------------------------
 A traves de "write", "printf" teniendo en cuenta la dificultad del Gateway al
 recibir la informacion
+
+--------------------------------------------------------------------------------

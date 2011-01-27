@@ -1,3 +1,7 @@
+#ifndef __ZT_PACKET_MGMT_H__
+#define __ZT_PACKET_MGMT_H__
+
+
 #define SINK_ADDR1 111
 #define SINK_ADDR2 111
 #define CHANNEL 111
@@ -27,3 +31,4 @@ unsigned short compute_checksum(Packet* my_packet);
 void mount_packet(Packet * my_packet, unsigned char* packet) ;
 Packet unmount_packet(unsigned char* my_array);
 
+#endif /*__ZT_PACKET_MGMT_H__*/
