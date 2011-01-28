@@ -152,6 +152,11 @@ static void ack_received(unsigned char type)
     {
         printf("[net] 'HELLO_ACK' received\n\n");
         output_msg_type = EMPTY;
+        
+        // (!) Discover/handshake finished.
+        // Changing to "BLOCKED" from "DATA_SEND" state  
+        state = BLOCKED;
+        printf("[state] current state 'BLOCKED'\n\n");
     }
     else if (type == DATA_ACK)
     {
@@ -172,6 +177,11 @@ static void ack_received(unsigned char type)
         cfs_remove(WORKING_FILE);
         sample_number = 0;
         file_size = 0;
+      
+        // (!) "WORKING_FILE" sended to the "Sink".
+        // Changing to "BLOCKED" from "DATA_SEND" state  
+        state = BLOCKED;
+        printf("[state] current state 'BLOCKED'\n\n");
       }
     }
 }
@@ -218,15 +228,17 @@ static void timedout(struct mesh_conn *c)
 	    else if (output_msg_type == DATA)
 	      printf(" 'DATA' message lost (packet number: %d)\n\n", packet_number);
         
+        // (!) Message lost.
+        // Changing to "BLOCKED" from "DATA_SEND" state  
+        state = BLOCKED;
+        printf("[state] current state 'BLOCKED'\n\n");
+        
         // Starting new sample period (10 minutes)
         sample_number = 0;
         
         leds_on(LEDS_RED);
 	}
 }
-
-// (!) Funcionalidades anteriores editadas (primera revision). Siguientes 
-// pendientes de adaptar 
 
 //------------------------------------------------------------------------------
 static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops) 
@@ -236,13 +248,18 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
     // already sending, this message is saved. If there's another message
     // saved, the last message is discarded.
     
+    // (!) Message received ("HELLO_BS/POLL").
+    // Changing to "DATA_SEND" from "DATA_SEND/BLOCKED/DATA_COLLECT" state  
+    state = DATA_SEND;
+    printf("[state] current state 'DATA_SEND'\n\n");
+    
     // 0. Obtaining the "Packet"
     Packet my_packet;
     my_packet = unmount_packet(packetbuf_dataptr());
     if (compute_checksum(&my_packet) == my_packet.checksum)
     {
         // Valid message
-            leds_on(LEDS_YELLOW);
+        leds_on(LEDS_YELLOW);
     
         if (my_packet.type == HELLO_ACK || my_packet.type == DATA_ACK)
         {
@@ -357,10 +374,15 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     // State Initialization
     state = BLOCKED;
     
+    printf("[state] current state 'BLOCKED'\n\n");
+    
+    // (!) Sending message ("HELLO_MN").
+    // Changing to "DATA_SEND" from "BLOCKED" state  
+    state = DATA_SEND;    
+    printf("[state] current state 'DATA_SEND'\n\n");
+    
     // 0. Send first "HELLO_MN"
     hello_msg();
-    
-    printf("[state] current state 'BLOCKED'\n\n");
     
     while (1)
     {
@@ -371,26 +393,36 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
             
             if (state == BLOCKED)
             {
-                // 1. Changing to "Data Collect" state
+                // (!) Timer expired. 
+                // Changing to "DATA_COLLECT" from "BLOCKED" state
                 state = DATA_COLLECT;
-                printf("[state] current state 'Data Collect'\n\n");
+                printf("[state] current state 'DATA_COLLECT'\n\n");
             
                 get_sensor_sample();
                 printf("[sensor] sample measured (sample number: %d)\n\n", sample_number); // 'sample_number' starts on zero
             
-                // 2. Updating state
+                // Updating state
                 sample_number++;
             
                 if (sample_number == 10)
                 {    
-                    // 3. Changing to "Data Send" state
+                    // (!) We've got 10 sensor samples.
+                    // Changing to "DATA_SEND" from "DATA_COLLECT" state
                     state = DATA_SEND;
-                    printf("[state] current state 'Data Send'\n\n");
+                    printf("[state] current state 'DATA_SEND'\n\n");
                     
                     send_packet_from_file();
                     
                     sample_number = 0;                
                 }
+                else
+                {
+                    // (!) We've got less than 10 sensor samples.
+                    // Changing to "BLOCKED" from "DATA_COLLECT" state
+                    state = BLOCKED;
+                    printf("[state] current state 'BLOCKED'\n\n");
+                }
+                  
             }       
         }
         else
