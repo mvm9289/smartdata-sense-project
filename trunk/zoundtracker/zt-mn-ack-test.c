@@ -21,6 +21,7 @@
 // NET Defines
 #define MY_ADDR1 1  // (!) Update for every mn
 #define MY_ADDR2 0
+#define EMPTY 0
 
 // Sensor Defines
 #define SAMPLE_SIZE 1
@@ -36,7 +37,7 @@
 static int write_bytes, read_bytes, fd, sample_number, packet_number;
 static unsigned short file_size;
 static struct etimer control_timer;
-static unsigned char read_buffer[DATA_SIZE], input_msg_type, output_msg_type,;
+static unsigned char read_buffer[DATA_SIZE], input_msg_type, output_msg_type;
     
 // NET variables
 static int attempts;
@@ -150,7 +151,7 @@ static void ack_received(unsigned char type)
     if (type == HELLO_ACK)
     {
         printf("[net] 'HELLO_ACK' received\n\n");
-        output_msg_type = NULL;
+        output_msg_type = EMPTY;
     }
     else if (type == DATA_ACK)
     {
@@ -165,7 +166,7 @@ static void ack_received(unsigned char type)
       else 
       {
         // There's no more packets to send
-        output_msg_type = NULL;
+        output_msg_type = EMPTY;
         
         // 1. 'WORKING_FILE' completely sended, removing it
         cfs_remove(WORKING_FILE);
@@ -241,6 +242,7 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
     if (compute_checksum(&my_packet) == my_packet.checksum)
     {
         // Valid message
+            leds_on(LEDS_YELLOW);
     
         if (my_packet.type == HELLO_ACK || my_packet.type == DATA_ACK)
         {
@@ -251,14 +253,14 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             leds_off(LEDS_RED);
         }
         
-        if ((input_msg_type != NULL && output_msg_type == NULL) || (my_packet.type != HELLO_ACK && my_packet.type != DATA_ACK && output_msg_type == NULL))
+        if ((input_msg_type != EMPTY && output_msg_type == EMPTY) || (my_packet.type != HELLO_ACK && my_packet.type != DATA_ACK && output_msg_type == EMPTY))
         {
             // There's a message saved ready to reply or the message received is not
             // an ACK and we can reply it.
             
             attempts = 0;
             
-            if (input_msg_type == NULL)
+            if (input_msg_type == EMPTY)
               input_msg_type = my_packet.type;
           
             // 2. Response depending on the "type" value
@@ -267,19 +269,19 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
                 // 3. Sending "HELLO_MN" message
                 hello_msg();
             }
-            else if (input_msg_type.type == POLL)
+            else if (input_msg_type == POLL)
             {
                 // 4. Sending "DATA" messages from "WORKING_FILE"
                 packet_number = 1;
                 send_packet_from_file();
             }
             
-            input_msg_type = NULL;
+            input_msg_type = EMPTY;
             
             leds_off(LEDS_GREEN);
             leds_off(LEDS_RED);
         }
-        else if (input_msg_type == NULL && output_msg_type != NULL)
+        else if (input_msg_type == EMPTY && output_msg_type != EMPTY)
         {
             // There's a message already sending. The input message is saved
             input_msg_type = my_packet.type;
@@ -292,7 +294,7 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 static void broadcast_received(struct trickle_conn* c)
 {
     // "HELLO_BS" message received, replying trough mesh connection
-    received();
+    //received();
 }
 
 const static struct mesh_callbacks zoundtracker_callbacks = {received, sent, timedout};
@@ -342,10 +344,10 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	my_addr.u8[0] = MY_ADDR1;
 	my_addr.u8[1] = MY_ADDR2;
 	rimeaddr_set_node_addr(&my_addr);
-	//ctimer_set(&hello_timer, NUM_SECONDS_HELLO*CLOCK_SECOND, hello_protocol, NULL);
+	mesh_open(&zoundtracker_conn, CHANNEL, &zoundtracker_callbacks);                                             
 	       
     // CFS Initialization
-    etimer_set(&control_timer, NUM_SECONDS_SAMPLE*CLOCK_SECOND);
+    //etimer_set(&control_timer, NUM_SECONDS_SAMPLE*CLOCK_SECOND);
     sample_number = 0;
     file_size = 0;
     
