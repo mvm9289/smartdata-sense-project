@@ -52,8 +52,8 @@ Packet unmount_packet(unsigned char* my_array) {
     my_packet.addr1 = my_array[0];
     my_packet.addr2 = my_array[1];
     my_packet.type = my_array[2];
-    my_packet.size = (my_array[3]<<8) + my_array[4];
-    my_packet.counter = (my_array[5]<<8) + my_array[6];
+    my_packet.size = (my_array[4]<<8) | my_array[3];
+    my_packet.counter = (my_array[6]<<8) | my_array[5];
     
     int i = 7;
     int j = 0;
@@ -72,7 +72,7 @@ Packet unmount_packet(unsigned char* my_array) {
         j++;
     }
     
-    my_packet.checksum = (my_array[i]<<8) + my_array[i+1];
+    my_packet.checksum = (my_array[i+1]<<8) | my_array[i];
     
     return my_packet;
 }
