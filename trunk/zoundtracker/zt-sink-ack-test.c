@@ -73,7 +73,13 @@ static void timedout(struct mesh_conn *c)
 //------------------------------------------------------------------------------
 static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 {  
-    // 0. Sending new ack message
+    Packet my_packet;
+    my_packet = unmount_packet(packetbuf_dataptr());
+    
+    // 0. Verifying "HELLO_MN" message received
+    printf("[msg] Type of message: %d\n\n", my_packet.type);
+
+    // 1. Sending new ack message
     resends = 0;
     ack_message();
     
