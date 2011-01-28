@@ -3,6 +3,7 @@
 #include "cfs/cfs.h"
 #include "net/rime.h"
 #include "net/rime/mesh.h"
+#include "net/rime/trickle.h"
 #include "adxl345.h"
 #include <stdio.h>
 #include <string.h>
@@ -41,6 +42,7 @@ static unsigned char read_buffer[DATA_SIZE], input_msg_type, output_msg_type,;
 static int attempts;
 static rimeaddr_t sink_addr;
 static struct mesh_conn zoundtracker_conn;
+static struct trickle_conn zoundtracker_broadcast_conn;
 
 // Sensor variables
 static char sensor_sample;
@@ -236,53 +238,66 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
     // 0. Obtaining the "Packet"
     Packet my_packet;
     my_packet = unmount_packet(packetbuf_dataptr());
-    
-    if (my_packet.type == HELLO_ACK || my_packet.type == DATA_ACK)
+    if (compute_checksum(&my_packet) == my_packet.checksum)
     {
-        // 1. Sending the next packet or erasing data from "WORKING_FILE"
-        ack_received(my_packet.type);
+        // Valid message
     
-        leds_off(LEDS_GREEN);
-        leds_off(LEDS_RED);
-    }
-    
-    if ((input_msg_type != NULL && output_msg_type == NULL) || (my_packet.type != HELLO_ACK && my_packet.type != DATA_ACK && output_msg_type == NULL))
-    {
-        // There's a message saved ready to reply or the message received is not
-        // an ACK and we can reply it.
-        
-        attempts = 0;
-        
-        if (input_msg_type == NULL)
-          input_msg_type = my_packet.type;
-      
-        // 2. Response depending on the "type" value
-        if (input_msg_type == HELLO_BS)
+        if (my_packet.type == HELLO_ACK || my_packet.type == DATA_ACK)
         {
-            // 3. Sending "HELLO_MN" message
-            hello_msg();
-        }
-        else if (input_msg_type.type == POLL)
-        {
-            // 4. Sending "DATA" messages from "WORKING_FILE"
-            packet_number = 1;
-            send_packet_from_file();
+            // 1. Sending the next packet or erasing data from "WORKING_FILE"
+            ack_received(my_packet.type);
+        
+            leds_off(LEDS_GREEN);
+            leds_off(LEDS_RED);
         }
         
-        input_msg_type = NULL;
-        
-        leds_off(LEDS_GREEN);
-        leds_off(LEDS_RED);
+        if ((input_msg_type != NULL && output_msg_type == NULL) || (my_packet.type != HELLO_ACK && my_packet.type != DATA_ACK && output_msg_type == NULL))
+        {
+            // There's a message saved ready to reply or the message received is not
+            // an ACK and we can reply it.
+            
+            attempts = 0;
+            
+            if (input_msg_type == NULL)
+              input_msg_type = my_packet.type;
+          
+            // 2. Response depending on the "type" value
+            if (input_msg_type == HELLO_BS)
+            {
+                // 3. Sending "HELLO_MN" message
+                hello_msg();
+            }
+            else if (input_msg_type.type == POLL)
+            {
+                // 4. Sending "DATA" messages from "WORKING_FILE"
+                packet_number = 1;
+                send_packet_from_file();
+            }
+            
+            input_msg_type = NULL;
+            
+            leds_off(LEDS_GREEN);
+            leds_off(LEDS_RED);
+        }
+        else if (input_msg_type == NULL && output_msg_type != NULL)
+        {
+            // There's a message already sending. The input message is saved
+            input_msg_type = my_packet.type;
+        }
+        // else the message is discarded
     }
-    else if (input_msg_type == NULL && output_msg_type != NULL)
-    {
-        // There's a message already sending. The input message is saved
-        input_msg_type = my_packet.type;
-    }
-    // else the message is discarded
+    // else invalid message
+}
+
+static void broadcast_received(struct trickle_conn* c)
+{
+    // "HELLO_BS" message received, replying trough mesh connection
+    received();
 }
 
 const static struct mesh_callbacks zoundtracker_callbacks = {received, sent, timedout};
+const static struct trickle_callbacks zoundtracker_broadcast_callbacks = {broadcast_received};
+
 //------------------------------------------------------------------------------
 
 // Sensor functions
