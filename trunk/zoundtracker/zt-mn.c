@@ -44,6 +44,9 @@ static int attempts;
 static rimeaddr_t sink_addr;
 static struct mesh_conn zoundtracker_conn;
 static struct trickle_conn zoundtracker_broadcast_conn;
+static Packet my_packet;
+static unsigned char my_array[PACKET_SIZE];
+static unsigned short packet_checksum;
 
 // Sensor variables
 static char sensor_sample;
@@ -62,7 +65,6 @@ static void hello_msg()
     output_msg_type = HELLO_MN;
  
     // 1. "Packet" construction
-    Packet my_packet;
     my_packet.addr1 = MY_ADDR1;
     my_packet.addr2 = MY_ADDR2;
     my_packet.type = HELLO_MN;
@@ -71,7 +73,6 @@ static void hello_msg()
     my_packet.checksum = compute_checksum(&my_packet);
     
     // 2. "Packet" transform
-    unsigned char my_array[PACKET_SIZE];
     mount_packet(&my_packet, my_array);
     packetbuf_copyfrom((void *)my_array, PACKET_SIZE);
 	
@@ -91,7 +92,6 @@ static void data_msg()
     output_msg_type = DATA;
  
     // 1. "Packet" construction
-    Packet my_packet;
     my_packet.addr1 = MY_ADDR1;
     my_packet.addr2 = MY_ADDR2;
     my_packet.type = DATA;
@@ -101,7 +101,6 @@ static void data_msg()
     my_packet.checksum = compute_checksum(&my_packet);
     
     // 2. "Packet" transform
-    unsigned char my_array[PACKET_SIZE];
     mount_packet(&my_packet, my_array);
     packetbuf_copyfrom((void *)my_array, PACKET_SIZE);
 	
@@ -243,20 +242,20 @@ static void timedout(struct mesh_conn *c)
 //------------------------------------------------------------------------------
 static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops) 
 {
-    // This function sends a "HELLO_MN" if "HELLO_BS" is received or sends the
-    // "WORKING_FILE" if the "Basestation" requests data. If there's a message
-    // already sending, this message is saved. If there's another message
-    // saved, the last message is discarded.
+    // This function sends the "WORKING_FILE" if the "Basestation" requests 
+    // data. If there's a message already sending, this message is saved. If 
+    // there's another message saved, the last message is discarded.
     
-    // (!) Message received ("HELLO_BS/POLL").
+    // (!) Message received ("POLL/HELLO_ACK/DATA_ACK").
     // Changing to "DATA_SEND" from "DATA_SEND/BLOCKED/DATA_COLLECT" state  
     state = DATA_SEND;
     printf("[state] current state 'DATA_SEND'\n\n");
     
-    // 0. Obtaining the "Packet"
-    Packet my_packet;
+    // 0. Obtaining the "Packet" and checking checksum
     my_packet = unmount_packet(packetbuf_dataptr());
-    if (compute_checksum(&my_packet) == my_packet.checksum)
+    packet_checksum = compute_checksum(&my_packet);
+    
+    if (packet_checksum == my_packet.checksum)
     {
         // Valid message
         leds_on(LEDS_YELLOW);
@@ -310,8 +309,55 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 
 static void broadcast_received(struct trickle_conn* c)
 {
-    // "HELLO_BS" message received, replying trough mesh connection
-    received();
+    // This function sends a "HELLO_MN" message through the "mesh" connection when
+    // a "broadcast" "HELLO_BS" message received. The behaviour is very similar 
+    // to "received" mesh callback to attend only the "HELLO_BS" messages sended 
+    // through the "broadcast" connection.
+
+    // (!) Message received ("HELLO_BS").
+    // Changing to "DATA_SEND" from "DATA_SEND/BLOCKED/DATA_COLLECT" state  
+    state = DATA_SEND;
+    printf("[state] current state 'DATA_SEND'\n\n");
+    
+    // 0. Obtaining the "Packet" and checking checksum
+    my_packet = unmount_packet(packetbuf_dataptr());
+    packet_checksum = compute_checksum(&my_packet);
+    
+    if (packet_checksum == my_packet.checksum)
+    {
+        // Valid message
+        leds_on(LEDS_YELLOW);
+        
+        if ((input_msg_type != EMPTY && output_msg_type == EMPTY) || (my_packet.type != HELLO_ACK && my_packet.type != DATA_ACK && output_msg_type == EMPTY))
+        {
+            // There's a message saved ready to reply or the message received is not
+            // an ACK and we can reply it.
+            
+            attempts = 0;
+            
+            if (input_msg_type == EMPTY)
+              input_msg_type = my_packet.type;
+          
+            // 2. Response depending on the "type" value
+            if (input_msg_type == HELLO_BS)
+            {
+                // 3. Sending "HELLO_MN" message
+                hello_msg();
+            }
+            
+            input_msg_type = EMPTY;
+            
+            leds_off(LEDS_GREEN);
+            leds_off(LEDS_RED);
+        }
+        else if (input_msg_type == EMPTY && output_msg_type != EMPTY)
+        {
+            // There's a message already sending. The input message is saved
+            input_msg_type = my_packet.type;
+        }
+        // else the message is discarded
+    }
+    // else invalid message
 }
 
 const static struct mesh_callbacks zoundtracker_callbacks = {received, sent, timedout};
