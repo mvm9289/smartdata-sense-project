@@ -2,6 +2,7 @@
 #include "contiki.h"
 #include "net/rime.h"
 #include "net/rime/mesh.h"
+#include "net/rime/trickle.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -43,6 +44,7 @@ typedef struct                                                                  
 static NodeTableEntry nodeTable[NODE_TABLE_SIZE];                                                                              //
 //                                                                                                                             //
 static struct mesh_conn zoundtracker_conn;                                                                                     //
+static struct trickle_conn zt_broadcast_conn;                                                                                  //
 //                                                                                                                             //
 static unsigned int state;                                                                                                     //
 //                                                                                                                             //
@@ -105,6 +107,21 @@ Packet poll_packet()                                                            
 //                                                                                                                             //
     return poll;                                                                                                               //
 }                                                                                                                              //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////// Trickle connection callback //////////////////////////////////////////////////
+static void broadcast_received(struct trickle_conn *c)                                                                         //
+{                                                                                                                              //
+    #ifdef DEBUG_MODE                                                                                                          //
+        printf("Trickle received callback: Broadcast packet received\n\n");                                                    //
+    #endif                                                                                                                     //
+}                                                                                                                              //
+//                                                                                                                             //
+const static struct trickle_callbacks broadcast_callback = {broadcast_received};                                               //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -277,6 +294,9 @@ PROCESS_THREAD(zoundtracker_sink_process, ev, data)
     // Mesh connection                                                                                                    //
     mesh_open(&zoundtracker_conn, CHANNEL, &zoundtracker_sink_callbacks);                                                 //
     //                                                                                                                    //
+    // Trickle connection                                                                                                 //
+    trickle_open(&zt_broadcast_conn, 0, CHANNEL, &broadcast_callback);                                                    //
+    //                                                                                                                    //
     // Timer                                                                                                              //
     partial_seconds = 0;                                                                                                  //
     seconds = 0;                                                                                                          //
@@ -300,15 +320,20 @@ PROCESS_THREAD(zoundtracker_sink_process, ev, data)
                     #endif
                     packet = hello_packet();
                     mount_packet(&packet, packet_buff);
+                    packetbuf_copyfrom((void *)packet_buff, PACKET_SIZE);
+                    trickle_send(&zt_broadcast_conn);
                     //packetbuf_copyfrom((void *)packet_buff, PACKET_SIZE); //?????????????????????
                     //~ for (i = 0; i < 256; i++)
                     //~ {
                         //~ for (j = 0; j < 256; j++)
                         //~ {
-                            //~ addr_send.u8[0] = i;
-                            //~ addr_send.u8[1] = j;
-                            //~ packetbuf_copyfrom((void *)packet_buff, PACKET_SIZE); //?????????????????????
-                            //~ mesh_send(&zoundtracker_conn, &addr_send);
+                            //~ if (i != SINK_ADDR1 || j != SINK_ADDR2)
+                            //~ {
+                                //~ addr_send.u8[0] = i;
+                                //~ addr_send.u8[1] = j;
+                                //~ packetbuf_copyfrom((void *)packet_buff, PACKET_SIZE); //?????????????????????
+                                //~ mesh_send(&zoundtracker_conn, &addr_send);
+                            //~ }
                         //~ }
                     //~ }
                     #ifdef DEBUG_MODE
