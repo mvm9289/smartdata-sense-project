@@ -328,7 +328,7 @@ static void broadcast_received(struct trickle_conn* c)
         // Valid message
         leds_on(LEDS_YELLOW);
         
-        if ((input_msg_type != EMPTY && output_msg_type == EMPTY) || (my_packet.type != HELLO_ACK && my_packet.type != DATA_ACK && output_msg_type == EMPTY))
+        if (output_msg_type == EMPTY)
         {
             // There's a message saved ready to reply or the message received is not
             // an ACK and we can reply it.
