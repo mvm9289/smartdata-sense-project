@@ -13,7 +13,7 @@
 
 // CFS Defines
 #define MAX_ATTEMPTS 5
-#define NUM_SECONDS_SAMPLE 60
+#define NUM_SECONDS_SAMPLE 6
 #define WORKING_FILE "my_file"
 #define ERROR -1
 #define NO_NEXT_PACKET -1
@@ -34,7 +34,7 @@
 //------------------------------------------------------------------------------
 
 // CFS variables
-static int write_bytes, read_bytes, fd, sample_number, packet_number;
+static int write_bytes, read_bytes, fd_read, fd_write, sample_number, packet_number;
 static unsigned short file_size;
 static struct etimer control_timer;
 static unsigned char read_buffer[DATA_SIZE], input_msg_type, output_msg_type;
@@ -44,7 +44,6 @@ static int attempts;
 static rimeaddr_t sink_addr;
 static struct mesh_conn zoundtracker_conn;
 static struct trickle_conn zoundtracker_broadcast_conn;
-static Packet my_packet;
 static unsigned char my_array[PACKET_SIZE];
 static unsigned short packet_checksum;
 
@@ -60,20 +59,21 @@ static unsigned char state;
 static void hello_msg() 
 {
     // This function builds and sends a "HELLO_MN" message to de "Basestation"    
+    Packet my_packet_send;
 
     // 0. Configure MN state
     output_msg_type = HELLO_MN;
  
     // 1. "Packet" construction
-    my_packet.addr1 = MY_ADDR1;
-    my_packet.addr2 = MY_ADDR2;
-    my_packet.type = HELLO_MN;
-    my_packet.size = HELLO_MSG_SIZE;    
-    my_packet.counter = 0;
-    my_packet.checksum = compute_checksum(&my_packet);
+    my_packet_send.addr1 = MY_ADDR1;
+    my_packet_send.addr2 = MY_ADDR2;
+    my_packet_send.type = HELLO_MN;
+    my_packet_send.size = HELLO_MSG_SIZE;    
+    my_packet_send.counter = 0;
+    my_packet_send.checksum = compute_checksum(&my_packet_send);
     
     // 2. "Packet" transform
-    mount_packet(&my_packet, my_array);
+    mount_packet(&my_packet_send, my_array);
     packetbuf_copyfrom((void *)my_array, PACKET_SIZE);
 	
 	// 3. "Packet" send
@@ -87,21 +87,31 @@ static void hello_msg()
 static void data_msg() 
 {   
     // This function builds and sends a "DATA" message to the "Basestation"
-
+    Packet my_packet_send;
+    
     // 0. Configure MN state
     output_msg_type = DATA;
  
     // 1. "Packet" construction
-    my_packet.addr1 = MY_ADDR1;
-    my_packet.addr2 = MY_ADDR2;
-    my_packet.type = DATA;
-    my_packet.size = file_size;    
-    my_packet.counter = (packet_number-1)*DATA_SIZE + my_packet.size; // File offset
-    memcpy(my_packet.data, read_buffer, read_bytes); // File fragmentation (!)
-    my_packet.checksum = compute_checksum(&my_packet);
+    my_packet_send.addr1 = MY_ADDR1;
+    my_packet_send.addr2 = MY_ADDR2;
+    my_packet_send.type = DATA;
+    my_packet_send.size = file_size;    
+    my_packet_send.counter = (packet_number-1)*DATA_SIZE + my_packet_send.size; // File offset
+    memcpy(my_packet_send.data, read_buffer, read_bytes); // File fragmentation (!)
+    my_packet_send.checksum = compute_checksum(&my_packet_send);
+    
+    printf("[net] 'DATA' packet contents:\n");
+    printf("[net] Addr1: %d\n", my_packet_send.addr1);
+    printf("[net] Addr2: %d\n", my_packet_send.addr2);
+    printf("[net] Type: %d\n", my_packet_send.type);
+    printf("[net] Size: %d\n", my_packet_send.size);
+    printf("[net] Counter: %d\n", my_packet_send.counter);
+    printf("[net] Data: %s\n", my_packet_send.data);
+    printf("[net] Checksum: %d\n\n", my_packet_send.checksum);
     
     // 2. "Packet" transform
-    mount_packet(&my_packet, my_array);
+    mount_packet(&my_packet_send, my_array);
     packetbuf_copyfrom((void *)my_array, PACKET_SIZE);
 	
 	// 3. "Packet" send
@@ -118,12 +128,18 @@ static void send_packet_from_file(void)
     // from the "WORKING_FILE" to the "Basestation".
 
     // 0. Reading from the "WORKING_FILE"
-    fd = cfs_open(WORKING_FILE, CFS_READ);
-	if (fd == ERROR)
+    if (fd_read == EMPTY)
+    {
+        // First packet of "WORKING_FILE"
+        fd_read = cfs_open(WORKING_FILE, CFS_READ);
+	}
+	// else currently sending 'WORKING_FILE'
+	
+	if (fd_read == ERROR)
 	  printf("[cfs] error openning the 'WORKING_FILE'\n\n");
 	else 
 	{                  
-        read_bytes = cfs_read(fd, read_buffer, DATA_SIZE);
+        read_bytes = cfs_read(fd_read, read_buffer, DATA_SIZE);
         if (read_bytes == ERROR)
           printf("[cfs] error reading from the 'WORKING_FILE'\n\n");
         else if (read_bytes == 0)
@@ -137,7 +153,6 @@ static void send_packet_from_file(void)
             
             printf("[net] sending the 'WORKING_FILE' (packet number: %d)\n\n", packet_number);			
         }
-        cfs_close(fd);
     }
 }
 
@@ -173,6 +188,8 @@ static void ack_received(unsigned char type)
         output_msg_type = EMPTY;
         
         // 1. 'WORKING_FILE' completely sended, removing it
+        cfs_close(fd_read);
+        fd_read = EMPTY;
         cfs_remove(WORKING_FILE);
         sample_number = 0;
         file_size = 0;
@@ -252,6 +269,7 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
     printf("[state] current state 'DATA_SEND'\n\n");
     
     // 0. Obtaining the "Packet" and checking checksum
+    Packet my_packet;
     my_packet = unmount_packet(packetbuf_dataptr());
     packet_checksum = compute_checksum(&my_packet);
     
@@ -277,8 +295,11 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             attempts = 0;
             
             if (input_msg_type == EMPTY)
-              input_msg_type = my_packet.type;
-          
+            {
+                input_msg_type = my_packet.type;
+                printf("[net] a) 'input_msg_type' = %d\n\n", my_packet.type);
+            }
+            
             // 2. Response depending on the "type" value
             if (input_msg_type == HELLO_BS)
             {
@@ -293,19 +314,21 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             }
             
             input_msg_type = EMPTY;
+            printf("[net] b) 'input_msg_type' = %d\n\n", my_packet.type);
             
             leds_off(LEDS_GREEN);
             leds_off(LEDS_RED);
         }
-        else if (input_msg_type == EMPTY && output_msg_type != EMPTY)
+        else if (input_msg_type == EMPTY && output_msg_type != EMPTY && my_packet.type != HELLO_ACK && my_packet.type != DATA_ACK)
         {
             // There's a message already sending. The input message is saved
             input_msg_type = my_packet.type;
+            printf("[net] c) 'input_msg_type' = %d\n\n", my_packet.type);
         }
         else 
         {
-            //the message is discarded
-            printf("[net] 'input_msg_type != EMPTY' message is discarded\n\n");
+            // Input is empty or message is discarded 
+            printf("[net] 'input_msg_type == EMPTY' or message is discarded\n\n");
         }
     }
     else 
@@ -328,6 +351,7 @@ static void broadcast_received(struct trickle_conn* c)
     printf("[state] current state 'DATA_SEND'\n\n");
     
     // 0. Obtaining the "Packet" and checking checksum
+    Packet my_packet;
     my_packet = unmount_packet(packetbuf_dataptr());
     packet_checksum = compute_checksum(&my_packet);
     
@@ -358,7 +382,7 @@ static void broadcast_received(struct trickle_conn* c)
             leds_off(LEDS_GREEN);
             leds_off(LEDS_RED);
         }
-        else if (input_msg_type == EMPTY && output_msg_type != EMPTY)
+        else if (input_msg_type == EMPTY && output_msg_type != EMPTY && my_packet.type != HELLO_ACK && my_packet.type != DATA_ACK)
         {
             // There's a message already sending. The input message is saved
             input_msg_type = my_packet.type;
@@ -392,18 +416,19 @@ void get_sensor_sample(void)
 	printf("[accel] x axis readed\n value: %d\n\n", sensor_sample);
 
     // 1. Writing data into the "WORKING_FILE"
-	fd = cfs_open(WORKING_FILE, CFS_WRITE | CFS_APPEND);       
-    if (fd == ERROR) 
+	fd_write = cfs_open(WORKING_FILE, CFS_WRITE | CFS_APPEND);       
+    if (fd_write == ERROR) 
       printf("[cfs] error openning the 'WORKING_FILE'\n\n");
     else 
     {
-        write_bytes = cfs_write(fd, &sensor_sample, SAMPLE_SIZE);
+        write_bytes = cfs_write(fd_write, &sensor_sample, SAMPLE_SIZE);
         if (write_bytes != SAMPLE_SIZE) 
           printf("[cfs] write: error writing into the 'WORKING_FILE'\n\n");
         else
           file_size += write_bytes;
                   
-        cfs_close(fd);
+        cfs_close(fd_write);
+        fd_write = EMPTY;
         
     }
 }
@@ -425,11 +450,13 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	rimeaddr_set_node_addr(&my_addr);
 	mesh_open(&zoundtracker_conn, CHANNEL1, &zoundtracker_callbacks);                                             
 	trickle_open(&zoundtracker_broadcast_conn, 0, CHANNEL2, &zoundtracker_broadcast_callbacks);       
-	       
+	input_msg_type = output_msg_type = EMPTY;
+	
     // CFS Initialization
     etimer_set(&control_timer, NUM_SECONDS_SAMPLE*CLOCK_SECOND);
     sample_number = 0;
     file_size = 0;
+    fd_read = fd_write = EMPTY;
     
     // Sensor Initialization
     accm_init();
