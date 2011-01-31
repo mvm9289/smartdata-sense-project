@@ -101,14 +101,15 @@ static void data_msg()
     memcpy(my_packet_send.data, read_buffer, read_bytes); // File fragmentation (!)
     my_packet_send.checksum = compute_checksum(&my_packet_send);
     
-    printf("[net] 'DATA' packet contents:\n");
-    printf("[net] Addr1: %d\n", my_packet_send.addr1);
-    printf("[net] Addr2: %d\n", my_packet_send.addr2);
-    printf("[net] Type: %d\n", my_packet_send.type);
-    printf("[net] Size: %d\n", my_packet_send.size);
-    printf("[net] Counter: %d\n", my_packet_send.counter);
-    printf("[net] Data: %s\n", my_packet_send.data);
-    printf("[net] Checksum: %d\n\n", my_packet_send.checksum);
+    printf("[net]----------- DATA' packet contents:---------\n");
+    printf("Addr1: %d\n", my_packet_send.addr1);
+    printf("Addr2: %d\n", my_packet_send.addr2);
+    printf("Type: %d\n", my_packet_send.type);
+    printf("Size: %d\n", my_packet_send.size);
+    printf("Counter: %d\n", my_packet_send.counter);
+    printf("Data: %c\n", my_packet_send.data[0]);
+    printf("Checksum: %d\n", my_packet_send.checksum);
+    printf("---------------------------------------------------\n\n");
     
     // 2. "Packet" transform
     mount_packet(&my_packet_send, my_array);
@@ -131,6 +132,7 @@ static void send_packet_from_file(void)
     if (fd_read == EMPTY)
     {
         // First packet of "WORKING_FILE"
+        packet_number = 1;
         fd_read = cfs_open(WORKING_FILE, CFS_READ);
 	}
 	// else currently sending 'WORKING_FILE'
@@ -140,18 +142,24 @@ static void send_packet_from_file(void)
 	else 
 	{                  
         read_bytes = cfs_read(fd_read, read_buffer, DATA_SIZE);
+        printf("\n------BYTES READED: %d--------\n\n", read_bytes);
+        
         if (read_bytes == ERROR)
           printf("[cfs] error reading from the 'WORKING_FILE'\n\n");
-        else if (read_bytes == 0)
+        else if (read_bytes == 0) {
           packet_number = NO_NEXT_PACKET;
+          printf("\n********NO NEXT PACKET*********\n\n");
+          
+        }
         else
         {  
             // There's information to send
             
             // 1. "Packet" sending
             data_msg();
+            printf("[net] sending the 'WORKING_FILE' (packet number: %d)\n\n", packet_number);
+            packet_number++;
             
-            printf("[net] sending the 'WORKING_FILE' (packet number: %d)\n\n", packet_number);			
         }
     }
 }
@@ -176,13 +184,15 @@ static void ack_received(unsigned char type)
     {
       printf("[net] 'DATA_ACK' received\n\n");
       
-      if (packet_number != NO_NEXT_PACKET)
+      /*if (packet_number != NO_NEXT_PACKET)
       {        
         // 0. Sending the next packet from the "WORKING_FILE"
-        packet_number++;
+        //packet_number++;************************************************************NO IRIA DESPUES DE SEND_PACKET!!!!!!
         send_packet_from_file();
-      }
-      else 
+      }*/
+      send_packet_from_file();
+      
+      if(packet_number == NO_NEXT_PACKET) 
       {
         // There's no more packets to send
         output_msg_type = EMPTY;
@@ -457,6 +467,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     sample_number = 0;
     file_size = 0;
     fd_read = fd_write = EMPTY;
+    
     
     // Sensor Initialization
     accm_init();
