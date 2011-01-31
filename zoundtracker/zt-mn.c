@@ -302,9 +302,17 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             // There's a message already sending. The input message is saved
             input_msg_type = my_packet.type;
         }
-        // else the message is discarded
+        else 
+        {
+            //the message is discarded
+            printf("[net] 'input_msg_type != EMPTY' message is discarded\n\n");
+        }
     }
-    // else invalid message
+    else 
+    {
+        // invalid message
+        printf("[net] incorrect checksum invalid message\n\n");
+    }
 }
 
 static void broadcast_received(struct trickle_conn* c)
@@ -355,9 +363,17 @@ static void broadcast_received(struct trickle_conn* c)
             // There's a message already sending. The input message is saved
             input_msg_type = my_packet.type;
         }
-        // else the message is discarded
+        else 
+        {
+            //the message is discarded
+            printf("[net] 'input_msg_type != EMPTY' message is discarded\n\n");
+        }
     }
-    // else invalid message
+    else 
+    {
+        // invalid message
+        printf("[net] incorrect checksum invalid message\n\n");
+    }
 }
 
 const static struct mesh_callbacks zoundtracker_callbacks = {received, sent, timedout};
