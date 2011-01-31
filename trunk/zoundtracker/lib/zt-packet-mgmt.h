@@ -4,7 +4,8 @@
 
 #define SINK_ADDR1 111
 #define SINK_ADDR2 111
-#define CHANNEL 111
+#define CHANNEL1 111
+#define CHANNEL2 222
 #define HELLO_BS 1
 #define HELLO_MN 2
 #define DATA 3
