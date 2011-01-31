@@ -408,6 +408,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	my_addr.u8[1] = MY_ADDR2;
 	rimeaddr_set_node_addr(&my_addr);
 	mesh_open(&zoundtracker_conn, CHANNEL, &zoundtracker_callbacks);                                             
+	trickle_open(&zoundtracker_broadcast_conn, 0, CHANNEL, &zoundtracker_broadcast_callbacks);       
 	       
     // CFS Initialization
     etimer_set(&control_timer, NUM_SECONDS_SAMPLE*CLOCK_SECOND);
