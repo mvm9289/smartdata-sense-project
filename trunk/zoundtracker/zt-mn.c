@@ -19,8 +19,8 @@
 #define NO_NEXT_PACKET -1
 
 // NET Defines
-#define MY_ADDR1 1  // (!) Update for every mn
-#define MY_ADDR2 0
+//#define MY_ADDR1 1  // (!) Update for every mn
+//#define MY_ADDR2 0
 #define EMPTY 99
 
 // Sensor Defines
@@ -302,12 +302,7 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
     // This function sends the "WORKING_FILE" if the "Basestation" requests 
     // data. If there's a message already sending, this message is saved. If 
     // there's another message saved, the last message is discarded.
-    
-    // (!) Message received ("POLL/HELLO_ACK/DATA_ACK").
-    // Changing to "DATA_SEND" from "DATA_SEND/BLOCKED/DATA_COLLECT" state  
-    state = DATA_SEND;
-    printf("[state] current state 'DATA_SEND'\n\n");
-    
+       
     // 0. Obtaining the "Packet" and checking checksum
     Packet my_packet;
     my_packet = unmount_packet(packetbuf_dataptr());
@@ -315,6 +310,11 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
     
     if (packet_checksum == my_packet.checksum)
     {
+        // (!) Message received ("POLL/HELLO_ACK/DATA_ACK").
+        // Changing to "DATA_SEND" from "DATA_SEND/BLOCKED/DATA_COLLECT" state  
+        state = DATA_SEND;
+        printf("[state] current state 'DATA_SEND'\n\n");
+
         // Valid message
         leds_on(LEDS_YELLOW);
     
@@ -385,11 +385,6 @@ static void broadcast_received(struct trickle_conn* c)
     // a "broadcast" "HELLO_BS" message received. The behaviour is very similar 
     // to "received" mesh callback to attend only the "HELLO_BS" messages sended 
     // through the "broadcast" connection.
-
-    // (!) Message received ("HELLO_BS").
-    // Changing to "DATA_SEND" from "DATA_SEND/BLOCKED/DATA_COLLECT" state  
-    state = DATA_SEND;
-    printf("[state] current state 'DATA_SEND'\n\n");
     
     // 0. Obtaining the "Packet" and checking checksum
     Packet my_packet;
@@ -398,6 +393,11 @@ static void broadcast_received(struct trickle_conn* c)
     
     if (packet_checksum == my_packet.checksum)
     {
+        // (!) Message received ("HELLO_BS").
+        // Changing to "DATA_SEND" from "DATA_SEND/BLOCKED/DATA_COLLECT" state  
+        state = DATA_SEND;
+        printf("[state] current state 'DATA_SEND'\n\n");
+
         // Valid message
         leds_on(LEDS_YELLOW);
         
