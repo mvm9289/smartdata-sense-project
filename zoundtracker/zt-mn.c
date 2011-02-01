@@ -538,16 +538,26 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                 if (ack_timeout == 1)
                 {
                     // ACK message lost. We can't erase the "WORKING_FILE"
-                           
-                    cfs_close(fd_read);
-                    fd_read = EMPTY;
-                    sample_number = 0;
-                    printf("[net] ACK message lost\n\n");
+                    
+                    if (output_msg_type == DATA)
+                    {       
+                        cfs_close(fd_read);
+                        fd_read = EMPTY;
+                        sample_number = 0;
+                        printf("[net] DATA_ACK message lost\n\n");
+                    }
+                    else
+                    {
+                        printf("[net] HELLO_ACK message lost\n\n");
+                    }
+                     
+                    output_msg_type = EMPTY;
                     
                     // Changing to "BLOCKED" from "DATA_SEND" state
                     state = BLOCKED;
                     printf("[state] current state 'BLOCKED'\n\n");
                 }
+                
             }       
         }
         else
