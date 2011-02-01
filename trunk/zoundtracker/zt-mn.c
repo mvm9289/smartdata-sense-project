@@ -170,49 +170,71 @@ static void ack_received(unsigned char type)
     // "Basestation" till the end of the file. When the end of the file is 
     // reached removes the "WORKING_FILE" and reopens it.
     
-    ack_timeout = 0;
-    
-    if (type == HELLO_ACK)
+    if (output_msg_type != EMPTY)
     {
-        printf("[net] 'HELLO_ACK' received\n\n");
-        output_msg_type = EMPTY;
+        // ACK message that we're waiting for
+        ack_timeout = 0;
         
-        // (!) Discover/handshake finished.
-        // Changing to "BLOCKED" from "DATA_SEND" state  
-        state = BLOCKED;
-        printf("[state] current state 'BLOCKED'\n\n");
+        if (type == HELLO_ACK)
+        {
+            printf("[net] 'HELLO_ACK' received\n\n");
+            output_msg_type = EMPTY;
+            
+            // (!) Discover/handshake finished.
+            // Changing to "BLOCKED" from "DATA_SEND" state  
+            state = BLOCKED;
+            printf("[state] current state 'BLOCKED'\n\n");
+        }
+        else if (type == DATA_ACK)
+        {
+          printf("[net] 'DATA_ACK' received\n\n");
+          
+          /*if (packet_number != NO_NEXT_PACKET)
+          {        
+            // 0. Sending the next packet from the "WORKING_FILE"
+            //packet_number++;************************************************************NO IRIA DESPUES DE SEND_PACKET!!!!!!
+            send_packet_from_file();
+          }*/
+          send_packet_from_file();
+          
+          if(packet_number == NO_NEXT_PACKET) 
+          {
+            // There's no more packets to send
+            output_msg_type = EMPTY;
+            
+            // 1. 'WORKING_FILE' completely sended, removing it
+            cfs_close(fd_read);
+            fd_read = EMPTY;
+            cfs_remove(WORKING_FILE);
+            sample_number = 0;
+            file_size = 0;
+          
+            // (!) "WORKING_FILE" sended to the "Sink".
+            // Changing to "BLOCKED" from "DATA_SEND" state  
+            state = BLOCKED;
+            printf("[state] current state 'BLOCKED'\n\n");
+          }
+        }
     }
-    else if (type == DATA_ACK)
-    {
-      printf("[net] 'DATA_ACK' received\n\n");
-      
-      /*if (packet_number != NO_NEXT_PACKET)
-      {        
-        // 0. Sending the next packet from the "WORKING_FILE"
-        //packet_number++;************************************************************NO IRIA DESPUES DE SEND_PACKET!!!!!!
-        send_packet_from_file();
-      }*/
-      send_packet_from_file();
-      
-      if(packet_number == NO_NEXT_PACKET) 
-      {
-        // There's no more packets to send
-        output_msg_type = EMPTY;
-        
-        // 1. 'WORKING_FILE' completely sended, removing it
+    // else ACK message is discarded
+}
+
+static void file_send_failed(void)
+{
+    if (output_msg_type == DATA)
+    {       
         cfs_close(fd_read);
         fd_read = EMPTY;
-        cfs_remove(WORKING_FILE);
         sample_number = 0;
-        file_size = 0;
-      
-        // (!) "WORKING_FILE" sended to the "Sink".
-        // Changing to "BLOCKED" from "DATA_SEND" state  
-        state = BLOCKED;
-        printf("[state] current state 'BLOCKED'\n\n");
-      }
+        printf("[net] DATA_ACK message lost\n\n");
     }
-}
+    else
+    {
+        printf("[net] HELLO_ACK message lost\n\n");
+    }
+        
+    output_msg_type = EMPTY;
+}                    
 
 //------------------------------------------------------------------------------
 static void sent(struct mesh_conn *c) 
@@ -258,6 +280,9 @@ static void timedout(struct mesh_conn *c)
 	      printf(" 'HELLO_MN' message lost\n\n");
 	    else if (output_msg_type == DATA)
 	      printf(" 'DATA' message lost (packet number: %d)\n\n", packet_number);
+        
+        // Current sending message lost. We can't erase the "WORKING_FILE"
+        file_send_failed();                
         
         // (!) Message lost.
         // Changing to "BLOCKED" from "DATA_SEND" state  
@@ -541,20 +566,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                 if (ack_timeout == 1)
                 {
                     // ACK message lost. We can't erase the "WORKING_FILE"
-                    
-                    if (output_msg_type == DATA)
-                    {       
-                        cfs_close(fd_read);
-                        fd_read = EMPTY;
-                        sample_number = 0;
-                        printf("[net] DATA_ACK message lost\n\n");
-                    }
-                    else
-                    {
-                        printf("[net] HELLO_ACK message lost\n\n");
-                    }
-                     
-                    output_msg_type = EMPTY;
+                    file_send_failed();
                     
                     // Changing to "BLOCKED" from "DATA_SEND" state
                     state = BLOCKED;
