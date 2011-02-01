@@ -312,24 +312,26 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             if (input_msg_type == EMPTY)
             {
                 input_msg_type = my_packet.type;
-                printf("[net] a) 'input_msg_type' = %d\n\n", my_packet.type);
             }
             
             // 2. Response depending on the "type" value
             if (input_msg_type == HELLO_BS)
             {
+                printf("[net] 'HELLO_BS' message received\n\n");
+                
                 // 3. Sending "HELLO_MN" message
                 hello_msg();
             }
             else if (input_msg_type == POLL)
             {
+                printf("[net] 'POLL' message received\n\n");
+                
                 // 4. Sending "DATA" messages from "WORKING_FILE"
                 packet_number = 1;
                 send_packet_from_file();
             }
             
             input_msg_type = EMPTY;
-            printf("[net] b) 'input_msg_type' = %d\n\n", my_packet.type);
             
             leds_off(LEDS_GREEN);
             leds_off(LEDS_RED);
@@ -338,7 +340,6 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         {
             // There's a message already sending. The input message is saved
             input_msg_type = my_packet.type;
-            printf("[net] c) 'input_msg_type' = %d\n\n", my_packet.type);
         }
         else 
         {
@@ -388,6 +389,8 @@ static void broadcast_received(struct trickle_conn* c)
             // 2. Response depending on the "type" value
             if (input_msg_type == HELLO_BS)
             {
+                printf("[net] 'HELLO_BS' message received\n\n");
+                
                 // 3. Sending "HELLO_MN" message
                 hello_msg();
             }
