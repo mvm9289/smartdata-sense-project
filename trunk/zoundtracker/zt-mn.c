@@ -21,7 +21,7 @@
 // NET Defines
 #define MY_ADDR1 1  // (!) Update for every mn
 #define MY_ADDR2 0
-#define EMPTY 0
+#define EMPTY 99
 
 // Sensor Defines
 #define SAMPLE_SIZE 1
@@ -97,7 +97,7 @@ static void data_msg()
     my_packet_send.addr2 = MY_ADDR2;
     my_packet_send.type = DATA;
     my_packet_send.size = file_size;    
-    my_packet_send.counter = (packet_number-1)*DATA_SIZE + my_packet_send.size; // File offset
+    my_packet_send.counter = (packet_number-1)*DATA_SIZE; // File offset
     memcpy(my_packet_send.data, read_buffer, read_bytes); // File fragmentation (!)
     my_packet_send.checksum = compute_checksum(&my_packet_send);
     
@@ -170,6 +170,8 @@ static void ack_received(unsigned char type)
     // "Basestation" till the end of the file. When the end of the file is 
     // reached removes the "WORKING_FILE" and reopens it.
     
+    ack_timeout = 0;
+    
     if (type == HELLO_ACK)
     {
         printf("[net] 'HELLO_ACK' received\n\n");
@@ -220,6 +222,9 @@ static void sent(struct mesh_conn *c)
       printf("[net] sent 'HELLO_MN' message\n\n");
     else if (output_msg_type == DATA)
       printf("[net] sent 'DATA' message\n\n"); 
+    
+    // Waiting for an ACK message
+    ack_timeout = 1;
     
     leds_on(LEDS_GREEN);
 }
@@ -467,6 +472,8 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     sample_number = 0;
     file_size = 0;
     fd_read = fd_write = EMPTY;
+    //read_buffer[0] = 0;
+    cfs_remove(WORKING_FILE);
     
     
     // Sensor Initialization
@@ -524,6 +531,22 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                     printf("[state] current state 'BLOCKED'\n\n");
                 }
                   
+            }
+            else if (state == DATA_SEND)
+            {
+                if (ack_timeout == 1)
+                {
+                    // ACK message lost. We can't erase the "WORKING_FILE"
+                           
+                    cfs_close(fd_read);
+                    fd_read = EMPTY;
+                    sample_number = 0;
+                    printf("[net] ACK message lost\n\n");
+                    
+                    // Changing to "BLOCKED" from "DATA_SEND" state
+                    state = BLOCKED;
+                    printf("[state] current state 'BLOCKED'\n\n");
+                }
             }       
         }
         else
