@@ -34,7 +34,7 @@
 //------------------------------------------------------------------------------
 
 // CFS variables
-static int write_bytes, read_bytes, fd_read, fd_write, sample_number, packet_number;
+static int write_bytes, read_bytes, fd_read, fd_write, sample_number, packet_number, ack_timeout;
 static unsigned short file_size;
 static struct etimer control_timer;
 static unsigned char read_buffer[DATA_SIZE], input_msg_type, output_msg_type;
@@ -466,6 +466,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	mesh_open(&zoundtracker_conn, CHANNEL1, &zoundtracker_callbacks);                                             
 	trickle_open(&zoundtracker_broadcast_conn, 0, CHANNEL2, &zoundtracker_broadcast_callbacks);       
 	input_msg_type = output_msg_type = EMPTY;
+	ack_timeout = 0;
 	
     // CFS Initialization
     etimer_set(&control_timer, NUM_SECONDS_SAMPLE*CLOCK_SECOND);
