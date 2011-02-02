@@ -250,7 +250,9 @@ static void file_send_failed(void)
         printf("[net] HELLO_ACK message lost\n\n");
     }
         
+    // Current sending message lost. We're not pending of "DATA_ACK".    
     output_msg_type = EMPTY;
+    ack_timeout = 0;
 }                    
 
 //------------------------------------------------------------------------------
