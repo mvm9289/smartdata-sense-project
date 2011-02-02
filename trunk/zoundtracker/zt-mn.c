@@ -256,6 +256,8 @@ static void file_send_failed(void)
 //------------------------------------------------------------------------------
 static void sent(struct mesh_conn *c) 
 {
+    attempts = 0;
+    
     // Checksum comprobation needed on receiver
     if (output_msg_type == HELLO_MN)
       printf("[net] sent 'HELLO_MN' message\n\n");
@@ -349,8 +351,6 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             // There's a message saved ready to reply or the message received is not
             // an ACK and we can reply it.
             
-            attempts = 0;
-            
             if (input_msg_type == EMPTY)
             {
                 input_msg_type = my_packet.type;
@@ -367,9 +367,17 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             else if (input_msg_type == POLL)
             {
                 printf("[net] 'POLL' message received\n\n");
-                
-                // 4. Sending "DATA" messages from "WORKING_FILE"
-                send_packet_from_file();
+                if (output_msg_type == DATA)
+                {
+                    // 4."POLL" message reply to a "DATA" message sended. 
+                    // Resending the last packet.
+                    data_msg(); 
+                }
+                else 
+                {
+                    // 5. Sending next "DATA" messages from "WORKING_FILE"
+                    send_packet_from_file();
+                }
             }
             
             input_msg_type = EMPTY;
@@ -579,7 +587,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
             }
             else if (state == DATA_SEND)
             {
-                if (ack_timeout == 1)
+                if (ack_timeout == 1 && attempts >= MAX_ATTEMPTS)
                 {
                     // ACK message lost. We can't erase the "WORKING_FILE"
                     file_send_failed();
