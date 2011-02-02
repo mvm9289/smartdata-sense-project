@@ -44,7 +44,7 @@ static int attempts;
 static rimeaddr_t sink_addr;
 static struct mesh_conn zoundtracker_conn;
 static struct trickle_conn zoundtracker_broadcast_conn;
-static unsigned char my_array[PACKET_SIZE];
+static unsigned char my_array[PACKET_SIZE], next_packet;
 static unsigned short packet_checksum;
 
 // Sensor variables
@@ -123,7 +123,7 @@ static void data_msg()
 	printf("[net] sending 'DATA' message\n\n");
 }
 
-static void send_packet_from_file(void)
+static unsigned char prepare_packet(void)
 {
     // This function sends the next packet identified by the 'packet_number' 
     // from the "WORKING_FILE" to the "Basestation".
@@ -132,7 +132,7 @@ static void send_packet_from_file(void)
     if (fd_read == EMPTY)
     {
         // First packet of "WORKING_FILE"
-        packet_number = 1;
+        packet_number = 0;
         fd_read = cfs_open(WORKING_FILE, CFS_READ);
 	}
 	// else currently sending 'WORKING_FILE'
@@ -145,22 +145,45 @@ static void send_packet_from_file(void)
         printf("\n------BYTES READED: %d--------\n\n", read_bytes);
         
         if (read_bytes == ERROR)
-          printf("[cfs] error reading from the 'WORKING_FILE'\n\n");
-        else if (read_bytes == 0) {
-          packet_number = NO_NEXT_PACKET;
-          printf("\n********NO NEXT PACKET*********\n\n");
-          
-        }
-        else
         {  
-            // There's information to send
-            
-            // 1. "Packet" sending
-            data_msg();
-            printf("[net] sending the 'WORKING_FILE' (packet number: %d)\n\n", packet_number);
-            packet_number++;
-            
+            printf("[cfs] error reading from the 'WORKING_FILE'\n\n");
+            return FALSE;  
         }
+        else if (read_bytes == 0) {
+          return FALSE;
+        }
+        // else There's information to send
+        return TRUE;
+    }
+}
+
+static void send_packet_from_file(void)
+{
+    next_packet = prepare_packet();
+          
+    if (next_packet)
+    {              
+        // 1. "Packet" sending
+        packet_number++;
+        data_msg();
+        printf("[net] sending the 'WORKING_FILE' (packet number: %d)\n\n", packet_number);
+    }    
+    else  
+    {
+        // There's no more packets to send
+        output_msg_type = EMPTY;
+        
+        // 1. 'WORKING_FILE' completely sended, removing it
+        cfs_close(fd_read);
+        fd_read = EMPTY;
+        cfs_remove(WORKING_FILE);
+        sample_number = 0;
+        file_size = 0;
+        
+        // (!) "WORKING_FILE" sended to the "Sink".
+        // Changing to "BLOCKED" from "DATA_SEND" state  
+        state = BLOCKED;
+        printf("[state] current state 'BLOCKED'\n\n");
     }
 }
 
@@ -189,31 +212,8 @@ static void ack_received(unsigned char type)
         {
           printf("[net] 'DATA_ACK' received\n\n");
           
-          /*if (packet_number != NO_NEXT_PACKET)
-          {        
-            // 0. Sending the next packet from the "WORKING_FILE"
-            //packet_number++;************************************************************NO IRIA DESPUES DE SEND_PACKET!!!!!!
-            send_packet_from_file();
-          }*/
+          // If it's necessary sends next packet           
           send_packet_from_file();
-          
-          if(packet_number == NO_NEXT_PACKET) 
-          {
-            // There's no more packets to send
-            output_msg_type = EMPTY;
-            
-            // 1. 'WORKING_FILE' completely sended, removing it
-            cfs_close(fd_read);
-            fd_read = EMPTY;
-            cfs_remove(WORKING_FILE);
-            sample_number = 0;
-            file_size = 0;
-          
-            // (!) "WORKING_FILE" sended to the "Sink".
-            // Changing to "BLOCKED" from "DATA_SEND" state  
-            state = BLOCKED;
-            printf("[state] current state 'BLOCKED'\n\n");
-          }
         }
     }
     // else ACK message is discarded
@@ -267,7 +267,7 @@ static void timedout(struct mesh_conn *c)
 	    else if (output_msg_type == DATA)
 	    {
 	        // 2. Resending "DATA" message
-	        send_packet_from_file();
+	        data_msg();
         
             printf("[net] timeout resending the current packet"); 
 	        printf("(packet number: %d) from the 'WORKING_FILE'\n\n", packet_number);
@@ -352,7 +352,6 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
                 printf("[net] 'POLL' message received\n\n");
                 
                 // 4. Sending "DATA" messages from "WORKING_FILE"
-                packet_number = 1;
                 send_packet_from_file();
             }
             
