@@ -150,7 +150,10 @@ static unsigned char prepare_packet(void)
 	// else currently sending 'WORKING_FILE'
 	
 	if (fd_read == ERROR)
-	  printf("[cfs] error openning the 'WORKING_FILE'\n\n");
+	{  
+	    printf("[cfs] error openning the 'WORKING_FILE'\n\n");
+	    return FALSE;
+	}
 	else 
 	{                  
         read_bytes = cfs_read(fd_read, read_buffer, DATA_SIZE);
@@ -165,8 +168,10 @@ static unsigned char prepare_packet(void)
           return FALSE;
         }
         // else There's information to send
-        return TRUE;
+        
     }
+    
+    return TRUE;
 }
 
 static void send_packet_from_file(void)
