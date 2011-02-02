@@ -11,6 +11,18 @@
 
 //------------------------------------------------------------------------------
 
+#ifdef TRUE
+#undef TRUE
+#endif
+
+#define TRUE 1
+
+#ifdef FALSE
+#undef FALSE
+#endif
+
+#define FALSE 0
+
 // CFS Defines
 #define MAX_ATTEMPTS 5
 #define NUM_SECONDS_SAMPLE 6
