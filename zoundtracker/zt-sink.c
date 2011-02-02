@@ -18,6 +18,11 @@
 #define MAX_RESENDS 5
 #define DATA_TIMEOUT 60*12
 
+#ifdef DEBUG_MODE
+#define DEBUG_STATES
+#define DEBUG_NET
+#endif
+
 // States
 #define HELLO_STATE 1
 #define WAIT_STATE 2
@@ -26,8 +31,9 @@
 #define POLL_STATE 5
 ///////////////////////////////////////////////////////////////////////
 
-PROCESS(zoundtracker_sink_process, "ZoundTracker Sink Process");
-AUTOSTART_PROCESSES(&zoundtracker_sink_process);
+PROCESS(    zoundtracker_sink_process,
+            "ZoundTracker Sink Process"    );
+AUTOSTART_PROCESSES(    &zoundtracker_sink_process    );
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////// Static global Vars //////////////////////////
@@ -38,22 +44,17 @@ typedef struct
     unsigned char addr1;
     unsigned char addr2;
     unsigned char empty;
-} NodeTableEntry;
+} node_tableEntry;
 
-static NodeTableEntry nodeTable[NODE_TABLE_SIZE];
+static node_tableEntry node_table[NODE_TABLE_SIZE];
 
 static struct mesh_conn zoundtracker_conn;
 static struct trickle_conn zt_broadcast_conn;
-
-static unsigned int state;
-
-static unsigned short partial_seconds;
-static unsigned short seconds;
 ///////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////
 ////////////////////////////// Functions //////////////////////////////
-Packet hello_packet()
+inline Packet hello_packet()
 {
     Packet helloBS;
     helloBS.addr1 = SINK_ADDR1;
@@ -66,7 +67,7 @@ Packet hello_packet()
     return helloBS;
 }
 
-Packet hello_ack_packet()
+inline Packet hello_ack_packet()
 {
     Packet helloACK;
     helloACK.addr1 = SINK_ADDR1;
@@ -79,7 +80,7 @@ Packet hello_ack_packet()
     return helloACK;
 }
 
-Packet data_ack_packet()
+inline Packet data_ack_packet()
 {
     Packet dataACK;
     dataACK.addr1 = SINK_ADDR1;
@@ -92,7 +93,7 @@ Packet data_ack_packet()
     return dataACK;
 }
 
-Packet poll_packet()
+inline Packet poll_packet()
 {
     Packet poll;
     poll.addr1 = SINK_ADDR1;
@@ -108,7 +109,7 @@ Packet poll_packet()
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////// Trickle connection callback /////////////////////
-static void broadcast_received(struct trickle_conn *c)
+static void broadcast_received(    struct trickle_conn *c    )
 {
     #ifdef DEBUG_NET
         printf("Trickle received callback: ");
@@ -134,8 +135,7 @@ static void sent(    struct mesh_conn *c    )
 static void timedout(    struct mesh_conn *c    )
 {
     #ifdef DEBUG_NET
-        if (state == POLL_STATE)
-            printf("Mesh timedout callback: Poll packet timeout\n\n");
+        printf("Mesh timedout callback: Packet timeout\n\n");
     #endif
 }
 
@@ -160,8 +160,10 @@ static void received(    struct mesh_conn *c,
         {
             #ifdef DEBUG_NET
                 printf("Mesh received callback: ");
-                printf("Computed checksum dont match with packet checksum\n\n");
-                printf("Mesh reveived callback: Sending POLL packet\n\n");
+                printf("Computed checksum dont match with packet ");
+                printf("checksum\n\n");
+                printf("Mesh reveived callback: Sending POLL ");
+                printf("packet\n\n");
             #endif
             recv_send_packet = poll_packet();
             mount_packet(&recv_send_packet, recv_packet_buff);
@@ -175,33 +177,48 @@ static void received(    struct mesh_conn *c,
             {
                 case HELLO_MN:
                     #ifdef DEBUG_NET
-                        printf("Mesh received callback: Hello packet received from %d.%d\n\n", from->u8[0], from->u8[1]);
+                        printf("Mesh received callback: ");
+                        printf( "Hello packet received from %d.%d\n\n",
+                                from->u8[0],
+                                from->u8[1]);
                     #endif
                     is_valid = 1;
                     recv_send_packet = hello_ack_packet();
                     break;
                 case DATA:
                     #ifdef DEBUG_NET
-                        printf("Mesh received callback: Data packet received from %d.%d\n\n", from->u8[0], from->u8[1]);
-                        printf("Mesh received callback: Packet content:\n");
-                        printf("MOBILE NODE ID: %d.%d\n", recv_packet.addr1, recv_packet.addr2);
+                        printf("Mesh received callback: ");
+                        printf( "Data packet received from %d.%d\n\n",
+                                from->u8[0],
+                                from->u8[1]);
+                        printf("Mesh received callback: ");
+                        printf("Packet content:\n");
+                        printf( "MOBILE NODE ID: %d.%d\n",
+                                recv_packet.addr1,
+                                recv_packet.addr2);
                         printf("MESSAGE TYPE: %d\n", recv_packet.type);
                         printf("SIZE: %d\n", recv_packet.size);
                         printf("COUNTER: %d\n", recv_packet.counter);
                         printf("DATA: ");
-                        for (i = 0; i < DATA_SIZE && recv_packet.counter + i < recv_packet.size; i++)
+                        for (i = 0; i < DATA_SIZE &&
+                          recv_packet.counter + i < recv_packet.size;
+                          i++)
                             printf("%d ", recv_packet.data[i]);
                         printf("\n");
-                        printf("CHECKSUM: %d\n\n", recv_packet.checksum);
+                        printf( "CHECKSUM: %d\n\n",
+                                recv_packet.checksum);
                     #else
-                        for (i = 0; i < PACKET_SIZE; i++) putchar(((unsigned char*)packetbuf_dataptr())[i]);
+                        for (i = 0; i < PACKET_SIZE; i++)
+                            putchar(((char*)packetbuf_dataptr())[i]);
                     #endif
                     is_valid = 1;
                     recv_send_packet = data_ack_packet();
                     break;
                 default:
                     #ifdef DEBUG_NET
-                        printf("Mesh received callback: Unknown message type (%c)\n\n", recv_packet.type);
+                        printf("Mesh received callback: ");
+                        printf( "Unknown message type (%c)\n\n",
+                                recv_packet.type);
                     #endif
                     break;
             }
@@ -211,38 +228,48 @@ static void received(    struct mesh_conn *c,
                 found = 0;
                 for (i = 0; i < NODE_TABLE_SIZE && !found; i++)
                 {
-                    if (nodeTable[i].empty && first_empty_entry == -1)
+                    if (node_table[i].empty && first_empty_entry == -1)
                         first_empty_entry = i;
-                    else if (!nodeTable[i].empty &&
-                      nodeTable[i].addr1 == from->u8[0] &&
-                      nodeTable[i].addr2 == from->u8[1])
+                    else if (!node_table[i].empty &&
+                      node_table[i].addr1 == from->u8[0] &&
+                      node_table[i].addr2 == from->u8[1])
                         found = 1;
                 }
                 if (found)
                 {
-                    nodeTable[i].timestamp = 0;
-                    nodeTable[i].resends = 0;
+                    node_table[i].timestamp = 0;
+                    node_table[i].resends = 0;
                 }
                 else if (first_empty_entry != -1)
                 {
-                    nodeTable[first_empty_entry].empty = 0;
-                    nodeTable[first_empty_entry].timestamp = 0;
-                    nodeTable[first_empty_entry].resends = 0;
-                    nodeTable[first_empty_entry].addr1 = from->u8[0];
-                    nodeTable[first_empty_entry].addr2 = from->u8[1];
+                    node_table[first_empty_entry].empty = 0;
+                    node_table[first_empty_entry].timestamp = 0;
+                    node_table[first_empty_entry].resends = 0;
+                    node_table[first_empty_entry].addr1 = from->u8[0];
+                    node_table[first_empty_entry].addr2 = from->u8[1];
                 }
                 #ifdef DEBUG_NET
-                    else printf("Mesh received callback: Node table is full\n\n");
-                    printf("Mesh reveived callback: Sending ACK packet\n\n");
+                    else
+                    {
+                        printf("Mesh received callback: ");
+                        printf("Node table is full\n\n");
+                    }
+                    printf("Mesh reveived callback: ");
+                    printf("Sending ACK packet\n\n");
                 #endif
                 mount_packet(&recv_send_packet, recv_packet_buff);
-                packetbuf_copyfrom((void *)recv_packet_buff, PACKET_SIZE);
+                packetbuf_copyfrom( (void *)recv_packet_buff,
+                                    PACKET_SIZE);
                 mesh_send(&zoundtracker_conn, from);
             }
         }
     }
     #ifdef DEBUG_NET
-        else printf("Mesh received callback: Error with received packet size\n\n");
+        else
+        {
+            printf("Mesh received callback: ");
+            printf("Error with received packet size\n\n");
+        }
     #endif
 }
 
@@ -266,33 +293,31 @@ PROCESS_THREAD(zoundtracker_sink_process, ev, data)
     int i;
     rimeaddr_t my_addr;
     rimeaddr_t addr_send;
-    static struct etimer timer;
     unsigned char packet_buff[PACKET_SIZE];
     Packet packet;
+    static struct etimer timer;
+    static unsigned short partial_seconds;
+    static unsigned short seconds;
+    static unsigned int state;
     ///////////////////////////////////////////////////////////////////
     
     ///////////////////////////////////////////////////////////////////
     ///////////////////////// Initialization //////////////////////////
-    // Node table
+    // Clear node table
     for (i = 0; i < NODE_TABLE_SIZE; i++)
-        nodeTable[i].empty = 1;
-    // Sink rime address
+        node_table[i].empty = 1;
+    // Set sink rime address
     my_addr.u8[0] = SINK_ADDR1;
     my_addr.u8[1] = SINK_ADDR2;
     rimeaddr_set_node_addr(&my_addr);
-    // Mesh connection
+    // Open the mesh connection
     mesh_open(  &zoundtracker_conn,
                 CHANNEL1,
                 &zoundtracker_sink_callbacks);
-    // Trickle connection
-    //~ trickle_open(   &zt_broadcast_conn,
-                    //~ 0,
-                    //~ CHANNEL2,
-                    //~ &broadcast_callback);
-    // Timer
+    // Clear timer data
     partial_seconds = 0;
     seconds = 0;
-    // State
+    // Set first state
     state = HELLO_STATE;
     ///////////////////////////////////////////////////////////////////
 
@@ -306,13 +331,17 @@ PROCESS_THREAD(zoundtracker_sink_process, ev, data)
             partial_seconds++;
             switch (state)
             {
+                ///////////////////////////////////////////////////////
+                ///////////////////// Hello state /////////////////////
                 case HELLO_STATE:
                     #if defined(DEBUG_STATES) || defined(DEBUG_NET)
-                        printf("HELLO_STATE: Sending hello packet\n\n");
+                        printf("HELLO_STATE: ");
+                        printf("Sending hello packet\n\n");
                     #endif
                     packet = hello_packet();
                     mount_packet(&packet, packet_buff);
-                    packetbuf_copyfrom((void *)packet_buff, PACKET_SIZE);
+                    packetbuf_copyfrom( (void *)packet_buff,
+                                        PACKET_SIZE);
                     trickle_open(   &zt_broadcast_conn,
                                     0,
                                     CHANNEL2,
@@ -322,23 +351,25 @@ PROCESS_THREAD(zoundtracker_sink_process, ev, data)
                     #ifdef DEBUG_NET
                         printf("HELLO_STATE: Hello packet sent\n\n");
                     #endif
-                    //~ if (partial_seconds >= SECOND_PARTITION)
-                    //~ {
-                        //~ seconds++; // seconds += partial_seconds/SECOND_PARTITION; ???????????????????
-                        //~ partial_seconds = 0; // partial_seconds = partial_seconds%SECOND_PARTITION; ??????????????
-                        //~ state = UPDATE_STATE;
-                    //~ }
-                    //~ else state = TEST_STATE;
                     state = UPDATE_STATE;
                     break;
+                ///////////////////////////////////////////////////////
+                
+                ///////////////////////////////////////////////////////
+                ///////////////////// Wait state //////////////////////
                 case WAIT_STATE:
                     #ifdef DEBUG_STATES
-                        printf("WAIT_STATE: Waiting for anything happens\n\n");
+                        printf("WAIT_STATE: ");
+                        printf("Waiting for anything happens\n\n");
                     #endif
                     if (partial_seconds >= SECOND_PARTITION)
                     {
-                        seconds++; // seconds += partial_seconds/SECOND_PARTITION; ???????????????????
-                        partial_seconds = 0; // partial_seconds = partial_seconds%SECOND_PARTITION; ??????????????
+                        seconds++;
+                        partial_seconds = 0;
+                        // <----------------------------------------------------------------------------------------------------------
+                        //~ seconds += partial_seconds/SECOND_PARTITION;
+                        //~ partial_seconds =   partial_seconds%
+                                            //~ SECOND_PARTITION;
                         if (seconds >= 3600)
                         {
                             seconds = 0;
@@ -347,56 +378,96 @@ PROCESS_THREAD(zoundtracker_sink_process, ev, data)
                         else state = UPDATE_STATE;
                     }
                     break;
+                ///////////////////////////////////////////////////////
+                
+                ///////////////////////////////////////////////////////
+                //////////////////// Update state /////////////////////
                 case UPDATE_STATE:
                     #ifdef DEBUG_STATES
-                        printf("UPDATE_STATE: Updating timestamp for all Node table\n\n");
+                        printf("UPDATE_STATE: ");
+                        printf("Updating timestamp for all nodes\n\n");
                     #endif
                     for (i = 0; i < NODE_TABLE_SIZE; i++)
-                        if (!nodeTable[i].empty) nodeTable[i].timestamp++;
+                        if (!node_table[i].empty)
+                            node_table[i].timestamp++;
                     state = TEST_STATE;
                     break;
+                ///////////////////////////////////////////////////////
+                
+                ///////////////////////////////////////////////////////
+                ////////////////////// Test state /////////////////////
                 case TEST_STATE:
                     #ifdef DEBUG_STATES
-                        printf("TEST_STATE: Testing if some node need to be polled\n\n");
+                        printf("TEST_STATE: ");
+                        printf("Testing if some node need to be ");
+                        printf("polled\n\n");
                     #endif
-                    for (i = 0; i < NODE_TABLE_SIZE && state == TEST_STATE; i++)
-                        if (!nodeTable[i].empty && nodeTable[i].timestamp >= DATA_TIMEOUT)
+                    for (i = 0; i < NODE_TABLE_SIZE &&
+                      state == TEST_STATE; i++)
+                        if (!node_table[i].empty &&
+                          node_table[i].timestamp >= DATA_TIMEOUT)
                             state = POLL_STATE;
                     if (state == TEST_STATE) state = WAIT_STATE;
                     break;
+                ///////////////////////////////////////////////////////
+                
+                ///////////////////////////////////////////////////////
+                ////////////////////// Poll state /////////////////////
                 case POLL_STATE:
                     #ifdef DEBUG_STATES
-                        printf("POLL_STATE: Polling all nodes that has been timedout\n\n");
+                        printf("POLL_STATE: ");
+                        printf("Polling all nodes that has been ");
+                        printf("timedout\n\n");
                     #endif
                     packet = poll_packet();
                     mount_packet(&packet, packet_buff);
-                    //packetbuf_copyfrom((void *)packet_buff, PACKET_SIZE); //?????????????????????
+                    // <--------------------------------------------------------------------------------------------------------------
+                    //~ packetbuf_copyfrom( (void *)packet_buff,
+                                        //~ PACKET_SIZE);
                     for (i = 0; i < NODE_TABLE_SIZE; i++)
-                        if (!nodeTable[i].empty && nodeTable[i].timestamp >= DATA_TIMEOUT)
+                        if (!node_table[i].empty &&
+                          node_table[i].timestamp >= DATA_TIMEOUT)
                         {
-                            if (nodeTable[i].resends >= MAX_RESENDS)
+                            if (node_table[i].resends >= MAX_RESENDS)
                             {
-                                nodeTable[i].empty = 1;
+                                node_table[i].empty = 1;
                                 #ifdef DEBUG_NET
-                                    printf("POLL_STATE: MAX_RESENDS have been reached from node %d.%d\n\n", nodeTable[i].addr1, nodeTable[i].addr2);
+                                    printf("POLL_STATE: ");
+                                    printf("MAX_RESENDS have been ");
+                                    printf("reached from node ");
+                                    printf( "%d.%d\n\n",
+                                            node_table[i].addr1,
+                                            node_table[i].addr2);
                                 #endif
                             }
                             else
                             {
                                 #ifdef DEBUG_NET
-                                    printf("POLL_STATE: Sending poll packet to node %d.%d\n\n", nodeTable[i].addr1, nodeTable[i].addr2);
+                                    printf("POLL_STATE: ");
+                                    printf("Sending poll packet to ");
+                                    printf( "node %d.%d\n\n",
+                                            node_table[i].addr1,
+                                            node_table[i].addr2);
                                 #endif
-                                nodeTable[i].resends++;
-                                addr_send.u8[0] = nodeTable[i].addr1;
-                                addr_send.u8[1] = nodeTable[i].addr2;
-                                packetbuf_copyfrom((void *)packet_buff, PACKET_SIZE); //?????????????????????
-                                mesh_send(&zoundtracker_conn, &addr_send);
+                                node_table[i].resends++;
+                                addr_send.u8[0] = node_table[i].addr1;
+                                addr_send.u8[1] = node_table[i].addr2;
+                                // <--------------------------------------------------------------------------------------------------
+                                packetbuf_copyfrom(
+                                    (void *)packet_buff,
+                                    PACKET_SIZE);
+                                mesh_send(  &zoundtracker_conn,
+                                            &addr_send);
                             }
                         }
                     if (partial_seconds >= SECOND_PARTITION)
                     {
-                        seconds++; // seconds += partial_seconds/SECOND_PARTITION; ???????????????????
-                        partial_seconds = 0; // partial_seconds = partial_seconds%SECOND_PARTITION; ??????????????
+                        seconds++;
+                        partial_seconds = 0;
+                        // <----------------------------------------------------------------------------------------------------------
+                        //~ seconds += partial_seconds/SECOND_PARTITION;
+                        //~ partial_seconds =   partial_seconds%
+                                            //~ SECOND_PARTITION;
                         if (seconds >= 3600)
                         {
                             seconds = 0;
@@ -406,7 +477,12 @@ PROCESS_THREAD(zoundtracker_sink_process, ev, data)
                     }
                     else state = TEST_STATE;
                     break;
+                ///////////////////////////////////////////////////////
+                    
                 default:
+                    #ifdef DEBUG_STATES
+                        printf("UNKNOWN STATE\n\n");
+                    #endif
                     break;
             }
             etimer_set(&timer, STATE_TRANSITION_PERIOD);
