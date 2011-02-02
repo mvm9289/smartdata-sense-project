@@ -1,6 +1,6 @@
---------------------------------------------------------------------------------
+------------------------------------------------------------------------
 Trabajo
---------------------------------------------------------------------------------
+------------------------------------------------------------------------
 Datagrama aplicación
 - (Bea)Estructura datos "packet"" con tipos básicos:
 1. ID mota (2B)
@@ -16,12 +16,14 @@ Datagrama aplicación
 6. Reservado (23B)
 7. Checksum (2B) de los campos anteriores
 
-- (Bea)Función que construye un "array" preparado para RIME a partir de una estructura "packet".
-- (Bea)Función que construye la estructura "packet" a partir de un "array" proporcionado por RIME.
+- (Bea)Función que construye un "array" preparado para RIME a partir de 
+una estructura "packet".
+- (Bea)Función que construye la estructura "packet" a partir de un 
+"array" proporcionado por RIME.
 
---------------------------------------------------------------------------------
+------------------------------------------------------------------------
 Libreria
---------------------------------------------------------------------------------
+------------------------------------------------------------------------
 zt-packet-mt.h
 
 #define SINK_ADDR1
@@ -48,9 +50,9 @@ unsigned short compute_checksum((struct Packet *)my_packet);
 unsigned char * mount_packet((struct Packet *)my_packet);
 struct Packet unmount_packet((unsigned char*)my_array);
 
---------------------------------------------------------------------------------
+------------------------------------------------------------------------
 Compilacion
---------------------------------------------------------------------------------
+------------------------------------------------------------------------
 Modificaciones realizadas:
 1. Fichero "contiki/Makefile.include"
    Seccion: LIBS
@@ -60,38 +62,48 @@ Modificaciones realizadas:
    Copiados los ficheros "zt-packet-mgmt.h" y "zt-packet-mgmt.c"
 
 3. Fichero "zt-packet-mgmt.h"
-   Añadida definicion del fichero de cabezeras (ifndef __ZT_PACKET_MGMT_H ...)
+   Añadida definicion del fichero de cabezeras 
+   (ifndef __ZT_PACKET_MGMT_H ...)
    
---------------------------------------------------------------------------------
+------------------------------------------------------------------------
 Funcionalidades
---------------------------------------------------------------------------------
+------------------------------------------------------------------------
 Basestation
 - (MA)Añadir "timestamp" estructura de la tabla de nodos.
-- (MA)Función que actualiza el "timestamp" y comprueba si debe eliminarla de la tabla (timeout).
-- (MA) Función que comprueba "checksum" de los paquetes y si es correcto envía un paquete "ack" al nodo.
-- (MA)Función de envío de paquete "hello" en "broadcast" a la red, al iniciarse y cada 1 hora.
-- (MA)Función de envío de paquete "poll" pasados 10 minutos sin recibir datos del nodo móvil.
+- (MA)Función que actualiza el "timestamp" y comprueba si debe 
+eliminarla de la tabla (timeout).
+- (MA) Función que comprueba "checksum" de los paquetes y si es correcto 
+envía un paquete "ack" al nodo.
+- (MA)Función de envío de paquete "hello" en "broadcast" a la red, al 
+iniciarse y cada 1 hora.
+- (MA)Función de envío de paquete "poll" pasados 10 minutos sin recibir 
+datos del nodo móvil.
 * Enviar paquetes de datos correctos al "gateway".
 
 Nodos móviles
-- (Carlos)Función de envío de paquete "hello" a la "basestation", al iniciarse y cuando recibe un paquete "hello" de la "basestation".
+- (Carlos)Función de envío de paquete "hello" a la "basestation", al 
+iniciarse y cuando recibe un paquete "hello" de la "basestation".
   (!) Primer "HELLO_MN"
   - Enviamos datos a pesar de no recibir "ACK"
 
-- (Carlos)Función de envío de paquete, de respuesta a "poll" y, normal de datos cada 10 minutos, con todos los datos del fichero y 5 reintentos.
+- (Carlos)Función de envío de paquete, de respuesta a "poll" y, normal 
+de datos cada 10 minutos, con todos los datos del fichero y 5 
+reintentos.
 
   (!)Envio de un archivo
   ¿Necesitamos confirmar cada paquete?
   Modelo definido:
     En estado 'Data Send' envio el primer paquete.
-    En estado 'Data Ack Received' envio el siguiente. Si no hay siguiente, 
-    elimino el archivo (para posteriormente crear uno nuevo)
+    En estado 'Data Ack Received' envio el siguiente. Si no hay 
+    siguiente, elimino el archivo (para posteriormente crear uno nuevo)
 
-- (Carlos)Función que al recibir un paquete "ack" de la "basestation" borra el fichero actual y abre uno nuevo.
+- (Carlos)Función que al recibir un paquete "ack" de la "basestation" 
+borra el fichero actual y abre uno nuevo.
     
   (!) Distincion de "Ack"
   Modelo definido:
-    - Diferenciar "HELLO ACK" y "DATA ACK" como tipos diferentes de mensajes
+    - Diferenciar "HELLO ACK" y "DATA ACK" como tipos diferentes de 
+    mensajes
 
 - (Carlos)Función de toma de datos del sensor cada 1 minuto.
 
@@ -106,9 +118,14 @@ Nodos móviles
     - Timer único control de "Data Collect" y "Data Send" (1 minuto)
     - Suposicion: mensajes BS interrumpen y toman el control  
 
---------------------------------------------------------------------------------
+------------------------------------------------------------------------
+Ampliaciones
+------------------------------------------------------------------------
+- Obtener parámetros de consumo del "Battery_sensor".
+
+------------------------------------------------------------------------
 Maquina de estados (MN)
---------------------------------------------------------------------------------
+------------------------------------------------------------------------
 Blocked
 - Al inicio -> Data Send ("hello" packet)
 - Timer de 1 segundo
@@ -123,21 +140,65 @@ Data Send | Poll
 Data Resend
 - Al cabo de 5 intentos -> Blocked
 
---------------------------------------------------------------------------------
+------------------------------------------------------------------------
 Pruebas
---------------------------------------------------------------------------------
-Realizar pruebas de simulación de entorno (si es necesario utilizaremos antenas)
+------------------------------------------------------------------------
+Plan
+- 1 mota 
+  - Comunicación con "Basestation" ("HELLO_BS", "HELLO_MN") 
+  - Envío de archivos
+- 4 motas 
+  - Comunicación con "Basestation" ("HELLO_BS", "HELLO_MN")
+  - Envío de archivos
+    - Envío natural
+    - Forzando cuello de botella en la "Basestation"
+    
+
+Realizar pruebas de simulación de entorno (si es necesario utilizaremos 
+antenas)
 Utilizar parametros calidad de transmisión
 
 He añadido los siguientes tests funcionales (falta revisar)
-- "zt-mn-sensor-test.c": Prueba de lectura del sensor y escritura en fichero
-- "zt-mn-ack-test.c", "zt-sink-ack-test": Prueba de envio de "HELLO_MN" y 
-recepcion de "HELLO_ACK" (Discover/hanshake)
+- "zt-mn-sensor-test.c": Prueba de lectura del sensor y escritura en 
+fichero
+- "zt-mn-ack-test.c", "zt-sink-ack-test": Prueba de envio de "HELLO_MN" 
+y recepcion de "HELLO_ACK" (Discover/hanshake)
 
---------------------------------------------------------------------------------
+------------------------------------------------------------------------
 Comunicacion Gateway-Basestation
---------------------------------------------------------------------------------
-A traves de "write", "printf" teniendo en cuenta la dificultad del Gateway al
-recibir la informacion
+------------------------------------------------------------------------
+A traves de "write", "printf" teniendo en cuenta la dificultad del 
+Gateway al recibir la informacion
 
---------------------------------------------------------------------------------
+------------------------------------------------------------------------
+Modificaciones pendientes
+------------------------------------------------------------------------
+Archivo: "zt-mn.c"
+Fecha Rev.: 01/02/11
+Cambios a realizar:
+- Añadir el nombre y la fecha de última modificación del fichero al 
+inicio del archivo.
+- Línias de los archivos de máximo 72 caracteres.
+- Mover "max_attempts" a las definiciones de "net".
+- Renombrar "sample_number" a "sample_interval" y moverlo a las
+variables "sensor".
+- Cambio diseño en "DATA_COLLECT": Al tomar un dato del sensor, si el
+archivo actual está siendo enviado, abrimos un nuevo fichero y lo
+almacenamos.
+- Cambio diseño en "DATA_SEND": Verificar si son necesarios 
+"input_msg_type" y "output_msg_type". En caso afirmativo, decidir el
+tamaño de los buffers en función del rendimiento.
+- Mover "packet_number" a las variables de "net".
+- Mover "input/output_msg_type" a las variables de "net".
+- Renombrar "my_array" a "rime_stream".
+- Documentación funciones: ¿qué hace? ¿por qué? ¿cuándo? 
+¿valor de retorno esperado?
+- Modificar comentarios de las funciones "void hello/data_msg()": 
+a) "Configure MN state" -> "Configure type of message".
+b) "Packet transform", explicar detalladamente (confusión con cifrado)
+c) "Packet send", especificar siempre que se envia a la "Basestation"
+- Añadir "define" para el valor inicial de "counter" (mayor facilidad de
+lectura de la función "void hello_msg()").
+- Modificar el valor de la definición "EMPTY" para evitar conflictos con
+los tipos de mensajes.
+------------------------------------------------------------------------
