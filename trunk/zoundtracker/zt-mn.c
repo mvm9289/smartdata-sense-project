@@ -312,6 +312,7 @@ static void timedout(struct mesh_conn *c)
         
         // Starting new sample period (10 minutes)
         sample_number = 0;
+        attempts = 0;
         
         leds_on(LEDS_RED);
 	}
@@ -432,8 +433,6 @@ static void broadcast_received(struct trickle_conn* c)
             // There's a message saved ready to reply or the message received is not
             // an ACK and we can reply it.
             
-            attempts = 0;
-            
             if (input_msg_type == EMPTY)
               input_msg_type = my_packet.type;
           
@@ -521,6 +520,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	trickle_open(&zoundtracker_broadcast_conn, 0, CHANNEL2, &zoundtracker_broadcast_callbacks);       
 	input_msg_type = output_msg_type = EMPTY;
 	ack_timeout = 0;
+	attempts = 0;
 	
     // CFS Initialization
     etimer_set(&control_timer, NUM_SECONDS_SAMPLE*CLOCK_SECOND);
