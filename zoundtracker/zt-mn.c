@@ -151,7 +151,7 @@ static unsigned char prepare_packet(void)
 	
 	if (fd_read == ERROR)
 	{  
-	    printf("[cfs] error openning the 'WORKING_FILE'\n\n");
+	    printf("[cfs] error openning the 'WORKING_FILE' for read data\n\n");
 	    return FALSE;
 	}
 	else 
@@ -196,6 +196,7 @@ static void send_packet_from_file(void)
         cfs_remove(WORKING_FILE);
         sample_number = 0;
         file_size = 0;
+        printf("[net] 'WORKING_FILE' completely sended, removing it\n\n");
         
         // (!) "WORKING_FILE" sended to the "Sink".
         // Changing to "BLOCKED" from "DATA_SEND" state  
@@ -349,6 +350,11 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             // There's a message saved ready to reply or the message received is not
             // an ACK and we can reply it.
             
+            // Changing to "DATA_SEND" state  
+            state = DATA_SEND;
+            printf("[state] current state 'DATA_SEND'\n\n");
+            
+            
             if (input_msg_type == EMPTY)
             {
                 input_msg_type = my_packet.type;
@@ -481,7 +487,7 @@ void get_sensor_sample(void)
     // 1. Writing data into the "WORKING_FILE"
 	fd_write = cfs_open(WORKING_FILE, CFS_WRITE | CFS_APPEND);       
     if (fd_write == ERROR) 
-      printf("[cfs] error openning the 'WORKING_FILE'\n\n");
+      printf("[cfs] error openning the 'WORKING_FILE' for write data\n\n");
     else 
     {
         write_bytes = cfs_write(fd_write, &sensor_sample, SAMPLE_SIZE);
