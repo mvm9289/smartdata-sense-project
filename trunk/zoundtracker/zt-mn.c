@@ -414,59 +414,36 @@ static void broadcast_received(struct trickle_conn* c)
     // to "received" mesh callback to attend only the "HELLO_BS" messages sended 
     // through the "broadcast" connection.
     
-    // 0. Obtaining the "Packet" and checking checksum
-    Packet my_packet;
-    my_packet = unmount_packet(packetbuf_dataptr());
-    packet_checksum = compute_checksum(&my_packet);
+    if (state != DATA_SEND)
+    {    
     
-    if (packet_checksum == my_packet.checksum)
-    {
-        // (!) Message received ("HELLO_BS").
-        // Changing to "DATA_SEND" from "DATA_SEND/BLOCKED/DATA_COLLECT" state  
-        state = DATA_SEND;
-        printf("[state] current state 'DATA_SEND'\n\n");
-
-        // Valid message
-        leds_on(LEDS_YELLOW);
+        // 0. Obtaining the "Packet" and checking checksum
+        Packet my_packet;
+        my_packet = unmount_packet(packetbuf_dataptr());
+        packet_checksum = compute_checksum(&my_packet);
         
-        if (output_msg_type == EMPTY)
+        if (packet_checksum == my_packet.checksum)
         {
-            // There's a message saved ready to reply or the message received is not
-            // an ACK and we can reply it.
+            // (!) Message received ("HELLO_BS").
+            // Changing to "DATA_SEND" from "DATA_SEND/BLOCKED/DATA_COLLECT" state  
+            state = DATA_SEND;
+            printf("[state] current state 'DATA_SEND'\n\n");
+
+            // Valid message
+            leds_on(LEDS_YELLOW);
             
-            if (input_msg_type == EMPTY)
-              input_msg_type = my_packet.type;
-          
-            // 2. Response depending on the "type" value
-            if (input_msg_type == HELLO_BS)
-            {
-                printf("[net] 'HELLO_BS' message received\n\n");
-                
-                // 3. Sending "HELLO_MN" message
-                hello_msg();
-            }
+            printf("[net] 'HELLO_BS' message received\n\n");
             
-            input_msg_type = EMPTY;
-            
-            leds_off(LEDS_GREEN);
-            leds_off(LEDS_RED);
-        }
-        else if (input_msg_type == EMPTY && output_msg_type != EMPTY && my_packet.type != HELLO_ACK && my_packet.type != DATA_ACK)
-        {
-            // There's a message already sending. The input message is saved
-            input_msg_type = my_packet.type;
+            // 3. Sending "HELLO_MN" message
+            hello_msg();
         }
         else 
         {
-            //the message is discarded
-            printf("[net] 'input_msg_type != EMPTY' message is discarded\n\n");
+            // invalid message
+            printf("[net] incorrect checksum invalid message\n\n");
         }
     }
-    else 
-    {
-        // invalid message
-        printf("[net] incorrect checksum invalid message\n\n");
-    }
+    // else actually sending DATA
 }
 
 const static struct mesh_callbacks zoundtracker_callbacks = {received, sent, timedout};
