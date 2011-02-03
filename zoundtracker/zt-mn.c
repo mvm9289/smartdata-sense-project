@@ -71,6 +71,8 @@ static unsigned char state;
 static void hello_msg() 
 {
     // This function builds and sends a "HELLO_MN" message to de "Basestation"    
+    printf("[net] sending 'HELLO_MN' message\n\n");
+    
     Packet my_packet_send;
 
     // 0. Configure MN state
@@ -92,13 +94,13 @@ static void hello_msg()
 	sink_addr.u8[0] = SINK_ADDR1;
 	sink_addr.u8[1] = SINK_ADDR2;
 	mesh_send(&zoundtracker_conn, &sink_addr);
-	
-	printf("[net] sending 'HELLO_MN' message\n\n");
 }
 
 static void data_msg() 
 {   
     // This function builds and sends a "DATA" message to the "Basestation"
+    printf("[net] sending 'DATA' message\n\n");
+    
     Packet my_packet_send;
     
     // 0. Configure MN state
@@ -131,8 +133,6 @@ static void data_msg()
 	sink_addr.u8[0] = SINK_ADDR1;
 	sink_addr.u8[1] = SINK_ADDR2;
 	mesh_send(&zoundtracker_conn, &sink_addr);
-	
-	printf("[net] sending 'DATA' message\n\n");
 }
 
 static unsigned char prepare_packet(void)
@@ -144,6 +144,9 @@ static unsigned char prepare_packet(void)
     if (fd_read == EMPTY)
     {
         // First packet of "WORKING_FILE"
+        printf("[cfs] trying to prepare the first packet of the 'WORKING_FILE'\n\n");
+	    
+        
         packet_number = 0;
         fd_read = cfs_open(WORKING_FILE, CFS_READ);
 	}
@@ -395,6 +398,8 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         {
             // There's a message already sending. The input message is saved
             input_msg_type = my_packet.type;
+            printf("[net] There's a message already sending.\n"
+            printf("  Saving the input message 'input_msg_type == %d'\n\n", input_msg_type);
         }
         else 
         {
