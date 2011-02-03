@@ -246,7 +246,7 @@ static void file_send_failed(void)
         sample_number = 0;   
     }
         
-    // Current sending message lost. We're not pending of "DATA_ACK".    
+    // Current sending message lost. We're not pending of "ACK".    
     output_msg_type = EMPTY;
     ack_timeout = 0;
 }                    
