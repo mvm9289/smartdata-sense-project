@@ -320,6 +320,8 @@ static void received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
     // This function sends the "WORKING_FILE" if the "Basestation" requests 
     // data. If there's a message already sending, this message is saved. If 
     // there's another message saved, the last message is discarded.
+    
+    printf("[net] message received trough 'mesh' connection\n\n");
        
     // 0. Obtaining the "Packet" and checking checksum
     Packet my_packet;
@@ -413,6 +415,8 @@ static void broadcast_received(struct trickle_conn* c)
     // a "broadcast" "HELLO_BS" message received. The behaviour is very similar 
     // to "received" mesh callback to attend only the "HELLO_BS" messages sended 
     // through the "broadcast" connection.
+    
+    printf("[net] message received trough 'trickle' connection\n\n");
     
     if (state != DATA_SEND)
     {    
