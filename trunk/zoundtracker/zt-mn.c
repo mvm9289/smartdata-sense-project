@@ -242,12 +242,7 @@ static void file_send_failed(void)
     {       
         cfs_close(fd_read);
         fd_read = EMPTY;
-        sample_number = 0;
-        printf("[net] DATA_ACK message lost\n\n");
-    }
-    else
-    {
-        printf("[net] HELLO_ACK message lost\n\n");
+        sample_number = 0;   
     }
         
     // Current sending message lost. We're not pending of "DATA_ACK".    
@@ -589,8 +584,9 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
             }
             else if (state == DATA_SEND)
             {
-                if (ack_timeout == 1 && attempts >= MAX_ATTEMPTS)
+                if (ack_timeout == 1)
                 {
+                    printf("[net] ACK message lost\n\n");
                     // ACK message lost. We can't erase the "WORKING_FILE"
                     file_send_failed();
                     
