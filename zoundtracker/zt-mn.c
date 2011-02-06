@@ -1,3 +1,6 @@
+/* File: "zt-mn.c"
+   Date (last rev.): 02/06/2011 11:48 AM                           */
+   
 #include "contiki.h"
 #include "leds.h"
 #include "cfs/cfs.h"
@@ -9,7 +12,7 @@
 #include <string.h>
 #include "lib/zt-packet-mgmt.h"
 
-//----------------------------------------------------------------------
+/* ------------------------------------------------------------------ */
 
 #ifdef TRUE
 #undef TRUE
@@ -21,27 +24,27 @@
 #endif
 #define FALSE 0
 
-// CFS Defines
+/* CFS */
 #define MAX_ATTEMPTS 5
 #define NUM_SECONDS_SAMPLE 6
 #define WORKING_FILE "my_file"
 #define ERROR -1
 #define NO_NEXT_PACKET -1
 
-// NET Defines
+/* NET */
 #define EMPTY 99
 
-// Sensor Defines
+/* Sensor */
 #define SAMPLE_SIZE 1
 
-// State Defines
+/* State */
 #define BLOCKED 1
 #define DATA_COLLECT 2
 #define DATA_SEND 3
 
-//----------------------------------------------------------------------
+/* ------------------------------------------------------------------ */
 
-// CFS variables
+/* CFS */
 static int write_bytes, read_bytes, fd_read, fd_write, sample_number, 
   packet_number, ack_timeout;
 static unsigned short file_size;
@@ -49,7 +52,7 @@ static struct etimer control_timer;
 static unsigned char read_buffer[DATA_SIZE], input_msg_type, 
   output_msg_type;
     
-// NET variables
+/* NET */
 static int attempts;
 static rimeaddr_t sink_addr;
 static struct mesh_conn zoundtracker_conn;
@@ -57,28 +60,28 @@ static struct trickle_conn zoundtracker_broadcast_conn;
 static unsigned char my_array[PACKET_SIZE], next_packet;
 static unsigned short packet_checksum;
 
-// Sensor variables
+/* Sensor */
 static char sensor_sample;
 
-// State variables
+/* State */
 static unsigned char state;
 
-//----------------------------------------------------------------------
+/* ------------------------------------------------------------------ */
 
-// NET Functions
+/* NET */
 static void 
 hello_msg() 
 {
-    // This function builds and sends a "HELLO_MN" message to the 
-    // "Basestation".    
+    /* This function builds and sends a "HELLO_MN" message to the 
+       "Basestation". */    
     printf("[net] sending 'HELLO_MN' message\n\n");
     
     Packet my_packet_send;
 
-    // Configure MN state.
+    /* Configure MN state. */
     output_msg_type = HELLO_MN;
  
-    // "Packet" construction
+    /* "Packet" construction. */
     my_packet_send.addr1 = MY_ADDR1;
     my_packet_send.addr2 = MY_ADDR2;
     my_packet_send.type = HELLO_MN;
@@ -86,11 +89,11 @@ hello_msg()
     my_packet_send.counter = 0;
     my_packet_send.checksum = compute_checksum(&my_packet_send);
     
-    // "Packet" transform
+    /* "Packet" transform. */
     mount_packet(&my_packet_send, my_array);
     packetbuf_copyfrom((void *)my_array, PACKET_SIZE);
 	
-	// "Packet" send
+	/* "Packet" send. */
 	sink_addr.u8[0] = SINK_ADDR1;
 	sink_addr.u8[1] = SINK_ADDR2;
 	mesh_send(&zoundtracker_conn, &sink_addr);
@@ -99,16 +102,16 @@ hello_msg()
 static void 
 data_msg() 
 {   
-    // This function builds and sends a "DATA" message to the 
-    // "Basestation"
+    /* This function builds and sends a "DATA" message to the 
+       "Basestation". */
     printf("[net] sending 'DATA' message\n\n");
     
     Packet my_packet_send;
     
-    // Configure MN state
+    /* Configure MN state. */
     output_msg_type = DATA;
  
-    // "Packet" construction
+    /* "Packet" construction. */
     my_packet_send.addr1 = MY_ADDR1;
     my_packet_send.addr2 = MY_ADDR2;
     my_packet_send.type = DATA;
@@ -127,11 +130,11 @@ data_msg()
     printf("Checksum: %d\n", my_packet_send.checksum);
     printf("---------------------------------------------------\n\n");
     
-    // "Packet" transform
+    /* "Packet" transform. */
     mount_packet(&my_packet_send, my_array);
     packetbuf_copyfrom((void *)my_array, PACKET_SIZE);
 	
-	// "Packet" send
+	/* "Packet" send. */
 	sink_addr.u8[0] = SINK_ADDR1;
 	sink_addr.u8[1] = SINK_ADDR2;
 	mesh_send(&zoundtracker_conn, &sink_addr);
@@ -140,13 +143,13 @@ data_msg()
 static unsigned char 
 prepare_packet(void)
 {
-    // This function sends the next packet identified by the 
-    // 'packet_number' from the "WORKING_FILE" to the "Basestation".
+    /* This function sends the next packet identified by the 
+      'packet_number' from the "WORKING_FILE" to the "Basestation". */
 
-    // Reading from the "WORKING_FILE"
+    /* Reading from the "WORKING_FILE". */
     if (fd_read == EMPTY)
     {
-        // First packet of "WORKING_FILE"
+        /* First packet of "WORKING_FILE". */
         printf("[cfs] trying to prepare the first packet of the \
           'WORKING_FILE'\n\n");
 	    
@@ -154,7 +157,7 @@ prepare_packet(void)
         packet_number = 0;
         fd_read = cfs_open(WORKING_FILE, CFS_READ);
 	}
-	// else currently sending 'WORKING_FILE'
+	/* else currently sending 'WORKING_FILE'. */
 	
 	if (fd_read == ERROR)
 	{  
@@ -175,7 +178,7 @@ prepare_packet(void)
         else if (read_bytes == 0) {
           return FALSE;
         }
-        // else There's information to send
+        /* else There's information to send. */
         
     }
     
@@ -189,7 +192,7 @@ send_packet_from_file(void)
           
     if (next_packet)
     {              
-        // "Packet" sending
+        /* "Packet" sending. */
         packet_number++;
         data_msg();
         printf("[net] sending the 'WORKING_FILE' \
@@ -197,10 +200,10 @@ send_packet_from_file(void)
     }    
     else  
     {
-        // There's no more packets to send
+        /* There's no more packets to send. */
         output_msg_type = EMPTY;
         
-        // 'WORKING_FILE' completely sended, removing it
+        /* 'WORKING_FILE' completely sended, removing it. */
         cfs_close(fd_read);
         fd_read = EMPTY;
         cfs_remove(WORKING_FILE);
@@ -209,8 +212,8 @@ send_packet_from_file(void)
         printf("[net] 'WORKING_FILE' completely sended, \
           removing it\n\n");
         
-        // (!) "WORKING_FILE" sended to the "Sink".
-        // Changing to "BLOCKED" from "DATA_SEND" state  
+        /* (!) "WORKING_FILE" sended to the "Sink".
+           Changing to "BLOCKED" from "DATA_SEND" state. */  
         state = BLOCKED;
         printf("[state] current state 'BLOCKED'\n\n");
     }
@@ -219,13 +222,13 @@ send_packet_from_file(void)
 static void 
 ack_received(unsigned char type)
 {
-    // This function sends the next packet of the "WORKING_FILE" to the 
-    // "Basestation" till the end of the file. When the end of the file 
-    // is reached removes the "WORKING_FILE" and reopens it.
+    /* This function sends the next packet of the "WORKING_FILE" to the 
+       "Basestation" till the end of the file. When the end of the file 
+       is reached removes the "WORKING_FILE" and reopens it. */
     
     if (output_msg_type != EMPTY)
     {
-        // ACK message that we're waiting for
+        /* ACK message that we're waiting for. */
         ack_timeout = 0;
         
         if (type == HELLO_ACK)
@@ -233,8 +236,8 @@ ack_received(unsigned char type)
             printf("[net] 'HELLO_ACK' received\n\n");
             output_msg_type = EMPTY;
             
-            // (!) Discover/handshake finished.
-            // Changing to "BLOCKED" from "DATA_SEND" state  
+            /* (!) Discover/handshake finished.
+               Changing to "BLOCKED" from "DATA_SEND" state. */  
             state = BLOCKED;
             printf("[state] current state 'BLOCKED'\n\n");
         }
@@ -242,11 +245,11 @@ ack_received(unsigned char type)
         {
           printf("[net] 'DATA_ACK' received\n\n");
           
-          // If it's necessary sends next packet           
+          /* If it's necessary sends next packet. */           
           send_packet_from_file();
         }
     }
-    // else ACK message is discarded
+    /* else ACK message is discarded. */
 }
 
 static void 
@@ -259,24 +262,24 @@ file_send_failed(void)
         sample_number = 0;   
     }
         
-    // Current sending message lost. We're not pending of "ACK".    
+    /* Current sending message lost. We're not pending of "ACK". */    
     output_msg_type = EMPTY;
     ack_timeout = 0;
 }                    
 
-//----------------------------------------------------------------------
+/* ------------------------------------------------------------------ */
 static void 
 sent(struct mesh_conn *c) 
 {
     attempts = 0;
     
-    // Checksum comprobation needed on receiver
+    /* Checksum comprobation needed on receiver. */
     if (output_msg_type == HELLO_MN)
       printf("[net] sent 'HELLO_MN' message\n\n");
     else if (output_msg_type == DATA)
       printf("[net] sent 'DATA' message\n\n"); 
     
-    // Waiting for an ACK message
+    /* Waiting for an ACK message. */
     ack_timeout = 1;
     
     leds_on(LEDS_GREEN);
@@ -291,14 +294,14 @@ timedout(struct mesh_conn *c)
 	{
 	    if (output_msg_type == HELLO_MN)
 	    {
-	        // Resending "HELLO_MN" message
+	        /* Resending "HELLO_MN" message. */
 	        hello_msg();
 	        
 	        printf("[net] timeout resending 'HELLO_MN' message\n\n");
 	    }
 	    else if (output_msg_type == DATA)
 	    {
-	        // Resending "DATA" message
+	        /* Resending "DATA" message. */
 	        data_msg();
         
             printf("[net] timeout resending the current packet \
@@ -315,16 +318,16 @@ timedout(struct mesh_conn *c)
 	      printf(" 'DATA' message lost \
 	        (packet number: %d)\n\n", packet_number);
         
-        // Current sending message lost. We can't erase the 
-        // "WORKING_FILE"
+        /* Current sending message lost. We can't erase the 
+           "WORKING_FILE". */
         file_send_failed();                
         
-        // (!) Message lost.
-        // Changing to "BLOCKED" from "DATA_SEND" state  
+        /* (!) Message lost.
+           Changing to "BLOCKED" from "DATA_SEND" state. */  
         state = BLOCKED;
         printf("[state] current state 'BLOCKED'\n\n");
         
-        // Starting new sample period (10 minutes)
+        /* Starting new sample period (10 minutes). */
         sample_number = 0;
         attempts = 0;
         
@@ -336,33 +339,33 @@ timedout(struct mesh_conn *c)
 static void 
 received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops) 
 {
-    // This function sends the "WORKING_FILE" if the "Basestation" 
-    // requests data. If there's a message already sending, this message
-    // is saved. If there's another message saved, the last message is 
-    // discarded.
+    /* This function sends the "WORKING_FILE" if the "Basestation" 
+       requests data. If there's a message already sending, this message
+       is saved. If there's another message saved, the last message is 
+       discarded. */
     
     printf("[net] message received trough 'mesh' connection\n\n");
        
-    // 0. Obtaining the "Packet" and checking checksum
+    /* Obtaining the "Packet" and checking checksum. */
     Packet my_packet;
     my_packet = unmount_packet(packetbuf_dataptr());
     packet_checksum = compute_checksum(&my_packet);
     
     if (packet_checksum == my_packet.checksum)
     {
-        // (!) Message received ("POLL/HELLO_ACK/DATA_ACK").
-        // Changing to "DATA_SEND" from "DATA_SEND/BLOCKED/DATA_COLLECT"
-        // state  
+        /* (!) Message received ("POLL/HELLO_ACK/DATA_ACK").
+           Changing to "DATA_SEND" from "DATA_SEND/BLOCKED/DATA_COLLECT"
+           state. */ 
         state = DATA_SEND;
         printf("[state] current state 'DATA_SEND'\n\n");
 
-        // Valid message
+        /* Valid message. */
         leds_on(LEDS_YELLOW);
     
         if (my_packet.type == HELLO_ACK || my_packet.type == DATA_ACK)
         {
-            // Sending the next packet or erasing data from 
-            // "WORKING_FILE"
+            /* Sending the next packet or erasing data from 
+               "WORKING_FILE". */
             ack_received(my_packet.type);
         
             leds_off(LEDS_GREEN);
@@ -373,10 +376,10 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
           (my_packet.type != HELLO_ACK && my_packet.type != DATA_ACK && 
           output_msg_type == EMPTY))
         {
-            // There's a message saved ready to reply or the message 
-            // received is not an ACK and we can reply it.
+            /* There's a message saved ready to reply or the message 
+               received is not an ACK and we can reply it. */
             
-            // Changing to "DATA_SEND" state  
+            /* Changing to "DATA_SEND" state. */  
             state = DATA_SEND;
             printf("[state] current state 'DATA_SEND'\n\n");
             
@@ -386,12 +389,12 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
                 input_msg_type = my_packet.type;
             }
             
-            // Response depending on the "type" value
+            /* Response depending on the "type" value. */
             if (input_msg_type == HELLO_BS)
             {
                 printf("[net] 'HELLO_BS' message received\n\n");
                 
-                // Sending "HELLO_MN" message
+                /* Sending "HELLO_MN" message. */
                 hello_msg();
             }
             else if (input_msg_type == POLL)
@@ -399,13 +402,14 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
                 printf("[net] 'POLL' message received\n\n");
                 if (output_msg_type == DATA)
                 {
-                    // "POLL" message reply to a "DATA" message 
-                    // sended. Resending the last packet.
+                    /* "POLL" message on reply to a "DATA" message 
+                       sended. Resending the last packet. */
                     data_msg(); 
                 }
                 else 
                 {
-                    // Sending next "DATA" messages from "WORKING_FILE"
+                    /* Sending next "DATA" messages from 
+                       "WORKING_FILE". */
                     send_packet_from_file();
                 }
             }
@@ -418,8 +422,8 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         else if (input_msg_type == EMPTY && output_msg_type != EMPTY && 
           my_packet.type != HELLO_ACK && my_packet.type != DATA_ACK)
         {
-            // There's a message already sending. The input message is 
-            // saved
+            /* There's a message already sending. The input message is 
+               saved. */
             input_msg_type = my_packet.type;
             printf("[net] There's a message already sending.\n"
             printf("  Saving the input message \
@@ -427,14 +431,14 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         }
         else 
         {
-            // Input is empty or message is discarded 
+            /* Input is empty or message is discarded. */ 
             printf("[net] 'input_msg_type == EMPTY' or \
               message is discarded\n\n");
         }
     }
     else 
     {
-        // invalid message
+        /* Invalid message. */
         printf("[net] incorrect checksum invalid message\n\n");
     }
 }
@@ -442,45 +446,45 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 static void 
 broadcast_received(struct trickle_conn* c)
 {
-    // This function sends a "HELLO_MN" message through the "mesh" 
-    // connection when a "broadcast" "HELLO_BS" message received. The 
-    // behaviour is very similar to "received" mesh callback to attend 
-    // only the "HELLO_BS" messages sended through the "broadcast" 
-    // connection.
+    /* This function sends a "HELLO_MN" message through the "mesh" 
+       connection when a "broadcast" "HELLO_BS" message received. The 
+       behaviour is very similar to "received" mesh callback to attend 
+       only the "HELLO_BS" messages sended through the "broadcast" 
+       connection. */
     
     printf("[net] message received trough 'trickle' connection\n\n");
     
     if (state != DATA_SEND)
     {    
     
-        // Obtaining the "Packet" and checking checksum
+        /* Obtaining the "Packet" and checking checksum. */
         Packet my_packet;
         my_packet = unmount_packet(packetbuf_dataptr());
         packet_checksum = compute_checksum(&my_packet);
         
         if (packet_checksum == my_packet.checksum)
         {
-            // (!) Message received ("HELLO_BS").
-            // Changing to "DATA_SEND" from 
-            // "DATA_SEND/BLOCKED/DATA_COLLECT" state  
+            /* (!) Message received ("HELLO_BS").
+               Changing to "DATA_SEND" from 
+               "DATA_SEND/BLOCKED/DATA_COLLECT" state. */  
             state = DATA_SEND;
             printf("[state] current state 'DATA_SEND'\n\n");
 
-            // Valid message
+            /* Valid message. */
             leds_on(LEDS_YELLOW);
             
             printf("[net] 'HELLO_BS' message received\n\n");
             
-            // 3. Sending "HELLO_MN" message
+            /* Sending "HELLO_MN" message. */
             hello_msg();
         }
         else 
         {
-            // invalid message
+            /* Invalid message. */
             printf("[net] incorrect checksum invalid message\n\n");
         }
     }
-    // else actually sending DATA
+    /* else actually sending DATA. */
 }
 
 const static struct mesh_callbacks 
@@ -488,20 +492,21 @@ const static struct mesh_callbacks
 const static struct trickle_callbacks 
   zoundtracker_broadcast_callbacks = {broadcast_received};
 
-//----------------------------------------------------------------------
+/* ------------------------------------------------------------------ */
 
-// Sensor functions
+/* Sensor */
 void 
 get_sensor_sample(void)
 {
-    // This functions reads data of the x axis from the accelerometer	
+    /* This functions reads data of the x axis from the 
+       accelerometer. */	
 	
-	// Reading data from sensor
+	/* Reading data from sensor. */
 	sensor_sample = (char)accm_read_axis(X_AXIS);
 	
 	printf("[accel] x axis readed\n value: %d\n\n", sensor_sample);
 
-    // Writing data into the "WORKING_FILE"
+    /* Writing data into the "WORKING_FILE". */
 	fd_write = cfs_open(WORKING_FILE, CFS_WRITE | CFS_APPEND);       
     if (fd_write == ERROR) 
       printf("[cfs] error openning the 'WORKING_FILE' \
@@ -520,9 +525,9 @@ get_sensor_sample(void)
         
     }
 }
-//----------------------------------------------------------------------
+/* ------------------------------------------------------------------ */
 
-// Process
+/* Process */
 PROCESS(example_zoundt_mote_process, "Example zoundt mote process");
 AUTOSTART_PROCESSES(&example_zoundt_mote_process);
 
@@ -531,7 +536,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     PROCESS_EXITHANDLER(mesh_close(&zoundtracker_conn);)
     PROCESS_BEGIN();
     
-    // NET Initialization
+    /* NET */
     rimeaddr_t my_addr;
 	my_addr.u8[0] = MY_ADDR1;
 	my_addr.u8[1] = MY_ADDR2;
@@ -543,29 +548,27 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	ack_timeout = 0;
 	attempts = 0;
 	
-    // CFS Initialization
+    /* CFS */
     etimer_set(&control_timer, NUM_SECONDS_SAMPLE*CLOCK_SECOND);
     sample_number = 0;
     file_size = 0;
     fd_read = fd_write = EMPTY;
-    //read_buffer[0] = 0;
     cfs_remove(WORKING_FILE);
     
-    
-    // Sensor Initialization
+    /* Sensor */
     accm_init();
 
-    // State Initialization
+    /* State */
     state = BLOCKED;
     
     printf("[state] current state 'BLOCKED'\n\n");
     
-    // (!) Sending message ("HELLO_MN").
-    // Changing to "DATA_SEND" from "BLOCKED" state  
+    /* (!) Sending message ("HELLO_MN").
+       Changing to "DATA_SEND" from "BLOCKED" state. */  
     state = DATA_SEND;    
     printf("[state] current state 'DATA_SEND'\n\n");
     
-    // Send first "HELLO_MN"
+    /* Sending first "HELLO_MN" message. */
     hello_msg();
     
     while (1)
@@ -577,23 +580,24 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
             
             if (state == BLOCKED)
             {
-                // (!) Timer expired. 
-                // Changing to "DATA_COLLECT" from "BLOCKED" state
+                /* (!) Timer expired. 
+                   Changing to "DATA_COLLECT" from "BLOCKED" state. */
                 state = DATA_COLLECT;
                 printf("[state] current state 'DATA_COLLECT'\n\n");
             
                 get_sensor_sample();
                 printf("[sensor] sample measured \
                   (sample number: %d)\n\n", sample_number); 
-                // 'sample_number' starts on zero
+                /* 'sample_number' starts on zero. */
                 
-                // Updating state
+                /* Updating state. */
                 sample_number++;
             
                 if (sample_number == 10)
                 {    
-                    // (!) We've got 10 sensor samples.
-                    // Changing to "DATA_SEND" from "DATA_COLLECT" state
+                    /* (!) We've got 10 sensor samples.
+                       Changing to "DATA_SEND" from "DATA_COLLECT" 
+                       state. */
                     state = DATA_SEND;
                     printf("[state] current state 'DATA_SEND'\n\n");
                     
@@ -603,8 +607,9 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                 }
                 else
                 {
-                    // (!) We've got less than 10 sensor samples.
-                    // Changing to "BLOCKED" from "DATA_COLLECT" state
+                    /* (!) We've got less than 10 sensor samples.
+                       Changing to "BLOCKED" from "DATA_COLLECT" 
+                       state. */
                     state = BLOCKED;
                     printf("[state] current state 'BLOCKED'\n\n");
                 }
@@ -615,11 +620,11 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                 if (ack_timeout == 1)
                 {
                     printf("[net] ACK message lost\n\n");
-                    // ACK message lost. We can't erase the 
-                    // "WORKING_FILE"
+                    /* ACK message lost. We can't erase the 
+                       "WORKING_FILE". */
                     file_send_failed();
                     
-                    // Changing to "BLOCKED" from "DATA_SEND" state
+                    /* Changing to "BLOCKED" from "DATA_SEND" state. */
                     state = BLOCKED;
                     printf("[state] current state 'BLOCKED'\n\n");
                 }
@@ -629,7 +634,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
         else
           printf("[event] unknown event\n\n");  
     
-        // Reseting the timer 
+        /* Reseting the timer. */ 
         etimer_set(&control_timer, NUM_SECONDS_SAMPLE*CLOCK_SECOND);
     }
         
