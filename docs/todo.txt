@@ -64,6 +64,11 @@ Modificaciones realizadas:
 3. Fichero "zt-packet-mgmt.h"
    Añadida definicion del fichero de cabezeras 
    (ifndef __ZT_PACKET_MGMT_H ...)
+
+Comando
+$ make DEFINES+=MY_ADDR1=x DEFINES+=MY_ADDR2=y zt-mn.upload
+
+Donde (x,y) es el identificador de la mota.
    
 ------------------------------------------------------------------------
 Funcionalidades

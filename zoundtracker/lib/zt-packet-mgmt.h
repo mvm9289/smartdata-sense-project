@@ -21,7 +21,7 @@ typedef struct {
   unsigned char addr2;
   unsigned char type;
   unsigned short size;
-  unsigned short counter;
+  unsigned short counter;  // Data stream offset
   unsigned char data[32];
   unsigned char reserved[23];
   unsigned short checksum;
