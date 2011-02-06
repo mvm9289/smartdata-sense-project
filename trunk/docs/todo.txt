@@ -206,4 +206,6 @@ c) "Packet send", especificar siempre que se envia a la "Basestation"
 lectura de la función "void hello_msg()").
 - Modificar el valor de la definición "EMPTY" para evitar conflictos con
 los tipos de mensajes.
+- Incorporar la compilación condicional a través de "defines" de los 
+mensajes de "debug".
 ------------------------------------------------------------------------
