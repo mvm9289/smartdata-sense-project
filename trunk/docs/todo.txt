@@ -207,5 +207,11 @@ lectura de la función "void hello_msg()").
 - Modificar el valor de la definición "EMPTY" para evitar conflictos con
 los tipos de mensajes.
 - Incorporar la compilación condicional a través de "defines" de los 
-mensajes de "debug".
+mensajes de "debug".-----> HECHO
+----->Añadidos los siguientes defines
+-----#define DEBUG_NET
+-----#define DEBUG_STATE
+-----#define DEBUG_CFS
+-----#define DEBUG_SENSOR
+-----#define DEBUG_EVENT
 ------------------------------------------------------------------------
