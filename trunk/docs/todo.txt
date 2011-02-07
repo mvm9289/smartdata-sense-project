@@ -184,18 +184,18 @@ Cambios a realizar:
 - Añadir el nombre y la fecha de última modificación del fichero al 
 inicio del archivo.
 - Línias de los archivos de máximo 72 caracteres.
-- Mover "max_attempts" a las definiciones de "net".
+- Mover "max_attempts" a las definiciones de "net".-------> HECHO
 - Renombrar "sample_number" a "sample_interval" y moverlo a las
-variables "sensor".
+variables "sensor".------> HECHO
 - Cambio diseño en "DATA_COLLECT": Al tomar un dato del sensor, si el
 archivo actual está siendo enviado, abrimos un nuevo fichero y lo
 almacenamos.
 - Cambio diseño en "DATA_SEND": Verificar si son necesarios 
 "input_msg_type" y "output_msg_type". En caso afirmativo, decidir el
 tamaño de los buffers en función del rendimiento.
-- Mover "packet_number" a las variables de "net".
-- Mover "input/output_msg_type" a las variables de "net".
-- Renombrar "my_array" a "rime_stream".
+- Mover "packet_number" a las variables de "net".--------> HECHO
+- Mover "input/output_msg_type" a las variables de "net".--->HECHO
+- Renombrar "my_array" a "rime_stream".----->HECHO
 - Documentación funciones: ¿qué hace? ¿por qué? ¿cuándo? 
 ¿valor de retorno esperado?
 - Modificar comentarios de las funciones "void hello/data_msg()": 

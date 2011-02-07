@@ -1,5 +1,5 @@
 /* File: "zt-mn.c"
-   Date (last rev.): 02/06/2011 11:48 AM                              */
+   Date (last rev.): 02/07/2011 14:54 AM                              */
    
 #include "contiki.h"
 #include "leds.h"
@@ -25,13 +25,13 @@
 #define FALSE 0
 
 /* CFS */
-#define MAX_ATTEMPTS 5
 #define NUM_SECONDS_SAMPLE 6
 #define WORKING_FILE "my_file"
 #define ERROR -1
 #define NO_NEXT_PACKET -1
 
 /* NET */
+#define MAX_ATTEMPTS 5
 #define EMPTY 99
 
 /* Sensor */
@@ -45,23 +45,23 @@
 /* ------------------------------------------------------------------ */
 
 /* CFS */
-static int write_bytes, read_bytes, fd_read, fd_write, sample_number, 
-  packet_number, ack_timeout;
+static int write_bytes, read_bytes, fd_read, fd_write, ack_timeout;
 static unsigned short file_size;
 static struct etimer control_timer;
-static unsigned char read_buffer[DATA_SIZE], input_msg_type, 
-  output_msg_type;
+static unsigned char read_buffer[DATA_SIZE];
     
 /* NET */
-static int attempts;
+static int attempts,packet_number;
 static rimeaddr_t sink_addr;
 static struct mesh_conn zoundtracker_conn;
 static struct trickle_conn zoundtracker_broadcast_conn;
-static unsigned char my_array[PACKET_SIZE], next_packet;
+static unsigned char rime_stream[PACKET_SIZE], next_packet,input_msg_type,
+  output_msg_type;
 static unsigned short packet_checksum;
 
 /* Sensor */
 static char sensor_sample;
+static int sample_interval;
 
 /* State */
 static unsigned char state;
@@ -90,8 +90,8 @@ hello_msg()
     my_packet_send.checksum = compute_checksum(&my_packet_send);
     
     /* "Packet" transform. */
-    mount_packet(&my_packet_send, my_array);
-    packetbuf_copyfrom((void *)my_array, PACKET_SIZE);
+    mount_packet(&my_packet_send, rime_stream);
+    packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
 	
 	/* "Packet" send. */
 	sink_addr.u8[0] = SINK_ADDR1;
@@ -131,8 +131,8 @@ data_msg()
     printf("---------------------------------------------------\n\n");
     
     /* "Packet" transform. */
-    mount_packet(&my_packet_send, my_array);
-    packetbuf_copyfrom((void *)my_array, PACKET_SIZE);
+    mount_packet(&my_packet_send, rime_stream);
+    packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
 	
 	/* "Packet" send. */
 	sink_addr.u8[0] = SINK_ADDR1;
@@ -207,7 +207,7 @@ send_packet_from_file(void)
         cfs_close(fd_read);
         fd_read = EMPTY;
         cfs_remove(WORKING_FILE);
-        sample_number = 0;
+        sample_interval = 0;
         file_size = 0;
         printf("[net] 'WORKING_FILE' completely sended, \
           removing it\n\n");
@@ -259,7 +259,7 @@ file_send_failed(void)
     {       
         cfs_close(fd_read);
         fd_read = EMPTY;
-        sample_number = 0;   
+        sample_interval = 0;   
     }
         
     /* Current sending message lost. We're not pending of "ACK". */    
@@ -328,7 +328,7 @@ timedout(struct mesh_conn *c)
         printf("[state] current state 'BLOCKED'\n\n");
         
         /* Starting new sample period (10 minutes). */
-        sample_number = 0;
+        sample_interval = 0;
         attempts = 0;
         
         leds_on(LEDS_RED);
@@ -550,7 +550,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	
     /* CFS */
     etimer_set(&control_timer, NUM_SECONDS_SAMPLE*CLOCK_SECOND);
-    sample_number = 0;
+    sample_interval = 0;
     file_size = 0;
     fd_read = fd_write = EMPTY;
     cfs_remove(WORKING_FILE);
@@ -587,13 +587,13 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
             
                 get_sensor_sample();
                 printf("[sensor] sample measured \
-                  (sample number: %d)\n\n", sample_number); 
-                /* 'sample_number' starts on zero. */
+                  (sample number: %d)\n\n", sample_interval); 
+                /* 'sample_interval' starts on zero. */
                 
                 /* Updating state. */
-                sample_number++;
+                sample_interval++;
             
-                if (sample_number == 10)
+                if (sample_interval == 10)
                 {    
                     /* (!) We've got 10 sensor samples.
                        Changing to "DATA_SEND" from "DATA_COLLECT" 
@@ -603,7 +603,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                     
                     send_packet_from_file();
                     
-                    sample_number = 0;                
+                    sample_interval = 0;                
                 }
                 else
                 {
