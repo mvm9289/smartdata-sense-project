@@ -34,13 +34,13 @@
 
 /* CFS */
 #define NUM_SECONDS_SAMPLE 6
-#define WORKING_FILE "my_file"
+#define WORKING_FILE "sample_file"
 #define ERROR -1
-#define NO_NEXT_PACKET -1
+#define NO_NEXT_PACKET -2
 
 /* NET */
 #define MAX_ATTEMPTS 5
-#define EMPTY 99
+#define EMPTY -3
 
 /* Sensor */
 #define SAMPLE_SIZE 1
@@ -85,24 +85,25 @@ hello_msg()
      #ifdef DEBUG_NET
 		printf("[net] sending 'HELLO_MN' message\n\n");
     #endif
-    Packet my_packet_send;
+    Packet packet_to_send;
 
-    /* Configure MN state. */
+    /* Configure type of message. */
     output_msg_type = HELLO_MN;
  
     /* "Packet" construction. */
-    my_packet_send.addr1 = MY_ADDR1;
-    my_packet_send.addr2 = MY_ADDR2;
-    my_packet_send.type = HELLO_MN;
-    my_packet_send.size = HELLO_MSG_SIZE;    
-    my_packet_send.counter = 0;
-    my_packet_send.checksum = compute_checksum(&my_packet_send);
+    packet_to_send.addr1 = MY_ADDR1;
+    packet_to_send.addr2 = MY_ADDR2;
+    packet_to_send.type = HELLO_MN;
+    packet_to_send.size = HELLO_MSG_SIZE;    
+    packet_to_send.counter = HELLO_MSG_COUNTER;
+    packet_to_send.checksum = compute_checksum(&packet_to_send);
     
-    /* "Packet" transform. */
-    mount_packet(&my_packet_send, rime_stream);
+    /* Preparing "Packet" to send it through "rime". Building the 
+       "rime_stream" using the information of "packet_to_send"   */
+    mount_packet(&packet_to_send, rime_stream);
     packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
 	
-	/* "Packet" send. */
+	/* "Packet" send to the "Basestation" */
 	sink_addr.u8[0] = SINK_ADDR1;
 	sink_addr.u8[1] = SINK_ADDR2;
 	mesh_send(&zoundtracker_conn, &sink_addr);
@@ -117,37 +118,38 @@ data_msg()
 		printf("[net] sending 'DATA' message\n\n");
 	#endif
     
-    Packet my_packet_send;
+    Packet packet_to_send;
     
-    /* Configure MN state. */
+    /* Configure type of message. */
     output_msg_type = DATA;
  
     /* "Packet" construction. */
-    my_packet_send.addr1 = MY_ADDR1;
-    my_packet_send.addr2 = MY_ADDR2;
-    my_packet_send.type = DATA;
-    my_packet_send.size = file_size;    
-    my_packet_send.counter = (packet_number-1)*DATA_SIZE;
-    memcpy(my_packet_send.data, read_buffer, read_bytes);
-    my_packet_send.checksum = compute_checksum(&my_packet_send);
+    packet_to_send.addr1 = MY_ADDR1;
+    packet_to_send.addr2 = MY_ADDR2;
+    packet_to_send.type = DATA;
+    packet_to_send.size = file_size;    
+    packet_to_send.counter = (packet_number-1)*DATA_SIZE;
+    memcpy(packet_to_send.data, read_buffer, read_bytes);
+    packet_to_send.checksum = compute_checksum(&packet_to_send);
     
 	#ifdef DEBUG_NET
 		printf("[net]----------- DATA' packet contents:---------\n");
-		printf("Addr1: %d\n", my_packet_send.addr1);
-		printf("Addr2: %d\n", my_packet_send.addr2);
-		printf("Type: %d\n", my_packet_send.type);
-		printf("Size: %d\n", my_packet_send.size);
-		printf("Counter: %d\n", my_packet_send.counter);
-		printf("Data: %c\n", my_packet_send.data[0]);
-		printf("Checksum: %d\n", my_packet_send.checksum);
+		printf("Addr1: %d\n", packet_to_send.addr1);
+		printf("Addr2: %d\n", packet_to_send.addr2);
+		printf("Type: %d\n", packet_to_send.type);
+		printf("Size: %d\n", packet_to_send.size);
+		printf("Counter: %d\n", packet_to_send.counter);
+		printf("Data: %c\n", packet_to_send.data[0]);
+		printf("Checksum: %d\n", packet_to_send.checksum);
 		printf("---------------------------------------------------\n\n");
     #endif
 	
-    /* "Packet" transform. */
-    mount_packet(&my_packet_send, rime_stream);
+    /* Preparing "Packet" to send it through "rime". Building the 
+       "rime_stream" using the information of "packet_to_send"   */
+    mount_packet(&packet_to_send, rime_stream);
     packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
 	
-	/* "Packet" send. */
+	/* "Packet" send to the "Basestation" */
 	sink_addr.u8[0] = SINK_ADDR1;
 	sink_addr.u8[1] = SINK_ADDR2;
 	mesh_send(&zoundtracker_conn, &sink_addr);
@@ -394,11 +396,11 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 	#endif
        
     /* Obtaining the "Packet" and checking checksum. */
-    Packet my_packet;
-    my_packet = unmount_packet(packetbuf_dataptr());
-    packet_checksum = compute_checksum(&my_packet);
+    Packet packet_received;
+    packet_received = unmount_packet(packetbuf_dataptr());
+    packet_checksum = compute_checksum(&packet_received);
     
-    if (packet_checksum == my_packet.checksum)
+    if (packet_checksum == packet_received.checksum)
     {
         /* (!) Message received ("POLL/HELLO_ACK/DATA_ACK").
            Changing to "DATA_SEND" from "DATA_SEND/BLOCKED/DATA_COLLECT"
@@ -411,18 +413,18 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         /* Valid message. */
         leds_on(LEDS_YELLOW);
     
-        if (my_packet.type == HELLO_ACK || my_packet.type == DATA_ACK)
+        if (packet_received.type == HELLO_ACK || packet_received.type == DATA_ACK)
         {
             /* Sending the next packet or erasing data from 
                "WORKING_FILE". */
-            ack_received(my_packet.type);
+            ack_received(packet_received.type);
         
             leds_off(LEDS_GREEN);
             leds_off(LEDS_RED);
         }
         
         if ((input_msg_type != EMPTY && output_msg_type == EMPTY) || 
-          (my_packet.type != HELLO_ACK && my_packet.type != DATA_ACK && 
+          (packet_received.type != HELLO_ACK && packet_received.type != DATA_ACK && 
           output_msg_type == EMPTY))
         {
             /* There's a message saved ready to reply or the message 
@@ -436,7 +438,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             
             if (input_msg_type == EMPTY)
             {
-                input_msg_type = my_packet.type;
+                input_msg_type = packet_received.type;
             }
             
             /* Response depending on the "type" value. */
@@ -474,11 +476,11 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             leds_off(LEDS_RED);
         }
         else if (input_msg_type == EMPTY && output_msg_type != EMPTY && 
-          my_packet.type != HELLO_ACK && my_packet.type != DATA_ACK)
+          packet_received.type != HELLO_ACK && packet_received.type != DATA_ACK)
         {
             /* There's a message already sending. The input message is 
                saved. */
-            input_msg_type = my_packet.type;
+            input_msg_type = packet_received.type;
 			#ifdef DEBUG_NET
 				printf("[net] There's a message already sending.\n");
 				printf("  Saving the input message \
@@ -520,11 +522,11 @@ broadcast_received(struct trickle_conn* c)
     {    
     
         /* Obtaining the "Packet" and checking checksum. */
-        Packet my_packet;
-        my_packet = unmount_packet(packetbuf_dataptr());
-        packet_checksum = compute_checksum(&my_packet);
+        Packet packet_received;
+        packet_received = unmount_packet(packetbuf_dataptr());
+        packet_checksum = compute_checksum(&packet_received);
         
-        if (packet_checksum == my_packet.checksum)
+        if (packet_checksum == packet_received.checksum)
         {
             /* (!) Message received ("HELLO_BS").
                Changing to "DATA_SEND" from 
