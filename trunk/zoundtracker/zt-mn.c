@@ -53,7 +53,8 @@
 /* ------------------------------------------------------------------ */
 
 /* CFS */
-static int write_bytes, read_bytes, fd_read, fd_write, ack_timeout;
+static int write_bytes, read_bytes, fd_read, fd_write, ack_timeout,
+  input_msg_type, output_msg_type;
 static unsigned short file_size;
 static struct etimer control_timer;
 static unsigned char read_buffer[DATA_SIZE];
@@ -63,8 +64,7 @@ static int attempts,packet_number;
 static rimeaddr_t sink_addr;
 static struct mesh_conn zoundtracker_conn;
 static struct trickle_conn zoundtracker_broadcast_conn;
-static unsigned char rime_stream[PACKET_SIZE], next_packet,input_msg_type,
-  output_msg_type;
+static unsigned char rime_stream[PACKET_SIZE], next_packet;
 static unsigned short packet_checksum;
 
 /* Sensor */
@@ -307,13 +307,17 @@ sent(struct mesh_conn *c)
     
     /* Checksum comprobation needed on receiver. */
     if (output_msg_type == HELLO_MN)
-		#ifdef DEBUG_NET
+	{	
+	    #ifdef DEBUG_NET
 			printf("[net] sent 'HELLO_MN' message\n\n");
 		#endif
+    }
     else if (output_msg_type == DATA)
-		#ifdef DEBUG_NET
+	{	
+	    #ifdef DEBUG_NET
 			printf("[net] sent 'DATA' message\n\n"); 
 		#endif
+    }
     
     /* Waiting for an ACK message. */
     ack_timeout = 1;
@@ -355,14 +359,19 @@ timedout(struct mesh_conn *c)
 			printf("[net] maximum number of attempts reached\n");
 		#endif
 	    if (output_msg_type == HELLO_MN)
-			#ifdef DEBUG_NET
+		{	
+		    #ifdef DEBUG_NET
 				printf("[net] 'HELLO_MN' message lost\n\n");
 			#endif
+	    }
 	    else if (output_msg_type == DATA)
-			#ifdef DEBUG_NET
+		{	
+		    #ifdef DEBUG_NET
 				printf("[net] 'DATA' message lost \
 					(packet number: %d)\n\n", packet_number);
 			#endif
+        }
+        
         /* Current sending message lost. We can't erase the 
            "WORKING_FILE". */
         file_send_failed();                
@@ -581,18 +590,22 @@ get_sensor_sample(void)
     /* Writing data into the "WORKING_FILE". */
 	fd_write = cfs_open(WORKING_FILE, CFS_WRITE | CFS_APPEND);       
     if (fd_write == ERROR) 
-		#ifdef DEBUG_CFS
+	{	
+	    #ifdef DEBUG_CFS
 			printf("[cfs] error openning the 'WORKING_FILE' \
 				for write data\n\n");
 		#endif
+    }
     else 
     {
         write_bytes = cfs_write(fd_write, &sensor_sample, SAMPLE_SIZE);
         if (write_bytes != SAMPLE_SIZE) 
+		{
 			#ifdef DEBUG_CFS
 				printf("[cfs] write: error writing into the \
 					'WORKING_FILE'\n\n");
 			#endif
+        }
         else
           file_size += write_bytes;
                   
