@@ -14,9 +14,12 @@
 // Configuration
 #define NODE_TABLE_SIZE 128
 #define SECOND_PARTITION 10
-#define STATE_TRANSITION_PERIOD CLOCK_SECOND/SECOND_PARTITION
+#define STATE_TRANSITION_PERIOD CLOCK_SECOND/SECOND_PARTITION // 1 ds
 #define MAX_RESENDS 5
-#define DATA_TIMEOUT 60*12
+#define DATA_TIMEOUT 60*12 // 12 min
+#define POLL_PERIOD 5*SECOND_PARTITION // 5 s
+#define HELLO_PERIOD 30 // 1 hour
+#define INIT_WAIT 2*CLOCK_SECOND
 
 #ifdef DEBUG_MODE
 #define DEBUG_STATES
@@ -41,12 +44,13 @@ typedef struct
 {
     unsigned int timestamp;
     unsigned int resends;
+    unsigned int poll_wait;
     unsigned char addr1;
     unsigned char addr2;
     unsigned char empty;
-} node_tableEntry;
+} Node_table_entry;
 
-static node_tableEntry node_table[NODE_TABLE_SIZE];
+static Node_table_entry node_table[NODE_TABLE_SIZE];
 
 static struct mesh_conn zoundtracker_conn;
 static struct trickle_conn zt_broadcast_conn;
@@ -147,7 +151,7 @@ static void received(    struct mesh_conn *c,
     unsigned short recv_checksum;
     Packet recv_send_packet;
     unsigned char recv_packet_buff[PACKET_SIZE];
-    int i, first_empty_entry;
+    int i, first_empty_entry, found_node;
     unsigned char found;
     unsigned char is_valid;
     
@@ -226,6 +230,7 @@ static void received(    struct mesh_conn *c,
             {
                 first_empty_entry = -1;
                 found = 0;
+                found_node = -1;
                 for (i = 0; i < NODE_TABLE_SIZE && !found; i++)
                 {
                     if (node_table[i].empty && first_empty_entry == -1)
@@ -233,18 +238,23 @@ static void received(    struct mesh_conn *c,
                     else if (!node_table[i].empty &&
                       node_table[i].addr1 == from->u8[0] &&
                       node_table[i].addr2 == from->u8[1])
+                    {
                         found = 1;
+                        found_node = i;
+                    }
                 }
                 if (found)
                 {
-                    node_table[i].timestamp = 0;
-                    node_table[i].resends = 0;
+                    node_table[found_node].timestamp = 0;
+                    node_table[found_node].resends = 0;
+                    node_table[found_node].poll_wait = 0;
                 }
                 else if (first_empty_entry != -1)
                 {
                     node_table[first_empty_entry].empty = 0;
                     node_table[first_empty_entry].timestamp = 0;
                     node_table[first_empty_entry].resends = 0;
+                    node_table[first_empty_entry].poll_wait = 0;
                     node_table[first_empty_entry].addr1 = from->u8[0];
                     node_table[first_empty_entry].addr2 = from->u8[1];
                 }
@@ -283,7 +293,7 @@ const static struct mesh_callbacks zoundtracker_sink_callbacks =
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////// Main ////////////////////////////////
-PROCESS_THREAD(zoundtracker_sink_process, ev, data)
+PROCESS_THREAD(    zoundtracker_sink_process, ev, data    )
 {
     PROCESS_EXITHANDLER(mesh_close(&zoundtracker_conn);)
     PROCESS_BEGIN();
@@ -314,12 +324,20 @@ PROCESS_THREAD(zoundtracker_sink_process, ev, data)
     mesh_open(  &zoundtracker_conn,
                 CHANNEL1,
                 &zoundtracker_sink_callbacks);
+    trickle_open(   &zt_broadcast_conn,
+                    0,
+                    CHANNEL2,
+                    &broadcast_callback);
     // Clear timer data
     partial_seconds = 0;
     seconds = 0;
     // Set first state
     state = HELLO_STATE;
     ///////////////////////////////////////////////////////////////////
+    
+    etimer_set(&timer, INIT_WAIT);
+    PROCESS_WAIT_EVENT();
+    while(!etimer_expired(&timer)) PROCESS_WAIT_EVENT();
 
     etimer_set(&timer, STATE_TRANSITION_PERIOD);
     while (1)
@@ -342,12 +360,12 @@ PROCESS_THREAD(zoundtracker_sink_process, ev, data)
                     mount_packet(&packet, packet_buff);
                     packetbuf_copyfrom( (void *)packet_buff,
                                         PACKET_SIZE);
-                    trickle_open(   &zt_broadcast_conn,
-                                    0,
-                                    CHANNEL2,
-                                    &broadcast_callback);
+                    //~ trickle_open(   &zt_broadcast_conn,
+                                    //~ 0,
+                                    //~ CHANNEL2,
+                                    //~ &broadcast_callback);
                     trickle_send(&zt_broadcast_conn);
-                    trickle_close(&zt_broadcast_conn);
+                    //~ trickle_close(&zt_broadcast_conn);
                     #ifdef DEBUG_NET
                         printf("HELLO_STATE: Hello packet sent\n\n");
                     #endif
@@ -370,7 +388,7 @@ PROCESS_THREAD(zoundtracker_sink_process, ev, data)
                         //~ seconds += partial_seconds/SECOND_PARTITION;
                         //~ partial_seconds =   partial_seconds%
                                             //~ SECOND_PARTITION;
-                        if (seconds >= 3600)
+                        if (seconds >= HELLO_PERIOD)
                         {
                             seconds = 0;
                             state = HELLO_STATE;
@@ -440,7 +458,7 @@ PROCESS_THREAD(zoundtracker_sink_process, ev, data)
                                             node_table[i].addr2);
                                 #endif
                             }
-                            else
+                            else if (node_table[i].poll_wait == 0)
                             {
                                 #ifdef DEBUG_NET
                                     printf("POLL_STATE: ");
@@ -450,6 +468,7 @@ PROCESS_THREAD(zoundtracker_sink_process, ev, data)
                                             node_table[i].addr2);
                                 #endif
                                 node_table[i].resends++;
+                                node_table[i].poll_wait = POLL_PERIOD;
                                 addr_send.u8[0] = node_table[i].addr1;
                                 addr_send.u8[1] = node_table[i].addr2;
                                 // <--------------------------------------------------------------------------------------------------
@@ -459,6 +478,7 @@ PROCESS_THREAD(zoundtracker_sink_process, ev, data)
                                 mesh_send(  &zoundtracker_conn,
                                             &addr_send);
                             }
+                            else node_table[i].poll_wait--;
                         }
                     if (partial_seconds >= SECOND_PARTITION)
                     {
@@ -468,7 +488,7 @@ PROCESS_THREAD(zoundtracker_sink_process, ev, data)
                         //~ seconds += partial_seconds/SECOND_PARTITION;
                         //~ partial_seconds =   partial_seconds%
                                             //~ SECOND_PARTITION;
-                        if (seconds >= 3600)
+                        if (seconds >= HELLO_PERIOD)
                         {
                             seconds = 0;
                             state = HELLO_STATE;
