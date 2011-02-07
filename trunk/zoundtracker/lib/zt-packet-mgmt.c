@@ -43,8 +43,6 @@ void mount_packet(Packet * my_packet, unsigned char* packet) {
     
     packet[i] = my_packet->checksum;
     packet[i+1] = (my_packet->checksum>>8);
-    
-    return packet;
 }
 
 Packet unmount_packet(unsigned char* my_array) {
