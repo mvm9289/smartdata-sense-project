@@ -176,42 +176,53 @@ A traves de "write", "printf" teniendo en cuenta la dificultad del
 Gateway al recibir la informacion
 
 ------------------------------------------------------------------------
-Modificaciones pendientes
+Correcciones
 ------------------------------------------------------------------------
 Archivo: "zt-mn.c"
-Fecha Rev.: 01/02/11
+Fecha Rev.: 07/02/11
+
 Cambios a realizar:
-- Añadir el nombre y la fecha de última modificación del fichero al 
-inicio del archivo.
-- Línias de los archivos de máximo 72 caracteres.
-- Mover "max_attempts" a las definiciones de "net".-------> HECHO
-- Renombrar "sample_number" a "sample_interval" y moverlo a las
-variables "sensor".------> HECHO
 - Cambio diseño en "DATA_COLLECT": Al tomar un dato del sensor, si el
 archivo actual está siendo enviado, abrimos un nuevo fichero y lo
 almacenamos.
 - Cambio diseño en "DATA_SEND": Verificar si son necesarios 
 "input_msg_type" y "output_msg_type". En caso afirmativo, decidir el
 tamaño de los buffers en función del rendimiento.
-- Mover "packet_number" a las variables de "net".--------> HECHO
-- Mover "input/output_msg_type" a las variables de "net".--->HECHO
-- Renombrar "my_array" a "rime_stream".----->HECHO
 - Documentación funciones: ¿qué hace? ¿por qué? ¿cuándo? 
 ¿valor de retorno esperado?
-- Modificar comentarios de las funciones "void hello/data_msg()": 
-a) "Configure MN state" -> "Configure type of message".
-b) "Packet transform", explicar detalladamente (confusión con cifrado)
-c) "Packet send", especificar siempre que se envia a la "Basestation"
-- Añadir "define" para el valor inicial de "counter" (mayor facilidad de
-lectura de la función "void hello_msg()").
-- Modificar el valor de la definición "EMPTY" para evitar conflictos con
-los tipos de mensajes.
+
+Cambios realizados:
+- Añadir el nombre y la fecha de última modificación del fichero al 
+inicio del archivo. 
+- Línias de los archivos de máximo 72 caracteres.
+- Mover "max_attempts" a las definiciones de "net".
+- Renombrar "sample_number" a "sample_interval" y moverlo a las
+variables "sensor".
+- Mover "packet_number" a las variables de "net".
+- Mover "input/output_msg_type" a las variables de "net".
+- Renombrar "my_array" a "rime_stream".
 - Incorporar la compilación condicional a través de "defines" de los 
-mensajes de "debug".-----> HECHO
+mensajes de "debug".
 ----->Añadidos los siguientes defines
 -----#define DEBUG_NET
 -----#define DEBUG_STATE
 -----#define DEBUG_CFS
 -----#define DEBUG_SENSOR
 -----#define DEBUG_EVENT
+- Modificar el valor de la definición "EMPTY" para evitar conflictos con
+los tipos de mensajes.
+----->Modificados también el valor de "ERROR" y "NO_NEXT_PACKET" para 
+evitar que múltiples defines tengan un mismo valor y se produzcan 
+errores (p. ej. para "fd_read" ERROR y EMPTY son valores posibles que 
+deben diferenciarse) 
+- Añadir "define" para el valor inicial de "counter" (mayor facilidad de
+lectura de la función "void hello_msg()").
+- Modificar el valor de "WORKING_FILE". Modificado a "sample_file".
+- Modificar nombre "my_packet". Modificado para envío como 
+"packet_to_send" y para la recepción de paquetes como "packet_received".
+- Modificar comentarios de las funciones "void hello/data_msg()": 
+a) "Configure MN state" -> "Configure type of message".
+b) "Packet transform", explicar detalladamente (confusión con cifrado)
+c) "Packet send", especificar siempre que se envia a la "Basestation"
+
 ------------------------------------------------------------------------

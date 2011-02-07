@@ -15,6 +15,7 @@
 #define PACKET_SIZE 64
 #define DATA_SIZE 32
 #define HELLO_MSG_SIZE 0
+#define HELLO_MSG_COUNTER 0
 
 typedef struct {
   unsigned char addr1;
