@@ -425,7 +425,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             /* There's a message already sending. The input message is 
                saved. */
             input_msg_type = my_packet.type;
-            printf("[net] There's a message already sending.\n"
+            printf("[net] There's a message already sending.\n");
             printf("  Saving the input message \
               'input_msg_type == %d'\n\n", input_msg_type);
         }
