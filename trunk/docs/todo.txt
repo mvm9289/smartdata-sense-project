@@ -185,11 +185,17 @@ Cambios a realizar:
 - Cambio diseño en "DATA_COLLECT": Al tomar un dato del sensor, si el
 archivo actual está siendo enviado, abrimos un nuevo fichero y lo
 almacenamos.
+- Cambio diseño en "DATA_COLLECT": A cada muestra, adjuntamos un entero
+identificador del número de muestra dentro del intervalo de 10 minutos.
+El objetivo es identificar que muestras (de que minutos) no se han 
+podido almacenar debido a un error de lectura del sensor, o de 
+escritura en el "WORKING_FILE".
 - Cambio diseño en "DATA_SEND": Verificar si son necesarios 
 "input_msg_type" y "output_msg_type". En caso afirmativo, decidir el
 tamaño de los buffers en función del rendimiento.
 - Documentación funciones: ¿qué hace? ¿por qué? ¿cuándo? 
 ¿valor de retorno esperado?
+
 
 Cambios realizados:
 - Añadir el nombre y la fecha de última modificación del fichero al 

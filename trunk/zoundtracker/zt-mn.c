@@ -80,9 +80,19 @@ static unsigned char state;
 static void 
 hello_msg() 
 {
-    /* This function builds and sends a "HELLO_MN" message to the 
-       "Basestation". */ 
-     #ifdef DEBUG_NET
+    /* [Functionality]
+     This function builds and sends a "HELLO_MN" message to the 
+     "Basestation". In this message there's the identificator that the 
+     "Basestation" uses to register the node. 
+
+       [Context]
+     This message is sended to the "Basestation" when the node gets up. 
+     However the message is sended to reply a broadcast "HELLO_BS" message 
+     sended by the "Basestation" periodically, to execute the "Discover" 
+     three-way hanshake. */ 
+    
+    
+    #ifdef DEBUG_NET
 		printf("[net] sending 'HELLO_MN' message\n\n");
     #endif
     Packet packet_to_send;
@@ -112,8 +122,19 @@ hello_msg()
 static void 
 data_msg() 
 {   
-    /* This function builds and sends a "DATA" message to the 
-       "Basestation". */
+    /* [Functionality]
+     This function builds and sends a "DATA" message to the 
+     "Basestation". In this message there's a set of sensor samples that 
+     the node saved in the "WORKING_FILE". When all the sensor samples 
+     are sended the "WORKING_FILE" is sended entirely. 
+
+       [Context]
+     This message is sended to the "Basestation" periodically every 10 
+     minutes. However the "DATA" message is sended to reply a "POLL" 
+     message sended by the "Basestation", to force the node to send it's 
+     saved sensor samples. */
+	
+	
 	#ifdef DEBUG_NET
 		printf("[net] sending 'DATA' message\n\n");
 	#endif
@@ -158,8 +179,18 @@ data_msg()
 static unsigned char 
 prepare_packet(void)
 {
-    /* This function sends the next packet identified by the 
-      'packet_number' from the "WORKING_FILE" to the "Basestation". */
+    /* [Functionally]
+     This function reads the "WORKING_FILE" to get info for the next 
+     packet to send.
+
+       [Context]
+     This function is called from the function 'send_packet_from_file' 
+     to check if there are more info to send at the 'WORKING_FILE".
+
+       [Return value]
+     The return value will be TRUE if 'read_bytes' is greater than 0.
+     Otherwise the return value will be FALSE */
+
 
     /* Reading from the "WORKING_FILE". */
     if (fd_read == EMPTY)
@@ -209,6 +240,20 @@ prepare_packet(void)
 static void 
 send_packet_from_file(void)
 {
+    /* [Functionality]
+     This function checks if there are info to send at the 
+     "WORKING_FILE" and if so, sends a "DATA" message.
+     Otherwise, the file will be closed and removed and 'fd_read',
+     'sample_interval' and 'file_size' will be reset.
+     Furthermore the 'output_msg_type' will be EMPTY, because the state
+     changes from "DATA_SEND" to "BLOCKED".
+
+       [Context]
+     This function is called when we want to send the first packet of 
+     the "WORKING_FILE" and when an "DATA_ACK" or "POLL" message is 
+     received. */
+
+
     next_packet = prepare_packet();
           
     if (next_packet)
@@ -287,6 +332,22 @@ ack_received(unsigned char type)
 static void 
 file_send_failed(void)
 {
+    /* [Functionality]
+     This function frees all the data structures related to the 
+     currently file send. This data structures are: the output net 
+     buffer (that reminds what message is already sending and the 
+     control of "ACK" waiting. When the node is waiting for a "DATA_ACK" 
+     the read field descriptor (that points to the data stored in the 
+     file, prepared to send) is free too.  
+
+       [Context]
+     This function is executed when the "ACK" reply to a "DATA" or a 
+     "HELLO_MN" message sended to the "Basestation" is lost. However 
+     when a "DATA" or a "HELLO_MN" message is already sending and 
+     "MAX_ATTEMPTS" attempts is reached (the "Basestation" don't receive 
+     the message) is executed too. */   
+
+
     if (output_msg_type == DATA)
     {       
         cfs_close(fd_read);
@@ -303,6 +364,15 @@ file_send_failed(void)
 static void 
 sent(struct mesh_conn *c) 
 {
+    /* [Functionality]
+     This function resets the number of attempts to send the last 
+     message and control of "ACK" waiting is activated.
+
+       [Context]
+     This funcion is executed when a message sended to the "Basestation"
+     arrives. But the integrity of the message could be transgressed. */
+
+
     attempts = 0;
     
     /* Checksum comprobation needed on receiver. */
@@ -329,6 +399,19 @@ sent(struct mesh_conn *c)
 static void 
 timedout(struct mesh_conn *c) 
 {
+    /* [Functionality]
+     This function resends the currently sended message. If 
+     "MAX_ATTEMPTS" is reached the message is considered lost. Then 
+     resets the number of attempts and returns to the "BLOCKED" state to 
+     start another sample periode.
+
+       [Context]
+     This function is executed when there's a radio lost message. The
+     function tries again "MAX_ATTEMPTS" attempts. If the "Basestation" 
+     don't receive any message "file_send_failed" function is called to 
+     free all the data structures related. */
+
+
     attempts++;
 	if (attempts < MAX_ATTEMPTS) 
 	{
@@ -400,6 +483,30 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
        is saved. If there's another message saved, the last message is 
        discarded. */
     
+    /* [Functionality]
+     This functions checks the type of message received and acts 
+     consequently. First the checksum's message is checked and if it's 
+     correct then checks if it's an "ACK" message.
+     
+     If it's an "ACK" message the function "ack_received()" is called.
+     After checks if there's a "POLL" message pending or if the current
+     message is a "POLL" and then acts as follow:
+     - Change the current state to "DATA_SEND"
+     - If output_msg_type is DATA, sends the last packet sended.
+     - Else calls send_packet_from_file() to start sending the
+     "WORKING_FILE".  
+     Then resets the 'input_msg_type'.
+
+     On the other hand, if 'output_msg_type' isn't EMPTY and 
+     'input_msg_type' is  EMPTY the current type of message is saved 
+     at 'input_msg_type'
+
+     Otherwise the message is discarded.
+
+       [Context]
+     This function is executed when message is received. */
+  
+    
     #ifdef DEBUG_NET
 		printf("[net] message received trough 'mesh' connection\n\n");
 	#endif
@@ -432,9 +539,8 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             leds_off(LEDS_RED);
         }
         
-        if ((input_msg_type != EMPTY && output_msg_type == EMPTY) || 
-          (packet_received.type != HELLO_ACK && packet_received.type != DATA_ACK && 
-          output_msg_type == EMPTY))
+        if (output_msg_type == EMPTY && 
+          (input_msg_type != EMPTY || my_packet.type == POLL))
         {
             /* There's a message saved ready to reply or the message 
                received is not an ACK and we can reply it. */
@@ -451,16 +557,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             }
             
             /* Response depending on the "type" value. */
-            if (input_msg_type == HELLO_BS)
-            {
-                #ifdef DEBUG_NET
-					printf("[net] 'HELLO_BS' message received\n\n");
-				#endif
-                
-                /* Sending "HELLO_MN" message. */
-                hello_msg();
-            }
-            else if (input_msg_type == POLL)
+            if (input_msg_type == POLL)
             {
                 #ifdef DEBUG_NET
 					printf("[net] 'POLL' message received\n\n");
@@ -484,8 +581,8 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             leds_off(LEDS_GREEN);
             leds_off(LEDS_RED);
         }
-        else if (input_msg_type == EMPTY && output_msg_type != EMPTY && 
-          packet_received.type != HELLO_ACK && packet_received.type != DATA_ACK)
+        else if (input_msg_type == EMPTY && 
+          output_msg_type != EMPTY && packet_received.type == POLL)
         {
             /* There's a message already sending. The input message is 
                saved. */
@@ -517,11 +614,19 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 static void 
 broadcast_received(struct trickle_conn* c)
 {
-    /* This function sends a "HELLO_MN" message through the "mesh" 
-       connection when a "broadcast" "HELLO_BS" message received. The 
-       behaviour is very similar to "received" mesh callback to attend 
-       only the "HELLO_BS" messages sended through the "broadcast" 
-       connection. */
+    /* [Functionality]
+     The behaviour of this function is very similar to the "received" 
+     "mesh" callback to attend only the "HELLO_BS" messages sended 
+     through the "trickle" broadcast connection. This function replies 
+     the "HELLO_BS" messages sending a "HELLO_MN" message to the 
+     "Basestation". If there's already a data sending, the "HELLO_BS" 
+     message is discarded.
+
+       [Context]
+     This function sends a "HELLO_MN" message through the "mesh" 
+     connection when a "broadcast" "HELLO_BS" message received from the 
+     "Basestation". */
+    
     
     #ifdef DEBUG_NET
 		printf("[net] message received trough 'trickle' connection\n\n");
@@ -577,8 +682,15 @@ const static struct trickle_callbacks
 void 
 get_sensor_sample(void)
 {
-    /* This functions reads data of the x axis from the 
-       accelerometer. */	
+    /* [Functionality]
+     This functions takes a sample of the x axis from the accelerometer 
+     sensor. Then stores the sample into the "WORKING_FILE". If there's 
+     any error the "WORKING_FILE" is not modified.
+
+       [Context]
+     This function is executed when the node enters into "DATA_COLLECT" 
+     state to take a sensor sample, every sample periode. */
+     	
 	
 	/* Reading data from sensor. */
 	sensor_sample = (char)accm_read_axis(X_AXIS);
