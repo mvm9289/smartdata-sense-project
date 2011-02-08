@@ -478,11 +478,6 @@ timedout(struct mesh_conn *c)
 static void 
 received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops) 
 {
-    /* This function sends the "WORKING_FILE" if the "Basestation" 
-       requests data. If there's a message already sending, this message
-       is saved. If there's another message saved, the last message is 
-       discarded. */
-    
     /* [Functionality]
      This functions checks the type of message received and acts 
      consequently. First the checksum's message is checked and if it's 
