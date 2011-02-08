@@ -89,7 +89,7 @@ hello_msg()
      This message is sended to the "Basestation" when the node gets up. 
      However the message is sended to reply a broadcast "HELLO_BS" message 
      sended by the "Basestation" periodically, to execute the "Discover" 
-     three-way hanshake. */ 
+     three-way handshake. */ 
     
     
     #ifdef DEBUG_NET
@@ -250,7 +250,7 @@ send_packet_from_file(void)
 
        [Context]
      This function is called when we want to send the first packet of 
-     the "WORKING_FILE" and when an "DATA_ACK" or "POLL" message is 
+     the "WORKING_FILE" and when a "DATA_ACK" or "POLL" message is 
      received. */
 
 
@@ -292,10 +292,20 @@ send_packet_from_file(void)
 
 static void 
 ack_received(unsigned char type)
-{
-    /* This function sends the next packet of the "WORKING_FILE" to the 
-       "Basestation" till the end of the file. When the end of the file 
-       is reached removes the "WORKING_FILE" and reopens it. */
+{       
+    /* [Functionality]
+     This function checks if the "ACK" message received is a "DATA_ACK" 
+     or a "HELLO_ACK".
+     If it's a DATA_ACK calls to the function send_packet_from_file() to
+     send the next packet if there is info ready to send at the
+     "WORKING FILE".
+     Otherwise the current state changes from DATA_SEND to BLOCKED.
+     In both cases the control of "ACK" waiting is reset.
+
+       [Context]
+     This function is called when the message received is an "ACK" 
+     message. */ 
+
     
     if (output_msg_type != EMPTY)
     {
