@@ -1,0 +1,22 @@
+------------------------------------------------------------------------
+Cambios de diseño
+------------------------------------------------------------------------
+a) Almacenamiento del par (núm. muestra, muestra micro) para identificar
+errores y conocer el minuto asociado a la muestra.
+
+Modificaciones:
+1. La función "get_sensor_sample" escribe en el fichero el par
+("sample_interval", "sensor_sample").
+2. La función "get_sensor_sample" escribe en el fichero un código de
+error en caso de:
+- Muestra erronea 
+(!) Un error debido al sistema de ficheros 
+(abrir el fichero, o escribir) se identificara por la falta
+de una muestra (no podemos almacenar un error de escritura).
+(códigos a especificar)
+
+3. La función "prepare_packet" deberá leer un número de bytes igual al
+máximo múltiplo de la longitud del par 
+("sample_interval", "sensor_sample") que no supere los "DATA_SIZE".
+
+------------------------------------------------------------------------
