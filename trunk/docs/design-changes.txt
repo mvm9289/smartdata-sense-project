@@ -36,6 +36,10 @@ mensaje recibido y realiza el comportamiento asociado:
 diferenciar entre "hello_ack_timeout" y "data_ack_timeout" que indicará
 que mensaje deberá reenviarse (pudiendo ser ambos a la vez).
 
+3. Las funciones "hello/data_msg", "send_packet_from_file", 
+"ack_received", "file_send_failed", "sent", "timedout", "received" 
+no configuran el estado de la red.
+
 (!) Cambiará la pérdida de un número mayor del paquetes (en
 función del rendimiento del buffer 'input'). Sin embargo del mismo modo
 las pérdidas se interpretarán como mensajes perdidos.
