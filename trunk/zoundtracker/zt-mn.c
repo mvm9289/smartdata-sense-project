@@ -540,7 +540,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         }
         
         if (output_msg_type == EMPTY && 
-          (input_msg_type != EMPTY || my_packet.type == POLL))
+          (input_msg_type != EMPTY || packet_received.type == POLL))
         {
             /* There's a message saved ready to reply or the message 
                received is not an ACK and we can reply it. */
