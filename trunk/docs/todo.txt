@@ -193,6 +193,8 @@ tamaño de los buffers en función del rendimiento.
 - Identificar los estados utilizando los leds, de la siguiente forma:
 a) "BLOCKED" y "DATA_COLLECT" -> LEDS_BLUE=Off
 b) "DATA_SEND" -> LEDS_BLUE=On
+- Corregir el modelo de "timeout". Puede ocurrir que se descarte un
+paquete en menos de MAX_ATTEMPTS reintentos (tiempo de vida del timer).
 
 Cambios realizados:
 - Añadir el nombre y la fecha de última modificación del fichero al 
