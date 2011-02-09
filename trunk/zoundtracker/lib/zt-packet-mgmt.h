@@ -28,6 +28,11 @@ typedef struct {
   unsigned short checksum;
 }Packet;
 
+typedef struct {
+  unsigned char number;
+  char value; 
+}Sample;
+
 unsigned short compute_checksum(Packet* my_packet);
 // PRE: packet must be an array of PACKET_SIZE bytes
 void mount_packet(Packet * my_packet, unsigned char* packet) ;

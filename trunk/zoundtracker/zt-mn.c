@@ -43,7 +43,7 @@
 #define EMPTY -3
 
 /* Sensor */
-#define SAMPLE_SIZE 1
+#define SAMPLE_SIZE sizeof(Sample)
 
 /* State */
 #define BLOCKED 1
@@ -58,6 +58,7 @@ static int write_bytes, read_bytes, fd_read, fd_write, ack_timeout,
 static unsigned short file_size;
 static struct etimer control_timer;
 static unsigned char read_buffer[DATA_SIZE];
+static Sample current_sample;
     
 /* NET */
 static int attempts,packet_number;
@@ -704,6 +705,10 @@ get_sensor_sample(void)
 		printf("[accel] x axis readed\n value: %d\n\n", sensor_sample);
 	#endif
 
+    /* Building the 'Sample' structure for writing. */
+    current_sample.number = sample_interval;
+    current_sample.value = sensor_sample;
+
     /* Writing data into the "WORKING_FILE". */
 	fd_write = cfs_open(WORKING_FILE, CFS_WRITE | CFS_APPEND);       
     if (fd_write == ERROR) 
@@ -715,7 +720,7 @@ get_sensor_sample(void)
     }
     else 
     {
-        write_bytes = cfs_write(fd_write, &sensor_sample, SAMPLE_SIZE);
+        write_bytes = cfs_write(fd_write, &current_sample, SAMPLE_SIZE);
         if (write_bytes != SAMPLE_SIZE) 
 		{
 			#ifdef DEBUG_CFS
