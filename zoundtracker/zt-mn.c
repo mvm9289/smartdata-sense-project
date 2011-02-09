@@ -530,9 +530,6 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         #ifdef DEBUG_STATE
 		  printf("[state] current state 'DATA_SEND'\n\n");
 		#endif
-
-        /* Valid message. */
-        leds_on(LEDS_YELLOW);
     
         if (packet_received.type == HELLO_ACK || packet_received.type == DATA_ACK)
         {
@@ -543,68 +540,27 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             leds_off(LEDS_GREEN);
             leds_off(LEDS_RED);
         }
-        
-        if (output_msg_type == EMPTY && 
-          (input_msg_type != EMPTY || packet_received.type == POLL))
+        else if (packet_received.type == POLL)
         {
-            /* There's a message saved ready to reply or the message 
-               received is not an ACK and we can reply it. */
-            
-            /* Changing to "DATA_SEND" state. */  
-            state = DATA_SEND;
-            #ifdef DEBUG_STATE
-			  printf("[state] current state 'DATA_SEND'\n\n");
-			#endif
-            
-            if (input_msg_type == EMPTY)
+            if (fd_read != EMPTY)
             {
-                input_msg_type = packet_received.type;
+                /* "POLL" message on reply to a "DATA" message 
+                   sended and lost. Resending the last packet. */
+                data_msg();
             }
-            
-            /* Response depending on the "type" value. */
-            if (input_msg_type == POLL)
+            else
             {
-                #ifdef DEBUG_NET
-				  printf("[net] 'POLL' message received\n\n");
-				#endif
-                if (output_msg_type == DATA)
-                {
-                    /* "POLL" message on reply to a "DATA" message 
-                       sended. Resending the last packet. */
-                    data_msg(); 
-                }
-                else 
-                {
-                    /* Sending next "DATA" messages from 
-                       "WORKING_FILE". */
-                    send_packet_from_file();
-                }
+                /* "POLL" message advertisement. Node timestamp exceed. 
+                   Sending the "WORKING_FILE". */
+                send_packet_from_file();
+            
             }
-            
-            input_msg_type = EMPTY;
-            
-            leds_off(LEDS_GREEN);
-            leds_off(LEDS_RED);
-        }
-        else if (input_msg_type == EMPTY && 
-          output_msg_type != EMPTY && packet_received.type == POLL)
-        {
-            /* There's a message already sending. The input message is 
-               saved. */
-            input_msg_type = packet_received.type;
-			#ifdef DEBUG_NET
-			  printf("[net] There's a message already sending.\n");
-			  printf("  Saving the input message");
-			  printf(" 'input_msg_type == %d'\n\n", input_msg_type);
-			#endif
         }
         else 
         {
-            /* Input is empty or message is discarded. */ 
             #ifdef DEBUG_NET
-			  printf("[net] 'input_msg_type == EMPTY' or");
-			  printf(" message is discarded\n\n");
-			#endif
+	          printf("[net] incorrect type of message received\n\n");
+		    #endif
         }
     }
     else 
