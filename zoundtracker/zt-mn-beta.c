@@ -338,8 +338,8 @@ timedout(struct mesh_conn *c)
         
             #ifdef DEBUG_NET
 		      printf("[net] timeout resending the current packet");
-			  printf(" (packet number: %d) from the");
-		      printf(" 'WORKING_FILE'\n\n", packet_number);
+			  printf(" (packet number: %d) from the", packet_number);
+		      printf(" 'WORKING_FILE'\n\n");
 			#endif
         }
 	}
@@ -350,7 +350,7 @@ timedout(struct mesh_conn *c)
 		#endif
 	    if (hello_ack_waiting == TRUE)
 		{	
-		    hello_ack_waiting == FALSE;
+		    hello_ack_waiting = FALSE;
 		    
 		    #ifdef DEBUG_NET
 			  printf("[net] 'HELLO_MN' message lost\n\n");
@@ -358,7 +358,7 @@ timedout(struct mesh_conn *c)
 	    }
 	    else if (data_ack_waiting == TRUE)
 		{	
-		    data_ack_waiting == FALSE;
+		    data_ack_waiting = FALSE;
 		
             /* Current sending message lost. We can't erase the 
                "WORKING_FILE". */
@@ -430,7 +430,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
     if (packet_checksum == packet_received.checksum)
     {
         /* (!) Message received ("POLL/HELLO_ACK/DATA_ACK").
-            Changing to "DATA_SEND" from "BLOCKED/DATA_COLLECT"
+            Changing to "DATA_SEND" from "DATA_SEND/BLOCKED/DATA_COLLECT"
             state. */ 
         state = DATA_SEND;
         
@@ -502,7 +502,6 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 		#endif
     }
 }
-}
 
 static void 
 broadcast_received(struct trickle_conn* c)
@@ -569,7 +568,7 @@ broadcast_received(struct trickle_conn* c)
     }
     else {
         #ifdef DEBUG_NET
-	      printf("[net] Already sending a message.")
+	      printf("[net] Already sending a message.");
 	      printf(" Message received discarded.\n\n");
 		#endif
         
@@ -754,7 +753,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                     data_ack_waiting = FALSE;
  
                     /* Starting a new sample periode (10 minutes) */
-                    sample_number = 0;
+                    sample_interval = 0;
                     
                     /* Changing to "BLOCKED" from "DATA_SEND" state. */
                     state = BLOCKED;
