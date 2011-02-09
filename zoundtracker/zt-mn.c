@@ -43,7 +43,7 @@
 #define EMPTY -3
 
 /* Sensor */
-#define SAMPLE_SIZE sizeof(Sample)
+#define SAMPLE_SIZE 2
 
 /* State */
 #define BLOCKED 1
