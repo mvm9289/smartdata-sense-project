@@ -265,8 +265,6 @@ send_packet_from_file(void)
     }    
     else  
     {       
-        data_ack_waiting = FALSE;
-        
         /* 'WORKING_FILE' completely sended, removing it. */
         cfs_close(fd_read);
         fd_read = EMPTY;
@@ -424,96 +422,86 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 	  printf("[net] message received trough 'mesh' connection\n\n");
 	#endif
            
-    if (state != DATA_SEND)
+    /* Obtaining the "Packet" and checking checksum. */
+    Packet packet_received;
+    packet_received = unmount_packet(packetbuf_dataptr());
+    packet_checksum = compute_checksum(&packet_received);
+
+    if (packet_checksum == packet_received.checksum)
     {
-        /* Obtaining the "Packet" and checking checksum. */
-        Packet packet_received;
-        packet_received = unmount_packet(packetbuf_dataptr());
-        packet_checksum = compute_checksum(&packet_received);
-
-        if (packet_checksum == packet_received.checksum)
-        {
-            /* (!) Message received ("POLL/HELLO_ACK/DATA_ACK").
-               Changing to "DATA_SEND" from "BLOCKED/DATA_COLLECT"
-               state. */ 
-            state = DATA_SEND;
-            
-            #ifdef DEBUG_STATE
-    		  printf("[state] current state 'DATA_SEND'\n\n");
-    		#endif
+        /* (!) Message received ("POLL/HELLO_ACK/DATA_ACK").
+            Changing to "DATA_SEND" from "BLOCKED/DATA_COLLECT"
+            state. */ 
+        state = DATA_SEND;
         
-            if (packet_received.type == HELLO_ACK)
-            {
-                hello_ack_waiting = FALSE;
+        #ifdef DEBUG_STATE
+		  printf("[state] current state 'DATA_SEND'\n\n");
+		#endif
+    
+        if (packet_received.type == HELLO_ACK)
+        {
+            hello_ack_waiting = FALSE;
+        
+    		#ifdef DEBUG_NET
+    		  printf("[net] 'HELLO_ACK' received\n\n");
+    		#endif        
+
+            leds_off(LEDS_GREEN);
+            leds_off(LEDS_RED);
+        }
+        else if (packet_received.type == DATA_ACK)
+        {	
+            data_ack_waiting = FALSE;
+
+    		#ifdef DEBUG_NET
+    		  printf("[net] 'DATA_ACK' received\n\n");
+    		#endif
             
-        		#ifdef DEBUG_NET
-        		  printf("[net] 'HELLO_ACK' received\n\n");
-        		#endif        
+            /* If it's necessary sends next packet. */           
+            send_packet_from_file();        
+        }
+        else if (packet_received.type == POLL)
+        {
+    		#ifdef DEBUG_NET
+    		  printf("[net] 'POLL' received\n\n");
+    		#endif
 
-                leds_off(LEDS_GREEN);
-                leds_off(LEDS_RED);
-            }
-            else if (packet_received.type == DATA_ACK)
-            {	
-                data_ack_waiting = FALSE;
-
-        		#ifdef DEBUG_NET
-        		  printf("[net] 'DATA_ACK' received\n\n");
-        		#endif
-                
-                /* If it's necessary sends next packet. */           
-                send_packet_from_file();        
-            }
-            else if (packet_received.type == POLL)
+            if (fd_read != EMPTY)
             {
-        		#ifdef DEBUG_NET
-        		  printf("[net] 'POLL' received\n\n");
-        		#endif
-
-                if (fd_read != EMPTY)
-                {
-                    /* "POLL" message on reply to a "DATA" message 
-                       sended and lost. Resending the last packet. */
-                    data_msg();
-                }
-                else
-                {
-                    /* "POLL" message advertisement. Node timestamp 
-                       exceed. Sending the "WORKING_FILE". */
-                    send_packet_from_file();
-                }
+                /* "POLL" message on reply to a "DATA" message 
+                    sended and lost. Resending the last packet. */
+                data_msg();
             }
-            else 
+            else
             {
-                #ifdef DEBUG_NET
-    	          printf("[net] incorrect type of message received\n\n");
-    		    #endif
-            }
-            
-            if (hello_ack_waiting == FALSE && fd_read == EMPTY)
-            {
-                /* Net work finalized */
-                state = BLOCKED;
-                #ifdef DEBUG_STATE
-    		      printf("[state] current state 'BLOCKED'\n\n");
-    		    #endif
+                /* "POLL" message advertisement. Node timestamp 
+                    exceed. Sending the "WORKING_FILE". */
+                send_packet_from_file();
             }
         }
         else 
         {
             #ifdef DEBUG_NET
-    	      printf("[net] incorrect checksum invalid message\n\n");
-    		#endif
+	          printf("[net] incorrect type of message received\n\n");
+		    #endif
+        }
+        
+        if (hello_ack_waiting == FALSE && fd_read == EMPTY)
+        {
+            /* Net work finalized */
+            state = BLOCKED;
+            #ifdef DEBUG_STATE
+		      printf("[state] current state 'BLOCKED'\n\n");
+		    #endif
         }
     }
-    else
+    else 
     {
         #ifdef DEBUG_NET
-	      printf("[net] Already sending a message.")
-	      printf(" Message received discarded.\n\n");
+	      printf("[net] incorrect checksum invalid message\n\n");
 		#endif
-        
     }
+}
 }
 
 static void 
@@ -667,7 +655,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	trickle_open(&zoundtracker_broadcast_conn, 0, CHANNEL2, 
 	  &zoundtracker_broadcast_callbacks);       
 	output_msg_type = EMPTY;
-	hello_ack_waiting = data_ack_waiting = 0;
+	hello_ack_waiting = data_ack_waiting = FALSE;
 	attempts = 0;
 	
     /* CFS */
