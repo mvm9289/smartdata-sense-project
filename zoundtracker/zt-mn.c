@@ -94,7 +94,7 @@ hello_msg()
     
     
     #ifdef DEBUG_NET
-		printf("[net] sending 'HELLO_MN' message\n\n");
+	  printf("[net] sending 'HELLO_MN' message\n\n");
     #endif
     Packet packet_to_send;
 
@@ -137,7 +137,7 @@ data_msg()
 	
 	
 	#ifdef DEBUG_NET
-		printf("[net] sending 'DATA' message\n\n");
+	  printf("[net] sending 'DATA' message\n\n");
 	#endif
     
     Packet packet_to_send;
@@ -155,15 +155,15 @@ data_msg()
     packet_to_send.checksum = compute_checksum(&packet_to_send);
     
 	#ifdef DEBUG_NET
-		printf("[net]----------- DATA' packet contents:---------\n");
-		printf("Addr1: %d\n", packet_to_send.addr1);
-		printf("Addr2: %d\n", packet_to_send.addr2);
-		printf("Type: %d\n", packet_to_send.type);
-		printf("Size: %d\n", packet_to_send.size);
-		printf("Counter: %d\n", packet_to_send.counter);
-		printf("Data: %c\n", packet_to_send.data[0]);
-		printf("Checksum: %d\n", packet_to_send.checksum);
-		printf("---------------------------------------------------\n\n");
+	  printf("[net]----------- DATA' packet contents:---------\n");
+	  printf("Addr1: %d\n", packet_to_send.addr1);
+	  printf("Addr2: %d\n", packet_to_send.addr2);
+	  printf("Type: %d\n", packet_to_send.type);
+	  printf("Size: %d\n", packet_to_send.size);
+	  printf("Counter: %d\n", packet_to_send.counter);
+	  printf("Data: %c\n", packet_to_send.data[0]);
+	  printf("Checksum: %d\n", packet_to_send.checksum);
+	  printf("------------------------------------------------\n\n");
     #endif
 	
     /* Preparing "Packet" to send it through "rime". Building the 
@@ -198,8 +198,8 @@ prepare_packet(void)
     {
         /* First packet of "WORKING_FILE". */
 		#ifdef DEBUG_CFS
-			printf("[cfs] trying to prepare the first packet of the \
-			  'WORKING_FILE'\n\n");
+	      printf("[cfs] trying to prepare the first packet");
+	      printf(" of the 'WORKING_FILE'\n\n");
 		#endif
         packet_number = 0;
         fd_read = cfs_open(WORKING_FILE, CFS_READ);
@@ -209,8 +209,8 @@ prepare_packet(void)
 	if (fd_read == ERROR)
 	{
 		#ifdef DEBUG_CFS
-			printf("[cfs] error openning the 'WORKING_FILE' for read \
-			  data\n\n");
+	      printf("[cfs] error openning the 'WORKING_FILE'");
+	      printf(" for read data\n\n");
 	    #endif
 		return FALSE;
 	}
@@ -218,13 +218,13 @@ prepare_packet(void)
 	{                  
         read_bytes = cfs_read(fd_read, read_buffer, DATA_SIZE);
 		#ifdef DEBUG_CFS
-			printf("\n[cfs]------BYTES READED: %d--------\n\n", read_bytes);
+	      printf("\n[cfs]------BYTES READED: %d--------\n\n", read_bytes);
 		#endif
         
         if (read_bytes == ERROR)
         {
 			#ifdef DEBUG_CFS
-				printf("[cfs] error reading from the 'WORKING_FILE'\n\n");
+			  printf("[cfs] error reading from the 'WORKING_FILE'\n\n");
 			#endif
             return FALSE;  
         }
@@ -263,8 +263,8 @@ send_packet_from_file(void)
         packet_number++;
         data_msg();
 		#ifdef DEBUG_NET
-			printf("[net] sending the 'WORKING_FILE' \
-			  (packet number: %d)\n\n", packet_number);
+		  printf("[net] sending the 'WORKING_FILE'");
+		  printf(" (packet number: %d)\n\n", packet_number);
 		#endif
     }    
     else  
@@ -279,14 +279,13 @@ send_packet_from_file(void)
         sample_interval = 0;
         file_size = 0;
 		#ifdef DEBUG_NET
-			printf("[net] 'WORKING_FILE' completely sended, \
-			  removing it\n\n");
+		  printf("[net] 'WORKING_FILE' completely sended, removing it\n\n");
         #endif
         /* (!) "WORKING_FILE" sended to the "Sink".
            Changing to "BLOCKED" from "DATA_SEND" state. */  
         state = BLOCKED;
 		#ifdef DEBUG_STATE
-			printf("[state] current state 'BLOCKED'\n\n");
+		  printf("[state] current state 'BLOCKED'\n\n");
 		#endif
     }
 }
@@ -316,7 +315,7 @@ ack_received(unsigned char type)
         if (type == HELLO_ACK)
         {
 			#ifdef DEBUG_NET
-				printf("[net] 'HELLO_ACK' received\n\n");
+			  printf("[net] 'HELLO_ACK' received\n\n");
 			#endif
             output_msg_type = EMPTY;
             
@@ -324,13 +323,13 @@ ack_received(unsigned char type)
                Changing to "BLOCKED" from "DATA_SEND" state. */  
             state = BLOCKED;
             #ifdef DEBUG_STATE
-				printf("[state] current state 'BLOCKED'\n\n");
+			  printf("[state] current state 'BLOCKED'\n\n");
 			#endif
         }
         else if (type == DATA_ACK)
         {
 		#ifdef DEBUG_NET
-			printf("[net] 'DATA_ACK' received\n\n");
+		  printf("[net] 'DATA_ACK' received\n\n");
 		#endif
           
           /* If it's necessary sends next packet. */           
@@ -390,13 +389,13 @@ sent(struct mesh_conn *c)
     if (output_msg_type == HELLO_MN)
 	{	
 	    #ifdef DEBUG_NET
-			printf("[net] sent 'HELLO_MN' message\n\n");
+		  printf("[net] sent 'HELLO_MN' message\n\n");
 		#endif
     }
     else if (output_msg_type == DATA)
 	{	
 	    #ifdef DEBUG_NET
-			printf("[net] sent 'DATA' message\n\n"); 
+		  printf("[net] sent 'DATA' message\n\n"); 
 		#endif
     }
     
@@ -432,7 +431,7 @@ timedout(struct mesh_conn *c)
 	        hello_msg();
 	        
 			#ifdef DEBUG_NET
-				printf("[net] timeout resending 'HELLO_MN' message\n\n");
+			  printf("[net] timeout resending 'HELLO_MN' message\n\n");
 			#endif
 	    }
 	    else if (output_msg_type == DATA)
@@ -441,28 +440,28 @@ timedout(struct mesh_conn *c)
 	        data_msg();
         
             #ifdef DEBUG_NET
-				printf("[net] timeout resending the current packet \
-				  (packet number: %d) from the \
-				  'WORKING_FILE'\n\n", packet_number);
+		      printf("[net] timeout resending the current packet");
+			  printf(" (packet number: %d) from the");
+		      printf(" 'WORKING_FILE'\n\n", packet_number);
 			#endif
         }
 	}
 	else
 	{
 	    #ifdef DEBUG_NET
-			printf("[net] maximum number of attempts reached\n");
+		  printf("[net] maximum number of attempts reached\n");
 		#endif
 	    if (output_msg_type == HELLO_MN)
 		{	
 		    #ifdef DEBUG_NET
-				printf("[net] 'HELLO_MN' message lost\n\n");
+			  printf("[net] 'HELLO_MN' message lost\n\n");
 			#endif
 	    }
 	    else if (output_msg_type == DATA)
 		{	
 		    #ifdef DEBUG_NET
-				printf("[net] 'DATA' message lost \
-					(packet number: %d)\n\n", packet_number);
+			  printf("[net] 'DATA' message lost");
+			  printf(" (packet number: %d)\n\n", packet_number);
 			#endif
         }
         
@@ -474,7 +473,7 @@ timedout(struct mesh_conn *c)
            Changing to "BLOCKED" from "DATA_SEND" state. */  
         state = BLOCKED;
         #ifdef DEBUG_STATE
-			printf("[state] current state 'BLOCKED'\n\n");
+		  printf("[state] current state 'BLOCKED'\n\n");
 		#endif
         
         /* Starting new sample period (10 minutes). */
@@ -514,7 +513,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
   
     
     #ifdef DEBUG_NET
-		printf("[net] message received trough 'mesh' connection\n\n");
+	  printf("[net] message received trough 'mesh' connection\n\n");
 	#endif
        
     /* Obtaining the "Packet" and checking checksum. */
@@ -529,7 +528,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
            state. */ 
         state = DATA_SEND;
         #ifdef DEBUG_STATE
-			printf("[state] current state 'DATA_SEND'\n\n");
+		  printf("[state] current state 'DATA_SEND'\n\n");
 		#endif
 
         /* Valid message. */
@@ -554,7 +553,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             /* Changing to "DATA_SEND" state. */  
             state = DATA_SEND;
             #ifdef DEBUG_STATE
-				printf("[state] current state 'DATA_SEND'\n\n");
+			  printf("[state] current state 'DATA_SEND'\n\n");
 			#endif
             
             if (input_msg_type == EMPTY)
@@ -566,7 +565,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             if (input_msg_type == POLL)
             {
                 #ifdef DEBUG_NET
-					printf("[net] 'POLL' message received\n\n");
+				  printf("[net] 'POLL' message received\n\n");
 				#endif
                 if (output_msg_type == DATA)
                 {
@@ -594,17 +593,17 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
                saved. */
             input_msg_type = packet_received.type;
 			#ifdef DEBUG_NET
-				printf("[net] There's a message already sending.\n");
-				printf("  Saving the input message \
-				  'input_msg_type == %d'\n\n", input_msg_type);
+			  printf("[net] There's a message already sending.\n");
+			  printf("  Saving the input message");
+			  printf(" 'input_msg_type == %d'\n\n", input_msg_type);
 			#endif
         }
         else 
         {
             /* Input is empty or message is discarded. */ 
             #ifdef DEBUG_NET
-				printf("[net] 'input_msg_type == EMPTY' or \
-				  message is discarded\n\n");
+			  printf("[net] 'input_msg_type == EMPTY' or");
+			  printf(" message is discarded\n\n");
 			#endif
         }
     }
@@ -612,7 +611,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
     {
         /* Invalid message. */
         #ifdef DEBUG_NET
-			printf("[net] incorrect checksum invalid message\n\n");
+	      printf("[net] incorrect checksum invalid message\n\n");
 		#endif
     }
 }
@@ -635,7 +634,7 @@ broadcast_received(struct trickle_conn* c)
     
     
     #ifdef DEBUG_NET
-		printf("[net] message received trough 'trickle' connection\n\n");
+	  printf("[net] message received trough 'trickle' connection\n\n");
 	#endif
     
     if (state != DATA_SEND)
@@ -653,14 +652,14 @@ broadcast_received(struct trickle_conn* c)
                "DATA_SEND/BLOCKED/DATA_COLLECT" state. */  
             state = DATA_SEND;
             #ifdef DEBUG_STATE
-				printf("[state] current state 'DATA_SEND'\n\n");
+			  printf("[state] current state 'DATA_SEND'\n\n");
 			#endif
 
             /* Valid message. */
             leds_on(LEDS_YELLOW);
             
             #ifdef DEBUG_NET
-				printf("[net] 'HELLO_BS' message received\n\n");
+			  printf("[net] 'HELLO_BS' message received\n\n");
             #endif
 			
             /* Sending "HELLO_MN" message. */
@@ -670,7 +669,7 @@ broadcast_received(struct trickle_conn* c)
         {
             /* Invalid message. */
             #ifdef DEBUG_NET
-				printf("[net] incorrect checksum invalid message\n\n");
+			  printf("[net] incorrect checksum invalid message\n\n");
 			#endif
         }
     }
@@ -702,7 +701,7 @@ get_sensor_sample(void)
 	sensor_sample = (char)accm_read_axis(X_AXIS);
 	
 	#ifdef DEBUG_SENSOR
-		printf("[accel] x axis readed\n value: %d\n\n", sensor_sample);
+	  printf("[accel] x axis readed\n value: %d\n\n", sensor_sample);
 	#endif
 
     /* Building the 'Sample' structure for writing. */
@@ -714,8 +713,8 @@ get_sensor_sample(void)
     if (fd_write == ERROR) 
 	{	
 	    #ifdef DEBUG_CFS
-			printf("[cfs] error openning the 'WORKING_FILE' \
-				for write data\n\n");
+		  printf("[cfs] error openning the 'WORKING_FILE'");
+		  printf(" for write data\n\n");
 		#endif
     }
     else 
@@ -724,8 +723,8 @@ get_sensor_sample(void)
         if (write_bytes != SAMPLE_SIZE) 
 		{
 			#ifdef DEBUG_CFS
-				printf("[cfs] write: error writing into the \
-					'WORKING_FILE'\n\n");
+			  printf("[cfs] write: error writing into the");
+			  printf(" 'WORKING_FILE'\n\n");
 			#endif
         }
         else
@@ -773,14 +772,14 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     state = BLOCKED;
     
     #ifdef DEBUG_STATE
-		printf("[state] current state 'BLOCKED'\n\n");
+	  printf("[state] current state 'BLOCKED'\n\n");
 	#endif
     
     /* (!) Sending message ("HELLO_MN").
        Changing to "DATA_SEND" from "BLOCKED" state. */  
     state = DATA_SEND;    
     #ifdef DEBUG_STATE
-		printf("[state] current state 'DATA_SEND'\n\n");
+	  printf("[state] current state 'DATA_SEND'\n\n");
 	#endif
     
     /* Sending first "HELLO_MN" message. */
@@ -792,7 +791,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
         if (ev == PROCESS_EVENT_TIMER)
         {
             #ifdef DEBUG_EVENT
-				printf("[event] timer expired event\n\n");
+			  printf("[event] timer expired event\n\n");
 			#endif
             
             if (state == BLOCKED)
@@ -801,13 +800,13 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                    Changing to "DATA_COLLECT" from "BLOCKED" state. */
                 state = DATA_COLLECT;
                 #ifdef DEBUG_STATE
-					printf("[state] current state 'DATA_COLLECT'\n\n");
+				  printf("[state] current state 'DATA_COLLECT'\n\n");
 				#endif
             
                 get_sensor_sample();
                 #ifdef DEBUG_SENSOR
-					printf("[sensor] sample measured \
-					  (sample number: %d)\n\n", sample_interval); 
+				  printf("[sensor] sample measured");
+				  printf(" (sample number: %d)\n\n", sample_interval); 
 				#endif
                 /* 'sample_interval' starts on zero. */
                 
@@ -821,7 +820,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                        state. */
                     state = DATA_SEND;
                     #ifdef DEBUG_STATE
-						printf("[state] current state 'DATA_SEND'\n\n");
+					  printf("[state] current state 'DATA_SEND'\n\n");
 					#endif
                     
                     send_packet_from_file();
@@ -835,7 +834,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                        state. */
                     state = BLOCKED;
                     #ifdef DEBUG_STATE
-						printf("[state] current state 'BLOCKED'\n\n");
+					  printf("[state] current state 'BLOCKED'\n\n");
 					#endif
                 }
                   
@@ -845,7 +844,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                 if (ack_timeout == 1)
                 {
                     #ifdef DEBUG_NET
-						printf("[net] ACK message lost\n\n");
+					  printf("[net] ACK message lost\n\n");
 					#endif
                     /* ACK message lost. We can't erase the 
                        "WORKING_FILE". */
@@ -854,7 +853,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                     /* Changing to "BLOCKED" from "DATA_SEND" state. */
                     state = BLOCKED;
 					#ifdef DEBUG_STATE
-						printf("[state] current state 'BLOCKED'\n\n");
+					  printf("[state] current state 'BLOCKED'\n\n");
 					#endif
                 }
                 
@@ -863,7 +862,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
         else
 		{	
 			#ifdef DEBUG_EVENT
-				printf("[event] unknown event\n\n");  
+			  printf("[event] unknown event\n\n");  
 			#endif
 		}
         /* Reseting the timer. */ 
