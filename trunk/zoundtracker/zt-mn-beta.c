@@ -33,7 +33,7 @@
 #endif
 
 /* CFS */
-#define NUM_SECONDS_SAMPLE 1
+#define NUM_SECONDS_SAMPLE 10
 #define WORKING_FILE "sample_file"
 #define ERROR -1
 #define NO_NEXT_PACKET -2
@@ -739,42 +739,45 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
             }
             else if (state == DATA_SEND)
             {
-                if (output_msg_type == DATA)
+                if (ack_waiting == TRUE)
                 {
-                    #ifdef DEBUG_NET
-					  printf("[net] DATA_ACK message lost\n\n");
-					#endif
-                    /* ACK message lost. We can't erase the 
-                       "WORKING_FILE". */
-                    cfs_close(fd_read);
-                    fd_read = EMPTY;       
+                    if (output_msg_type == DATA)
+                    {
+                        #ifdef DEBUG_NET
+    					  printf("[net] DATA_ACK message lost\n\n");
+    					#endif
+                        /* ACK message lost. We can't erase the 
+                           "WORKING_FILE". */
+                        cfs_close(fd_read);
+                        fd_read = EMPTY;       
 
-                    ack_waiting = FALSE;
- 
-                    /* Starting a new sample periode (10 minutes) */
-                    sample_interval = 0;
-                    
-                    /* Changing to "BLOCKED" from "DATA_SEND" state. */
-                    state = BLOCKED;
-					
-					#ifdef DEBUG_STATE
-					  printf("[state] current state 'BLOCKED'\n\n");
-					#endif
-                }
-                else if (output_msg_type == HELLO_MN)
-                {
-                    #ifdef DEBUG_NET
-					  printf("[net] HELLO_ACK message lost\n\n");
-					#endif
-					
-					ack_waiting = FALSE;
-                    
-                    /* Changing to "BLOCKED" from "DATA_SEND" state. */
-                    state = BLOCKED;
-					
-					#ifdef DEBUG_STATE
-					  printf("[state] current state 'BLOCKED'\n\n");
-					#endif               
+                        ack_waiting = FALSE;
+     
+                        /* Starting a new sample periode (10 minutes) */
+                        sample_interval = 0;
+                        
+                        /* Changing to "BLOCKED" from "DATA_SEND" state. */
+                        state = BLOCKED;
+    					
+    					#ifdef DEBUG_STATE
+    					  printf("[state] current state 'BLOCKED'\n\n");
+    					#endif
+                    }
+                    else if (output_msg_type == HELLO_MN)
+                    {
+                        #ifdef DEBUG_NET
+    					  printf("[net] HELLO_ACK message lost\n\n");
+    					#endif
+    					
+    					ack_waiting = FALSE;
+                        
+                        /* Changing to "BLOCKED" from "DATA_SEND" state. */
+                        state = BLOCKED;
+    					
+    					#ifdef DEBUG_STATE
+    					  printf("[state] current state 'BLOCKED'\n\n");
+    					#endif               
+                    }
                 }
             }       
         }
