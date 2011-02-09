@@ -33,7 +33,7 @@
 #endif
 
 /* CFS */
-#define NUM_SECONDS_SAMPLE 6
+#define NUM_SECONDS_SAMPLE 1
 #define WORKING_FILE "sample_file"
 #define ERROR -1
 #define NO_NEXT_PACKET -2
@@ -54,7 +54,7 @@
 
 /* CFS */
 static int write_bytes, read_bytes, fd_read, fd_write, 
-  hello_ack_waiting, data_ack_waiting, output_msg_type;
+  ack_waiting, output_msg_type;
 static unsigned short file_size;
 static struct etimer control_timer;
 static unsigned char read_buffer[DATA_SIZE];
@@ -115,7 +115,9 @@ hello_msg()
 	  printf("[net] sending 'HELLO_MN' message\n\n");
     #endif
 
-    hello_ack_waiting = TRUE;
+	/* Configuring type of message */
+    output_msg_type = HELLO_MN;
+	
 	mesh_send(&zoundtracker_conn, &sink_addr);
 }
 
@@ -170,7 +172,9 @@ data_msg()
 	  printf("[net] sending 'DATA' message\n\n");
 	#endif
     
-    data_ack_waiting = TRUE;
+	/* Configuring type of message */
+    output_msg_type = DATA;
+	
 	mesh_send(&zoundtracker_conn, &sink_addr);
 }
 
@@ -294,6 +298,7 @@ sent(struct mesh_conn *c)
 
     /* Checksum comprobation needed on receiver. */
     attempts = 0;
+    ack_waiting = TRUE;
     
     #ifdef DEBUG_NET
 	  printf("[net] sent message\n\n"); 
@@ -322,7 +327,7 @@ timedout(struct mesh_conn *c)
     attempts++;
 	if (attempts < MAX_ATTEMPTS) 
 	{
-	    if (hello_ack_waiting == TRUE)
+	    if (output_msg_type == HELLO_MN)
 	    {
 	        /* Resending "HELLO_MN" message. */
 	        hello_msg();
@@ -331,7 +336,7 @@ timedout(struct mesh_conn *c)
 			  printf("[net] timeout resending 'HELLO_MN' message\n\n");
 			#endif
 	    }
-	    else if (data_ack_waiting == TRUE)
+	    else if (output_msg_type == DATA)
 	    {
 	        /* Resending "DATA" message. */
 	        data_msg();
@@ -348,18 +353,14 @@ timedout(struct mesh_conn *c)
 	    #ifdef DEBUG_NET
 		  printf("[net] maximum number of attempts reached\n");
 		#endif
-	    if (hello_ack_waiting == TRUE)
-		{	
-		    hello_ack_waiting = FALSE;
-		    
+	    if (output_msg_type == HELLO_MN)
+		{	    
 		    #ifdef DEBUG_NET
 			  printf("[net] 'HELLO_MN' message lost\n\n");
 			#endif
 	    }
-	    else if (data_ack_waiting == TRUE)
+	    else if (output_msg_type == DATA)
 		{	
-		    data_ack_waiting = FALSE;
-		
             /* Current sending message lost. We can't erase the 
                "WORKING_FILE". */
             cfs_close(fd_read);
@@ -376,13 +377,11 @@ timedout(struct mesh_conn *c)
                 
         /* (!) Message lost.
            Changing to "BLOCKED" from "DATA_SEND" state. */  
-        if (hello_ack_waiting == FALSE && fd_read == EMPTY)
-        {
-            state = BLOCKED;
-            #ifdef DEBUG_STATE
-		      printf("[state] current state 'BLOCKED'\n\n");
-		    #endif
-        }
+        state = BLOCKED;
+        
+        #ifdef DEBUG_STATE
+	      printf("[state] current state 'BLOCKED'\n\n");
+	    #endif
 
         attempts = 0;
         
@@ -440,7 +439,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
     
         if (packet_received.type == HELLO_ACK)
         {
-            hello_ack_waiting = FALSE;
+            ack_waiting = FALSE;
         
     		#ifdef DEBUG_NET
     		  printf("[net] 'HELLO_ACK' received\n\n");
@@ -451,7 +450,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         }
         else if (packet_received.type == DATA_ACK)
         {	
-            data_ack_waiting = FALSE;
+            ack_waiting = FALSE;
 
     		#ifdef DEBUG_NET
     		  printf("[net] 'DATA_ACK' received\n\n");
@@ -486,7 +485,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 		    #endif
         }
         
-        if (hello_ack_waiting == FALSE && fd_read == EMPTY)
+        if (ack_waiting == FALSE && fd_read == EMPTY)
         {
             /* Net work finalized */
             state = BLOCKED;
@@ -654,7 +653,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	trickle_open(&zoundtracker_broadcast_conn, 0, CHANNEL2, 
 	  &zoundtracker_broadcast_callbacks);       
 	output_msg_type = EMPTY;
-	hello_ack_waiting = data_ack_waiting = FALSE;
+	ack_waiting = FALSE;
 	attempts = 0;
 	
     /* CFS */
@@ -740,7 +739,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
             }
             else if (state == DATA_SEND)
             {
-                if (data_ack_waiting == TRUE)
+                if (output_msg_type == DATA)
                 {
                     #ifdef DEBUG_NET
 					  printf("[net] DATA_ACK message lost\n\n");
@@ -750,7 +749,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                     cfs_close(fd_read);
                     fd_read = EMPTY;       
 
-                    data_ack_waiting = FALSE;
+                    ack_waiting = FALSE;
  
                     /* Starting a new sample periode (10 minutes) */
                     sample_interval = 0;
@@ -762,13 +761,13 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 					  printf("[state] current state 'BLOCKED'\n\n");
 					#endif
                 }
-                else if (hello_ack_waiting == TRUE)
+                else if (output_msg_type == HELLO_MN)
                 {
                     #ifdef DEBUG_NET
 					  printf("[net] HELLO_ACK message lost\n\n");
 					#endif
 					
-					hello_ack_waiting = FALSE;
+					ack_waiting = FALSE;
                     
                     /* Changing to "BLOCKED" from "DATA_SEND" state. */
                     state = BLOCKED;
