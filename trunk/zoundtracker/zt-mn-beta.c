@@ -53,15 +53,14 @@
 /* ------------------------------------------------------------------ */
 
 /* CFS */
-static int write_bytes, read_bytes, fd_read, fd_write, 
-  ack_waiting, output_msg_type;
+static int write_bytes, read_bytes, fd_read, fd_write;
 static unsigned short file_size;
 static struct etimer control_timer;
 static unsigned char read_buffer[DATA_SIZE];
 static Sample current_sample;
     
 /* NET */
-static int attempts,packet_number;
+static int attempts, packet_number, ack_waiting, output_msg_type;
 static rimeaddr_t sink_addr;
 static struct mesh_conn zoundtracker_conn;
 static struct trickle_conn zoundtracker_broadcast_conn;
@@ -181,12 +180,13 @@ static unsigned char
 prepare_packet(void)
 {
     /* [Functionally]
-     This function reads the "WORKING_FILE" to get info for the next 
-     packet to send.
+     This function reads the "WORKING_FILE" to get a set of sensor 
+     samples for the next packet to send.
 
        [Context]
      This function is called from the function 'send_packet_from_file' 
-     to check if there are more info to send at the 'WORKING_FILE".
+     to check if there's more sensor samples to send in the 
+     'WORKING_FILE".
 
        [Return value]
      The return value will be TRUE if 'read_bytes' is greater than 0.
@@ -196,7 +196,7 @@ prepare_packet(void)
     /* Reading from the "WORKING_FILE". */
     if (fd_read == EMPTY)
     {
-        /* First packet of "WORKING_FILE". */
+        /* That's the first packet of "WORKING_FILE". */
 		#ifdef DEBUG_CFS
 	      printf("[cfs]\n Trying to prepare the first packet of the");
 	      printf(" 'WORKING_FILE'\n\n");
@@ -204,7 +204,7 @@ prepare_packet(void)
         packet_number = 0;
         fd_read = cfs_open(WORKING_FILE, CFS_READ);
 	}
-	/* else currently sending 'WORKING_FILE'. */
+	/* else currently sending the 'WORKING_FILE'. */
 	
 	if (fd_read == ERROR)
 	{
@@ -242,12 +242,10 @@ static void
 send_packet_from_file(void)
 {
     /* [Functionality]
-     This function checks if there are info to send at the 
+     This function checks if there's sensor samples to send at the 
      "WORKING_FILE" and if so, sends a "DATA" message.
      Otherwise, the file will be closed and removed and 'fd_read',
      'sample_interval' and 'file_size' will be reset.
-     Furthermore the 'output_msg_type' will be EMPTY, because the state
-     changes from "DATA_SEND" to "BLOCKED".
 
        [Context]
      This function is called when we want to send the first packet of 
@@ -262,6 +260,7 @@ send_packet_from_file(void)
         /* "Packet" sending. */
         packet_number++;
         data_msg();
+		
 		#ifdef DEBUG_NET
 		  printf("[net]\n Sending the 'WORKING_FILE'");
 		  printf(" (packet number: %d)\n\n", packet_number);
@@ -291,13 +290,17 @@ sent(struct mesh_conn *c)
 {
     /* [Functionality]
      This function resets the number of attempts to send the last 
-     message and control of "ACK" waiting is activated.
+     message and the control of "ACK" waiting is activated. This control
+     consists in wait 1 minute for the 'ACK' reply. If the time is 
+     exceed the 'ACK' reply is considered lost.
 
        [Context]
      This funcion is executed when a message sended to the "Basestation"
-     arrives. But the integrity of the message could be transgressed. */
+     arrives (radio message). But the integrity of the message could be 
+     transgressed. */
 
-    /* Checksum comprobation needed on receiver. */
+    /* Checksum comprobation is needed on receiver. */
+    
     attempts = 0;
     ack_waiting = TRUE;
     
@@ -316,13 +319,14 @@ timedout(struct mesh_conn *c)
      This function resends the currently sended message. If 
      "MAX_ATTEMPTS" is reached the message is considered lost. Then 
      resets the number of attempts and returns to the "BLOCKED" state to 
-     start another sample periode.
+     start another sample period.
 
        [Context]
      This function is executed when there's a radio lost message. The
      function tries again "MAX_ATTEMPTS" attempts. If the "Basestation" 
-     don't receive any message "file_send_failed" function is called to 
-     free all the data structures related. */
+     don't receive any message the file send is considered failed. The 
+     file is closed (data is not erased, must be sended on the next 
+     send) and the node starts another sample period. */
 
 
     attempts++;
@@ -398,26 +402,15 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 {
     /* [Functionality]
      This functions checks the type of message received and acts 
-     consequently. First the checksum's message is checked and if it's 
-     correct then checks if it's an "ACK" message.
+     consequently. First the checksum's message is checked, if it's 
+     correct then attend the message by the message type. If there's no
+     pending net work (means that, the last message is an 'ACK' and the
+     'WORKING_FILE' is not opened for sending), the node returns to 
+     'BLOCKED' state.
      
-     If it's an "ACK" message the function "ack_received()" is called.
-     After checks if there's a "POLL" message pending or if the current
-     message is a "POLL" and then acts as follow:
-     - Change the current state to "DATA_SEND"
-     - If output_msg_type is DATA, sends the last packet sended.
-     - Else calls send_packet_from_file() to start sending the
-     "WORKING_FILE".  
-     Then resets the 'input_msg_type'.
-
-     On the other hand, if 'output_msg_type' isn't EMPTY and 
-     'input_msg_type' is  EMPTY the current type of message is saved 
-     at 'input_msg_type'
-
-     Otherwise the message is discarded.
-
        [Context]
-     This function is executed when message is received. */
+     This function is executed when a message is received through the
+     mesh connection. */
   
     
     #ifdef DEBUG_NET
@@ -492,7 +485,9 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         
         if (ack_waiting == FALSE && fd_read == EMPTY)
         {
-            /* Net work finalized */
+            /* We're not pending for an 'ACK' message and the 
+            'WORKING_FILE' is not opened for sending. 
+            Net work finalized */
             state = BLOCKED;
             
             #ifdef DEBUG_STATE
@@ -598,12 +593,14 @@ get_sensor_sample(void)
 {
     /* [Functionality]
      This functions takes a sample of the x axis from the accelerometer 
-     sensor. Then stores the sample into the "WORKING_FILE". If there's 
-     any error the "WORKING_FILE" is not modified.
+     sensor. Then stores the pair (number of sample, sensor sample) into 
+     the "WORKING_FILE". If there's any error the "WORKING_FILE" is not 
+     modified. By this way we can associate every sample to every minute 
+     on the sample period.
 
        [Context]
      This function is executed when the node enters into "DATA_COLLECT" 
-     state to take a sensor sample, every sample periode. */
+     state to take a sensor sample, every sample period. */
      	
 	
 	/* Reading data from sensor. */
@@ -782,7 +779,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 
                         ack_waiting = FALSE;
      
-                        /* Starting a new sample periode (10 minutes) */
+                        /* Starting a new sample period */
                         sample_interval = 0;
                         
                         /* Changing to "BLOCKED" from "DATA_SEND" 

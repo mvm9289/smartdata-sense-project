@@ -185,8 +185,6 @@ Cambios a realizar:
 - Cambio diseño en "DATA_COLLECT": Al tomar un dato del sensor, si el
 archivo actual está siendo enviado, abrimos un nuevo fichero y lo
 almacenamos.
-- Documentación funciones: ¿qué hace? ¿por qué? ¿cuándo? 
-¿valor de retorno esperado?
 
 Cambios realizados:
 - Añadir el nombre y la fecha de última modificación del fichero al 
@@ -232,5 +230,7 @@ tamaño de los buffers en función del rendimiento.
 - Identificar los estados utilizando los leds, de la siguiente forma:
 a) "BLOCKED" y "DATA_COLLECT" -> LEDS_BLUE=Off
 b) "DATA_SEND" -> LEDS_BLUE=On
+- Documentación funciones: ¿qué hace? ¿por qué? ¿cuándo? 
+¿valor de retorno esperado?
 
 ------------------------------------------------------------------------
