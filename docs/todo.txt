@@ -187,9 +187,6 @@ archivo actual está siendo enviado, abrimos un nuevo fichero y lo
 almacenamos.
 - Documentación funciones: ¿qué hace? ¿por qué? ¿cuándo? 
 ¿valor de retorno esperado?
-- Identificar los estados utilizando los leds, de la siguiente forma:
-a) "BLOCKED" y "DATA_COLLECT" -> LEDS_BLUE=Off
-b) "DATA_SEND" -> LEDS_BLUE=On
 
 Cambios realizados:
 - Añadir el nombre y la fecha de última modificación del fichero al 
@@ -232,5 +229,8 @@ escritura en el "WORKING_FILE".
 - Cambio diseño en "DATA_SEND": Verificar si son necesarios 
 "input_msg_type" y "output_msg_type". En caso afirmativo, decidir el
 tamaño de los buffers en función del rendimiento.
+- Identificar los estados utilizando los leds, de la siguiente forma:
+a) "BLOCKED" y "DATA_COLLECT" -> LEDS_BLUE=Off
+b) "DATA_SEND" -> LEDS_BLUE=On
 
 ------------------------------------------------------------------------
