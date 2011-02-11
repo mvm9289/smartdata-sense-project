@@ -18,6 +18,9 @@ unsigned short compute_checksum(Packet* my_packet) {
 }
 
 void mount_packet(Packet * my_packet, unsigned char* packet) {
+    int i;
+    for (i = 0; i < PACKET_SIZE; i++) packet[i] = 0;
+    
     packet[0] = my_packet->addr1;
     packet[1] = my_packet->addr2;
     packet[2] = my_packet->type;
@@ -26,7 +29,7 @@ void mount_packet(Packet * my_packet, unsigned char* packet) {
     packet[5] = my_packet->counter;
     packet[6] = (my_packet->counter>>8);
     
-    int i = 7;
+    i = 7;
     int j = 0;
     while (j < 32) {
         packet[i] = my_packet->data[j];
