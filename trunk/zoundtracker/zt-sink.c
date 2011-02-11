@@ -2,9 +2,10 @@
 #include "contiki.h"
 #include "net/rime.h"
 #include "net/rime/mesh.h"
-#include "net/rime/trickle.h"
+#include "net/rime/broadcast.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "lib/zt-packet-mgmt.h"
@@ -18,8 +19,7 @@
 #define MAX_RESENDS 5
 #define DATA_TIMEOUT 60*12 // 12 min
 #define POLL_PERIOD 5*SECOND_PARTITION // 5 s
-#define HELLO_PERIOD 30 // 1 hour
-#define INIT_WAIT 2*CLOCK_SECOND
+#define HELLO_PERIOD 40 // 1 hour
 
 #ifdef DEBUG_MODE
 #define DEBUG_STATES
@@ -53,7 +53,7 @@ typedef struct
 static Node_table_entry node_table[NODE_TABLE_SIZE];
 
 static struct mesh_conn zoundtracker_conn;
-static struct trickle_conn zt_broadcast_conn;
+static struct broadcast_conn zt_broadcast_conn;
 ///////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////
@@ -64,8 +64,9 @@ inline Packet hello_packet()
     helloBS.addr1 = SINK_ADDR1;
     helloBS.addr2 = SINK_ADDR2;
     helloBS.type = HELLO_BS;
-    helloBS.size = 0;
+    helloBS.size = 1;
     helloBS.counter = 0;
+    helloBS.data[0] = (unsigned char)(rand() % 256);
     helloBS.checksum = compute_checksum(&helloBS);
     
     return helloBS;
@@ -112,18 +113,29 @@ inline Packet poll_packet()
 ///////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////
-///////////////////// Trickle connection callback /////////////////////
-static void broadcast_received(    struct trickle_conn *c    )
+//////////////////// Broadcast connection callback ////////////////////
+static void broadcast_received(    struct broadcast_conn *c,
+                                   const rimeaddr_t *from    )
 {
     #ifdef DEBUG_NET
-        printf("Trickle received callback: ");
+        printf("Broadcast received callback: ");
         printf("Broadcast packet received\n\n");
     #endif
 }
 
-const static struct trickle_callbacks broadcast_callback =
+static void broadcast_sent(    struct broadcast_conn *ptr,
+                               int status,
+                               int num_tx    )
 {
-    broadcast_received
+    #ifdef DEBUG_NET
+        printf("Broadcast sent callback: Packet sent\n\n");
+    #endif
+}
+
+const static struct broadcast_callbacks broadcast_callback =
+{
+    broadcast_received,
+    broadcast_sent
 };
 ///////////////////////////////////////////////////////////////////////
 
@@ -324,20 +336,12 @@ PROCESS_THREAD(    zoundtracker_sink_process, ev, data    )
     mesh_open(  &zoundtracker_conn,
                 CHANNEL1,
                 &zoundtracker_sink_callbacks);
-    trickle_open(   &zt_broadcast_conn,
-                    0,
-                    CHANNEL2,
-                    &broadcast_callback);
     // Clear timer data
     partial_seconds = 0;
     seconds = 0;
     // Set first state
     state = HELLO_STATE;
     ///////////////////////////////////////////////////////////////////
-    
-    etimer_set(&timer, INIT_WAIT);
-    PROCESS_WAIT_EVENT();
-    while(!etimer_expired(&timer)) PROCESS_WAIT_EVENT();
 
     etimer_set(&timer, STATE_TRANSITION_PERIOD);
     while (1)
@@ -360,12 +364,11 @@ PROCESS_THREAD(    zoundtracker_sink_process, ev, data    )
                     mount_packet(&packet, packet_buff);
                     packetbuf_copyfrom( (void *)packet_buff,
                                         PACKET_SIZE);
-                    //~ trickle_open(   &zt_broadcast_conn,
-                                    //~ 0,
-                                    //~ CHANNEL2,
-                                    //~ &broadcast_callback);
-                    trickle_send(&zt_broadcast_conn);
-                    //~ trickle_close(&zt_broadcast_conn);
+                    broadcast_open(   &zt_broadcast_conn,
+                                      CHANNEL2,
+                                      &broadcast_callback);
+                    broadcast_send(&zt_broadcast_conn);
+                    broadcast_close(&zt_broadcast_conn);
                     #ifdef DEBUG_NET
                         printf("HELLO_STATE: Hello packet sent\n\n");
                     #endif
