@@ -31,7 +31,10 @@ void mount_packet(Packet * my_packet, unsigned char* packet) {
     
     i = 7;
     int j = 0;
-    while (j < 32) {
+    int max = (my_packet->size - my_packet->counter);
+    if(max > 32) max = 32;
+
+    while (j < max) {
         packet[i] = my_packet->data[j];
         i++;
         j++;
@@ -59,7 +62,10 @@ Packet unmount_packet(unsigned char* my_array) {
     int i = 7;
     int j = 0;
     
-    while (j < 32) {
+    int max = (my_packet->size - my_packet->counter);
+    if(max > 32) max = 32;
+    
+    while (j < max) {
         my_packet.data[j] = my_array[i];
         i++;
         j++;
