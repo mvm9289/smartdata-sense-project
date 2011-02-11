@@ -6,10 +6,11 @@
 #include "cfs/cfs.h"
 #include "net/rime.h"
 #include "net/rime/mesh.h"
-#include "net/rime/trickle.h"
+#include "net/rime/broadcast.h"
 #include "adxl345.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "lib/zt-packet-mgmt.h"
 
 /* ------------------------------------------------------------------ */
@@ -63,9 +64,11 @@ static Sample current_sample;
 static int attempts, packet_number, ack_waiting, output_msg_type;
 static rimeaddr_t sink_addr;
 static struct mesh_conn zoundtracker_conn;
-static struct trickle_conn zoundtracker_broadcast_conn;
-static unsigned char rime_stream[PACKET_SIZE], next_packet;
+static struct broadcast_conn zoundtracker_broadcast_conn;
+static unsigned char rime_stream[PACKET_SIZE], next_packet, 
+    broadcast_id;
 static unsigned short packet_checksum;
+static Packet packet_received;
 
 /* Sensor */
 static char sensor_sample;
@@ -418,7 +421,6 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 	#endif
            
     /* Obtaining the "Packet" and checking checksum. */
-    Packet packet_received;
     packet_received = unmount_packet(packetbuf_dataptr());
     packet_checksum = compute_checksum(&packet_received);
 
@@ -453,6 +455,9 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
     		#ifdef DEBUG_NET
     		  printf("[net]\n 'DATA_ACK' received\n\n");
     		#endif
+    		
+    		leds_off(LEDS_GREEN);
+            leds_off(LEDS_RED);
             
             /* If it's necessary sends next packet. */           
             send_packet_from_file();        
@@ -505,13 +510,18 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
     }
 }
 
+static void
+broadcast_sent(struct broadcast_conn* c,int status, int num_tx)
+{
+}
+
 static void 
-broadcast_received(struct trickle_conn* c)
+broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
 {
     /* [Functionality]
      The behaviour of this function is very similar to the "received" 
      "mesh" callback to attend only the "HELLO_BS" messages sended 
-     through the "trickle" broadcast connection. This function replies 
+     through the broadcast connection. This function replies 
      the "HELLO_BS" messages sending a "HELLO_MN" message to the 
      "Basestation". If there's already a data sending, the "HELLO_BS" 
      message is discarded.
@@ -523,14 +533,13 @@ broadcast_received(struct trickle_conn* c)
     
     
     #ifdef DEBUG_NET
-	  printf("[net]\n Message received trough 'trickle' connection\n\n");
+	  printf("[net]\n Message received trough 'broadcast' connection\n\n");
 	#endif
     
     if (state != DATA_SEND)
     {    
     
         /* Obtaining the "Packet" and checking checksum. */
-        Packet packet_received;
         packet_received = unmount_packet(packetbuf_dataptr());
         packet_checksum = compute_checksum(&packet_received);
         
@@ -552,9 +561,26 @@ broadcast_received(struct trickle_conn* c)
                 #ifdef DEBUG_NET
     			  printf("[net]\n 'HELLO_BS' message received\n\n");
                 #endif
+                
+                if(packet_received.data[0] != broadcast_id) 
+                {
+                    /*Saving the new broadcast_id */
+                    broadcast_id = packet_received.data[0];
+                    
+                    /*Sending "HELLO_BS" through broadcast*/
+                    mount_packet(&packet_received, rime_stream);
+                    packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
+                    broadcast_send(&zoundtracker_broadcast_conn);
+                           
+                    /*Waiting to send "HELLO_MN" message*/
+                    int random = rand();
+                    while(random > 0) random--;
+
+                    /* Sending "HELLO_MN" message. */
+                    hello_msg();
+                    
+                }
 			
-                /* Sending "HELLO_MN" message. */
-                hello_msg();
             }
             else
             {
@@ -582,8 +608,8 @@ broadcast_received(struct trickle_conn* c)
 
 const static struct mesh_callbacks 
   zoundtracker_callbacks = {received, sent, timedout};
-const static struct trickle_callbacks 
-  zoundtracker_broadcast_callbacks = {broadcast_received};
+const static struct broadcast_callbacks 
+  zoundtracker_broadcast_callbacks = {broadcast_received, broadcast_sent};
 
 /* ------------------------------------------------------------------ */
 
@@ -658,11 +684,12 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	my_addr.u8[1] = MY_ADDR2;
 	rimeaddr_set_node_addr(&my_addr);
 	mesh_open(&zoundtracker_conn, CHANNEL1, &zoundtracker_callbacks);                                             
-	trickle_open(&zoundtracker_broadcast_conn, 0, CHANNEL2, 
+	broadcast_open(&zoundtracker_broadcast_conn, CHANNEL2, 
 	  &zoundtracker_broadcast_callbacks);       
 	output_msg_type = EMPTY;
 	ack_waiting = FALSE;
 	attempts = 0;
+	broadcast_id = (unsigned char)(rand() % 256);
 	
     /* CFS */
     etimer_set(&control_timer, NUM_SECONDS_SAMPLE*CLOCK_SECOND);
