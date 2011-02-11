@@ -41,6 +41,7 @@ void mount_packet(Packet * my_packet, unsigned char* packet) {
     }
     
     j = 0;
+    i = 39;
     while (j < 23) {
         packet[i] = my_packet->reserved[j];
         i++;
@@ -72,7 +73,7 @@ Packet unmount_packet(unsigned char* my_array) {
     } 
     
     j = 0;
-    
+    i = 39;   
     while (j < 23) {
         my_packet.reserved[j] = my_array[i];
         i++;
