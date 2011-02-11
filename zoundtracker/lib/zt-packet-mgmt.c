@@ -62,7 +62,7 @@ Packet unmount_packet(unsigned char* my_array) {
     int i = 7;
     int j = 0;
     
-    int max = (my_packet->size - my_packet->counter);
+    int max = (my_packet.size - my_packet.counter);
     if(max > 32) max = 32;
     
     while (j < max) {
