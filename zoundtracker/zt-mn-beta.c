@@ -69,6 +69,7 @@ static unsigned char rime_stream[PACKET_SIZE], next_packet,
     broadcast_id;
 static unsigned short packet_checksum;
 static Packet packet_received;
+clock_time_t time_remaining;
 
 /* Sensor */
 static char sensor_sample;
@@ -573,12 +574,18 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
                     broadcast_send(&zoundtracker_broadcast_conn);
                            
                     /*Waiting to send "HELLO_MN" message*/
-                    unsigned int random = rand();
-                    printf("RANDOM NUMBER: %u", random);
-                    while(random > 0) random--;
+                    unsigned int random = 2 + rand()%10;
+                    printf("RANDOM NUMBER: %u\n", random);
+                    /*while(random > 0) random--;*/
+                    
+                    time_remaining = timer_remaining(&(control_timer.timer));
+                    etimer_set(&control_timer, random*CLOCK_SECOND/10);
+                    while(!etimer_expired(&control_timer));
+                    etimer_set(&control_timer, (timer_remaining-random*CLOCK_SECOND/10)>0 ? (timer_remaining-random*CLOCK_SECOND/10):CLOCK_SECOND*0);
 
                     /* Sending "HELLO_MN" message. */
                     hello_msg();
+                    
                     
                 }
 			
