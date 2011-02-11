@@ -417,7 +417,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
   
     
     #ifdef DEBUG_NET
-	  printf("[net]\n Message received trough 'mesh' connection\n\n");
+	  printf("[net]\n Message received through 'mesh' connection\n\n");
 	#endif
            
     /* Obtaining the "Packet" and checking checksum. */
@@ -573,7 +573,8 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
                     broadcast_send(&zoundtracker_broadcast_conn);
                            
                     /*Waiting to send "HELLO_MN" message*/
-                    int random = rand();
+                    unsigned int random = rand();
+                    printf("RANDOM NUMBER: %u", random);
                     while(random > 0) random--;
 
                     /* Sending "HELLO_MN" message. */
