@@ -158,9 +158,17 @@ Plan
     - Envío natural
     - Forzando cuello de botella en la "Basestation"
     
+Realizar pruebas de "ping" para estimar la distancia óptima entre 
+dispositivos (utilizando antenas de 5dB).Las condiciones son:
+- Visibilidad directa entre dispositivos.
+- Posicionamiento óptimo (teniendo en cuenta la direccionalidad de las 
+  antenas)
+- Sin obstáculos.
+- Sin fuentes de ruido (exceptuando el ambiente).
 
-Realizar pruebas de simulación de entorno (si es necesario utilizaremos 
-antenas)
+(!) Será necesario también realizar pruebas si alguna de estas 
+condiciones no se cumplen, y ver como afectan. 
+
 Utilizar parametros calidad de transmisión
 
 He añadido los siguientes tests funcionales (falta revisar)
@@ -185,6 +193,7 @@ Cambios a realizar:
 - Cambio diseño en "DATA_COLLECT": Al tomar un dato del sensor, si el
 archivo actual está siendo enviado, abrimos un nuevo fichero y lo
 almacenamos.
+- Establecer una espera aleatoria prévia al envío de mensajes. 
 
 Cambios realizados:
 - Añadir el nombre y la fecha de última modificación del fichero al 
