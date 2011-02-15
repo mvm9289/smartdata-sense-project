@@ -66,7 +66,7 @@ static rimeaddr_t sink_addr;
 static struct mesh_conn zoundtracker_conn;
 static struct broadcast_conn zoundtracker_broadcast_conn;
 static unsigned char rime_stream[PACKET_SIZE], next_packet, 
-    broadcast_id;
+    last_broadcast_id, valid_broadcast_id;
 static unsigned short packet_checksum;
 static Packet packet_received;
 static clock_time_t time_remaining;
@@ -441,6 +441,10 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         if (packet_received.type == HELLO_ACK)
         {
             ack_waiting = FALSE;
+            
+            /* Saving the last broadcast_id as valid */
+            valid_broadcast_id = last_broadcast_id;
+            
         
     		#ifdef DEBUG_NET
     		  printf("[net]\n 'HELLO_ACK' received\n\n");
@@ -525,7 +529,8 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
      through the broadcast connection. This function replies 
      the "HELLO_BS" messages sending a "HELLO_MN" message to the 
      "Basestation". If there's already a data sending, the "HELLO_BS" 
-     message is discarded.
+     message is discarded. Else if "HELLO_BS" is the last message
+     received, the new "HELLO_BS" message isn't discarded.
 
        [Context]
      This function sends a "HELLO_MN" message through the "mesh" 
@@ -537,7 +542,7 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
 	  printf("[net]\n Message received trough 'broadcast' connection\n\n");
 	#endif
     
-    if (state != DATA_SEND)
+    if (state != DATA_SEND || output_msg_type == HELLO_BS)
     {    
     
         /* Obtaining the "Packet" and checking checksum. */
@@ -562,21 +567,20 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
                 #ifdef DEBUG_NET
     			  printf("[net]\n 'HELLO_BS' message received\n\n");
                 #endif
-                
-                if(packet_received.data[0] != broadcast_id) 
+
+                last_broadcast_id = packet_received.id;
+
+                if (valid_broadcast_id != last_broadcast_id)
                 {
-                    /*Saving the new broadcast_id */
-                    broadcast_id = packet_received.data[0];
-                    
-                    /*Sending "HELLO_BS" through broadcast*/
+                    /* Sending "HELLO_BS" through broadcast */
                     mount_packet(&packet_received, rime_stream);
                     packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
                     broadcast_send(&zoundtracker_broadcast_conn);
                            
-                    /*Waiting to send "HELLO_MN" message*/
-                    unsigned int random = 2 + rand()%10;
+                    /* Waiting to send "HELLO_MN" message */
+                    /* unsigned int random = 2 + rand()%10;
                     printf("RANDOM NUMBER: %u\n", random);
-                    while(random > 0) random--;
+                    while(random > 0) random--; */
                     
                     /*time_remaining = timer_remaining(&(control_timer.timer));
                     etimer_set(&control_timer, random*CLOCK_SECOND/10);
@@ -585,10 +589,7 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
 
                     /* Sending "HELLO_MN" message. */
                     hello_msg();
-                    
-                    
                 }
-			
             }
             else
             {
@@ -697,7 +698,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	output_msg_type = EMPTY;
 	ack_waiting = FALSE;
 	attempts = 0;
-	broadcast_id = (unsigned char)(rand() % 256);
+	valid_broadcast_id = (unsigned char)(rand() % 256);
 	
     /* CFS */
     etimer_set(&control_timer, NUM_SECONDS_SAMPLE*CLOCK_SECOND);
