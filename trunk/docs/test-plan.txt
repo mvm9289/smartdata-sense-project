@@ -1,0 +1,31 @@
+------------------------------------------------------------------------
+Plan de pruebas
+------------------------------------------------------------------------
+
+(!) Problema "HELLO_BS":
+- Reenvio múltiple de un mensaje "HELLO_BS" identificado. Los nodos 
+móviles, únicamente responden una vez.
+
+(!)Prueba en el laboratorio con tiempo real, almacenando los datos en un
+fichero (minicom) durante una noche.
+
+Envío de mensaje RSSI en campo Reservado para obtener la información
+de control:
+- Potencia
+- Distancia
+- Tasa de pérdida de paquetes
+
+Colocación óptima (una frente a otra)
+
+Fuentes de ruido reales
+- Concentradores (tranvía)
+- Coches
+- Tiempo atmosférico (llúvia, ...)
+- Redes Wi-Fi (2.4GHz)
+
+Escenarios:
+- Espacios al aire libre (campus)
+- Estación de metro de Palau Reial
+- Estación de tranvía diagonal (cercano CRV) (punto crítico)
+
+------------------------------------------------------------------------
