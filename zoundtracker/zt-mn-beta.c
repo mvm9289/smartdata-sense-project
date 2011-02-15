@@ -41,6 +41,7 @@
 
 /* NET */
 #define MAX_ATTEMPTS 5
+#define MAX_FLOODING_ATTEMPTS 5
 #define EMPTY -3
 
 /* Sensor */
@@ -61,7 +62,7 @@ static unsigned char read_buffer[DATA_SIZE];
 static Sample current_sample;
     
 /* NET */
-static int attempts, packet_number, ack_waiting, output_msg_type;
+static int attempts, flooding_attempts, packet_number, ack_waiting, output_msg_type;
 static rimeaddr_t sink_addr;
 static struct mesh_conn zoundtracker_conn;
 static struct broadcast_conn zoundtracker_broadcast_conn;
@@ -557,8 +558,24 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
                 #ifdef DEBUG_NET
     			  printf("[net]\n 'HELLO_BS' message received\n\n");
                 #endif
+                
+                /* New Broadcast burst */
+                if (packet_received.data[0] != last_broadcast_id)
+                  flooding_attempts = 0;
+                
+                
+                if (flooding_attempts < MAX_FLOODING_ATTEMPTS)
+                {
+                    /* Sending "HELLO_BS" through broadcast */
+                    mount_packet(&packet_received, rime_stream);
+                    packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
+                    broadcast_send(&zoundtracker_broadcast_conn);                              
+                    
+                    flooding_attempts++;
+                }
 
-                last_broadcast_id = packet_received.data[0];
+                /* Controling 'HELLO_BS' messages */
+                last_broadcast_id = packet_received.data[0];                
 
                 if (valid_broadcast_id != last_broadcast_id)
                 {
@@ -573,12 +590,6 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
         			#endif
         			
         			leds_on(LEDS_BLUE);
-
-
-                    /* Sending "HELLO_BS" through broadcast */
-                    mount_packet(&packet_received, rime_stream);
-                    packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
-                    broadcast_send(&zoundtracker_broadcast_conn);
                            
                     /* Waiting to send "HELLO_MN" message */
                     /* unsigned int random = 2 + rand()%10;
