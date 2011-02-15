@@ -542,7 +542,7 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
 	  printf("[net]\n Message received trough 'broadcast' connection\n\n");
 	#endif
     
-    if (state != DATA_SEND || output_msg_type == HELLO_BS)
+    if (state != DATA_SEND || output_msg_type == HELLO_MN)
     {    
     
         /* Obtaining the "Packet" and checking checksum. */
@@ -553,7 +553,7 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
         {
             /* (!) Message received ("HELLO_BS").
                Changing to "DATA_SEND" from 
-               "BLOCKED/DATA_COLLECT" state. */  
+               "BLOCKED/DATA_COLLECT/DATA_SEND*" state. */  
             state = DATA_SEND;
             
             #ifdef DEBUG_STATE
@@ -568,7 +568,7 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
     			  printf("[net]\n 'HELLO_BS' message received\n\n");
                 #endif
 
-                last_broadcast_id = packet_received.id;
+                last_broadcast_id = packet_received.data[0];
 
                 if (valid_broadcast_id != last_broadcast_id)
                 {
@@ -589,6 +589,16 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
 
                     /* Sending "HELLO_MN" message. */
                     hello_msg();
+                }
+                else
+                {
+                    /* (!) Message discarded. Changing to "BLOCKED" from 
+                       "DATA_SEND" state. */  
+                    state = BLOCKED;
+                    
+                    #ifdef DEBUG_STATE
+        			  printf("---\n[state]\n Current state 'BLOCKED'\n---\n\n");
+        			#endif    
                 }
             }
             else
