@@ -1,5 +1,5 @@
 /* File: "zt-mn.c"
-   Date (last rev.): 10/02/2011 7:39 AM                              */
+   Date (last rev.): 10/02/2011 7:39 AM                               */
    
 #include "contiki.h"
 #include "leds.h"
@@ -551,16 +551,6 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
         
         if (packet_checksum == packet_received.checksum)
         {
-            /* (!) Message received ("HELLO_BS").
-               Changing to "DATA_SEND" from 
-               "BLOCKED/DATA_COLLECT/DATA_SEND*" state. */  
-            state = DATA_SEND;
-            
-            #ifdef DEBUG_STATE
-			  printf("---\n[state]\n Current state 'DATA_SEND'\n---\n\n");
-			#endif
-			
-			leds_on(LEDS_BLUE);
             
             if (packet_received.type == HELLO_BS)
             {
@@ -572,6 +562,19 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
 
                 if (valid_broadcast_id != last_broadcast_id)
                 {
+
+                    /* (!) Message received ("HELLO_BS").
+                       Changing to "DATA_SEND" from 
+                       "BLOCKED/DATA_COLLECT/DATA_SEND*" state. */  
+                    state = DATA_SEND;
+                    
+                    #ifdef DEBUG_STATE
+        			  printf("---\n[state]\n Current state 'DATA_SEND'\n---\n\n");
+        			#endif
+        			
+        			leds_on(LEDS_BLUE);
+
+
                     /* Sending "HELLO_BS" through broadcast */
                     mount_packet(&packet_received, rime_stream);
                     packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
@@ -589,16 +592,6 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
 
                     /* Sending "HELLO_MN" message. */
                     hello_msg();
-                }
-                else
-                {
-                    /* (!) Message discarded. Changing to "BLOCKED" from 
-                       "DATA_SEND" state. */  
-                    state = BLOCKED;
-                    
-                    #ifdef DEBUG_STATE
-        			  printf("---\n[state]\n Current state 'BLOCKED'\n---\n\n");
-        			#endif    
                 }
             }
             else
