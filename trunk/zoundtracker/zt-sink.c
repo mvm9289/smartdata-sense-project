@@ -19,7 +19,8 @@
 #define MAX_RESENDS 5
 #define DATA_TIMEOUT 60*12 // 12 min
 #define POLL_PERIOD 5*SECOND_PARTITION // 5 s
-#define HELLO_PERIOD 40 // 1 hour
+#define HELLO_PERIOD 90 // 1 hour
+#define HELLO_SENDS 5
 
 #ifdef DEBUG_MODE
 #define DEBUG_STATES
@@ -316,7 +317,8 @@ PROCESS_THREAD(    zoundtracker_sink_process, ev, data    )
     rimeaddr_t my_addr;
     rimeaddr_t addr_send;
     unsigned char packet_buff[PACKET_SIZE];
-    Packet packet;
+    static Packet packet;
+    static unsigned int hello_sends;
     static struct etimer timer;
     static unsigned short partial_seconds;
     static unsigned short seconds;
@@ -340,6 +342,7 @@ PROCESS_THREAD(    zoundtracker_sink_process, ev, data    )
     partial_seconds = 0;
     seconds = 0;
     // Set first state
+    hello_sends = 0;
     state = HELLO_STATE;
     ///////////////////////////////////////////////////////////////////
 
@@ -360,7 +363,7 @@ PROCESS_THREAD(    zoundtracker_sink_process, ev, data    )
                         printf("HELLO_STATE: ");
                         printf("Sending hello packet\n\n");
                     #endif
-                    packet = hello_packet();
+                    if (hello_sends == 0) packet = hello_packet();
                     mount_packet(&packet, packet_buff);
                     packetbuf_copyfrom( (void *)packet_buff,
                                         PACKET_SIZE);
@@ -372,6 +375,7 @@ PROCESS_THREAD(    zoundtracker_sink_process, ev, data    )
                     #ifdef DEBUG_NET
                         printf("HELLO_STATE: Hello packet sent\n\n");
                     #endif
+                    hello_sends++;
                     state = UPDATE_STATE;
                     break;
                 ///////////////////////////////////////////////////////
@@ -394,8 +398,10 @@ PROCESS_THREAD(    zoundtracker_sink_process, ev, data    )
                         if (seconds >= HELLO_PERIOD)
                         {
                             seconds = 0;
+                            hello_sends = 0;
                             state = HELLO_STATE;
                         }
+                        else if (hello_sends < HELLO_SENDS) state = HELLO_STATE;
                         else state = UPDATE_STATE;
                     }
                     break;
@@ -494,8 +500,10 @@ PROCESS_THREAD(    zoundtracker_sink_process, ev, data    )
                         if (seconds >= HELLO_PERIOD)
                         {
                             seconds = 0;
+                            hello_sends = 0;
                             state = HELLO_STATE;
                         }
+                        else if (hello_sends < HELLO_SENDS) state = HELLO_STATE;
                         else state = UPDATE_STATE;
                     }
                     else state = TEST_STATE;
