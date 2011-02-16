@@ -623,7 +623,7 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
         }
         else 
         {
-            /* Invalid message. 
+            /* Invalid message. */ 
             #ifdef DEBUG_NET
 			  printf("[net]\n Incorrect checksum. Invalid message\n\n");
 			#endif
