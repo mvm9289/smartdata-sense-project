@@ -561,8 +561,16 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
                 
                 /* New Broadcast burst */
                 if (packet_received.data[0] != last_broadcast_id)
-                  flooding_attempts = 0;
-                
+                {  
+                    flooding_attempts = 0;
+                        
+                    /* Controling 'HELLO_BS' messages */
+                    last_broadcast_id = packet_received.data[0];                
+                    
+                    #ifdef DEBUG_NET
+                	  printf("[net]\n New Broadcast burst\n\n");
+                	#endif
+                }
                 
                 if (flooding_attempts < MAX_FLOODING_ATTEMPTS)
                 {
@@ -572,10 +580,11 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
                     broadcast_send(&zoundtracker_broadcast_conn);                              
                     
                     flooding_attempts++;
+                
+                    #ifdef DEBUG_NET
+                	  printf("[net]\n Forwarding 'HELLO_BS' (flooding)\n\n");
+                	#endif
                 }
-
-                /* Controling 'HELLO_BS' messages */
-                last_broadcast_id = packet_received.data[0];                
 
                 if (valid_broadcast_id != last_broadcast_id)
                 {
@@ -614,9 +623,9 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
         }
         else 
         {
-            /* Invalid message. */
+            /* Invalid message. 
             #ifdef DEBUG_NET
-			  printf("[net]\n Incorrect checksum invalid message\n\n");
+			  printf("[net]\n Incorrect checksum. Invalid message\n\n");
 			#endif
         }
     }
