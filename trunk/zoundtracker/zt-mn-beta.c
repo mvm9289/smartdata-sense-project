@@ -41,7 +41,7 @@
 
 /* NET */
 #define MAX_ATTEMPTS 5
-#define MAX_FLOODING_ATTEMPTS 5
+#define MAX_FLOODING_ATTEMPTS 1
 #define EMPTY -3
 
 /* Sensor */
@@ -543,7 +543,7 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
 	  printf("[net]\n Message received trough 'broadcast' connection\n\n");
 	#endif
     
-    if (state != DATA_SEND || output_msg_type == HELLO_MN)
+    if (state != DATA_SEND)
     {    
     
         /* Obtaining the "Packet" and checking checksum. */
@@ -586,12 +586,12 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
                 	#endif
                 }
 
-                if (valid_broadcast_id != last_broadcast_id)
+                /*if (valid_broadcast_id != last_broadcast_id)
                 {
 
                     /* (!) Message received ("HELLO_BS").
                        Changing to "DATA_SEND" from 
-                       "BLOCKED/DATA_COLLECT/DATA_SEND*" state. */  
+                       "BLOCKED/DATA_COLLECT/DATA_SEND*" state.  
                     state = DATA_SEND;
                     
                     #ifdef DEBUG_STATE
@@ -600,19 +600,19 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
         			
         			leds_on(LEDS_BLUE);
                            
-                    /* Waiting to send "HELLO_MN" message */
-                    /* unsigned int random = 2 + rand()%10;
-                    printf("RANDOM NUMBER: %u\n", random);
-                    while(random > 0) random--; */
+                    // Waiting to send "HELLO_MN" message 
+                    // unsigned int random = 2 + rand()%10;
+                    //printf("RANDOM NUMBER: %u\n", random);
+                    //while(random > 0) random--;
                     
-                    /*time_remaining = timer_remaining(&(control_timer.timer));
-                    etimer_set(&control_timer, random*CLOCK_SECOND/10);
-                    while(!etimer_expired(&control_timer));
-                    etimer_set(&control_timer, (timer_remaining-random*CLOCK_SECOND/10)>0 ? (timer_remaining-random*CLOCK_SECOND/10):CLOCK_SECOND*0);*/
+                    // time_remaining = timer_remaining(&(control_timer.timer));
+                    // etimer_set(&control_timer, random*CLOCK_SECOND/10);
+                    // while(!etimer_expired(&control_timer));
+                    // etimer_set(&control_timer, (timer_remaining-random*CLOCK_SECOND/10)>0 ? (timer_remaining-random*CLOCK_SECOND/10):CLOCK_SECOND*0);
 
-                    /* Sending "HELLO_MN" message. */
+                    // Sending "HELLO_MN" message.
                     hello_msg();
-                }
+                }*/
             }
             else
             {
