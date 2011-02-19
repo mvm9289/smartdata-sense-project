@@ -36,7 +36,7 @@ Prueba 1
        aplicacion linux "minicom" o similares).
 
 Prueba 2
-  Escenario: Campus Nord UPC (paseo que empieza en el edificio A1 y
+  Escenario: Campus Nord UPC (paseo que empieza en el edificio C1 y
     acaba en el edificio C6).
   Objetivo: Calcular la tasa de fallos en un entorno tranquilo y 
     edificado.
@@ -69,7 +69,7 @@ Prueba 4
 Pruebas realizadas
 ------------------------------------------------------------------------
 Prueba 1
-  Escenario: Campus Nord UPC (paseo que empieza en el edificio A1 y
+  Escenario: Campus Nord UPC (paseo que empieza en el edificio C1 y
     acaba en el edificio C6).
   Objetivo: Calcular la distancia maxima entre nodos, en un entorno
     tranquilo y edificado.
