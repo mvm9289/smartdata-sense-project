@@ -1,21 +1,8 @@
 ------------------------------------------------------------------------
 Plan de pruebas
 ------------------------------------------------------------------------
-
-(!) Problema "HELLO_BS":
-- Reenvio múltiple de un mensaje "HELLO_BS" identificado. Los nodos 
-móviles, únicamente responden una vez.
-
-(!)Prueba en el laboratorio con tiempo real, almacenando los datos en un
-fichero (minicom) durante una noche.
-
-Envío de mensaje RSSI en campo Reservado para obtener la información
-de control:
-- Potencia
-- Distancia
-- Tasa de pérdida de paquetes
-
-Colocación óptima (una frente a otra)
+Colocación óptima (una frente a otra, es decir los chips de zolertia
+ deben encontrarse en linia de vista)
 
 Fuentes de ruido reales
 - Concentradores (tranvía)
@@ -23,9 +10,100 @@ Fuentes de ruido reales
 - Tiempo atmosférico (llúvia, ...)
 - Redes Wi-Fi (2.4GHz)
 
+(!) Las redes Wi-Fi no afectan a las motas. Actualmente las motas 
+trabajan sobre unos canales que no interfieren con los utilizados
+por las redes Wi-Fi.
+
 Escenarios:
-- Espacios al aire libre (campus)
-- Estación de metro de Palau Reial
-- Estación de tranvía diagonal (cercano CRV) (punto crítico)
+- Espacio tranquilo y edificado (paseo desde el C1 hasta el C6)
+- Espacio ruidoso (coches) y edificado (cruce de la diagonal enfrente
+  a las facultades de Fisica y Quimica de la UB)
+- Espacio muy ruidoso (coches, metro y tranvia) y edificado (acera de la
+  Diagonal situada en el Campus Sud donde se situa la boca de metro de
+  Palau Reial, junto con la estacion de Trambaix)
 
 ------------------------------------------------------------------------
+Pruebas a realizar
+------------------------------------------------------------------------
+Prueba 1
+  Escenario: Laboratorio 
+  Objetivo: Validar el funcionamiento "indoor" de la aplicacion.
+  Condiciones:
+    1. Utilizar los tiempos finales (para toma de datos, 
+       envío de ficheros, ...).
+    2. Durante 24h seguidas.
+    3. Almacenar los datos de la BS en un fichero (utilizando la 
+       aplicacion linux "minicom" o similares).
+
+Prueba 2
+  Escenario: Campus Nord UPC (paseo que empieza en el edificio A1 y
+    acaba en el edificio C6).
+  Objetivo: Calcular la tasa de fallos en un entorno tranquilo y 
+    edificado.
+  Condiciones:
+    1. Utilizar dos MN y la BS con las antenas de 5dB.
+    2. Situar cada nodo a ~100m respecto a sus vecinos, en linia de vista.
+    
+Prueba 3
+  Escenario: Avenida Diagonal (paseo enfrente del Palau Reial, acera 
+    del Campus Nord).
+  Objetivo: Calcular la tasa de fallos en un entorno ruidoso (coches) y 
+    edificado.
+  Condiciones:
+    1. Utilizar un MN y la BS con las antenas de 5dB.
+    2. Situar el MN a una distancia de ~100m de la BS (a lo largo del 
+       paseo), en linia de vista.
+       
+Prueba 4
+  Escenario: Avenida Diagonal (calle que empieza en la facultad de 
+    Fisica y Quimica de la UB hasta la boca del metro de Palau reial 
+    situada en la misma acera del Campus Sud).
+  Objetivo: Calcular la tasa de fallos en un entorno muy ruidoso 
+    (coches, metro y tranvia) y edificado.
+  Condiciones:
+    1. Utilizar un MN y la BS con las antenas de 5dB.
+    2. Situar el MN a una distancia de ~80-100m de la BS (a lo largo de la 
+       calle descrita en la seccion "Escenario"), en linia de vista.
+
+------------------------------------------------------------------------
+Pruebas realizadas
+------------------------------------------------------------------------
+Prueba 1
+  Escenario: Campus Nord UPC (paseo que empieza en el edificio A1 y
+    acaba en el edificio C6).
+  Objetivo: Calcular la distancia maxima entre nodos, en un entorno
+    tranquilo y edificado.
+  Condiciones:
+    1. Utilizar dos MN y la BS con las antenas de 5dB.
+    2. Dispositivos en linia de vista entre ellos.
+  Resultados:
+    1. Distancias alcanzadas de ~100-200m.
+    2. Leve perdida de paquetes.
+    
+Prueba 2
+  Escenario: Avenida Diagonal (paso de peatones enfrente de las 
+    facultades de Fisica y Quimica de la UB).
+  Objetivo: Calcular la distancia maxima entre nodos, en un entorno 
+    ruidoso (coches) y edificado.
+  Condiciones:
+    1. Utilizar un MN y la BS con las antenas de 5dB.
+    2. Dispositivos en linia de vista entre ellos
+  Resultados:
+    1. Distancia alcanzada de ~50m sin perdida de paquetes.
+    2. Distancia alcanzada de ~80-100m con perdida de paquetes.
+
+Prueba 3
+  Escenario: Avenida Diagonal (boca del metro de Palau reial 
+    situada en la misma acera del Campus Sud).
+  Objetivo: Calcular la distancia maxima entre nodos, en un entorno 
+    muy ruidoso (coches, metro y tranvia) y edificado.
+  Condiciones:
+    1. Utilizar un MN y la BS con las antenas de 5dB.
+    2. Dispositivos en linia de vista entre ellos
+  Resultados:
+    1. Distancia alcanzada de ~50m sin perdida de paquetes.
+    2. Distancia alcanzada de ~80m con perdida de paquetes.
+
+------------------------------------------------------------------------
+
+

@@ -193,7 +193,12 @@ Cambios a realizar:
 - Cambio diseño en "DATA_COLLECT": Al tomar un dato del sensor, si el
 archivo actual está siendo enviado, abrimos un nuevo fichero y lo
 almacenamos.
-- Establecer una espera aleatoria prévia al envío de mensajes. 
+- Establecer una espera aleatoria prévia al envío de mensajes.
+- Establecer dinamicamente la direccion de la 'Basestation' (en los MN)
+en funcion de la direccion enviada en los mensajes "HELLO_BS".
+- Substituir el "HELLO_MN" inicial por una rafaga de mensajes "HELLO_MN"
+(en los MN).
+ 
 
 Cambios realizados:
 - Añadir el nombre y la fecha de última modificación del fichero al 
@@ -241,5 +246,15 @@ a) "BLOCKED" y "DATA_COLLECT" -> LEDS_BLUE=Off
 b) "DATA_SEND" -> LEDS_BLUE=On
 - Documentación funciones: ¿qué hace? ¿por qué? ¿cuándo? 
 ¿valor de retorno esperado?
+- Modificacion del protocolo de "hello": Los MN no responden al 
+"HELLO_BS" enviado por la BS, unicamente realizan "forwarding" para
+contribuir al "flooding" y advertir al resto de nodos de la presencia de
+la BS.
+- Añadida información RSSI en campo Reservado en los mensajes enviados
+entre la BS y el "Gateway" para obtener la información
+de control:
+- Potencia (consumo de energia)
+- Distancia
+- Tasa de pérdida de paquetes
 
 ------------------------------------------------------------------------
