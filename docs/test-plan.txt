@@ -43,18 +43,8 @@ Prueba 2
   Condiciones:
     1. Utilizar dos MN y la BS con las antenas de 5dB.
     2. Situar cada nodo a ~100m respecto a sus vecinos, en linia de vista.
-    
+          
 Prueba 3
-  Escenario: Avenida Diagonal (paseo enfrente del Palau Reial, acera 
-    del Campus Nord).
-  Objetivo: Calcular la tasa de fallos en un entorno ruidoso (coches) y 
-    edificado.
-  Condiciones:
-    1. Utilizar un MN y la BS con las antenas de 5dB.
-    2. Situar el MN a una distancia de ~100m de la BS (a lo largo del 
-       paseo), en linia de vista.
-       
-Prueba 4
   Escenario: Avenida Diagonal (calle que empieza en la facultad de 
     Fisica y Quimica de la UB hasta la boca del metro de Palau reial 
     situada en la misma acera del Campus Sud).
