@@ -798,6 +798,13 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
             
                 if (sample_interval == 10)
                 {    
+                    /* Net Control Information */
+                    #ifdef DEBUG_NET
+					  printf("[net]\n");
+					  printf(" Number of packets sended: %d\n", num_msg_sended);
+					  printf(" Number of packets acknowledged: %d\n\n", num_msg_acked);
+					#endif
+                
                     /* (!) We've got 10 sensor samples.
                        Changing to "DATA_SEND" from "DATA_COLLECT" 
                        state. */
@@ -813,13 +820,6 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                     send_packet_from_file();
                     
                     sample_interval = 0;                
- 
-                    /* Net Control Information */
-                    #ifdef DEBUG_NET
-					  printf("[net]\n");
-					  printf(" Number of packets sended: %d\n", num_msg_sended);
-					  printf(" Number of packets acknowledged: %d\n\n", num_msg_acked);
-					#endif
                 }
                 else
                 {
