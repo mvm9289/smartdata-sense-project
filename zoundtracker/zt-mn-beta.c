@@ -62,7 +62,8 @@ static unsigned char read_buffer[DATA_SIZE];
 static Sample current_sample;
     
 /* NET */
-static int attempts, flooding_attempts, packet_number, ack_waiting, output_msg_type;
+static int attempts, flooding_attempts, packet_number, ack_waiting, 
+    output_msg_type, num_msg_sended, num_msg_acked;
 static rimeaddr_t sink_addr;
 static struct mesh_conn zoundtracker_conn;
 static struct broadcast_conn zoundtracker_broadcast_conn;
@@ -70,7 +71,7 @@ static unsigned char rime_stream[PACKET_SIZE], next_packet,
     last_broadcast_id, valid_broadcast_id;
 static unsigned short packet_checksum;
 static Packet packet_received;
-static clock_time_t time_remaining;
+/*static clock_time_t time_remaining;*/
 
 /* Sensor */
 static char sensor_sample;
@@ -123,6 +124,7 @@ hello_msg()
     output_msg_type = HELLO_MN;
 	
 	mesh_send(&zoundtracker_conn, &sink_addr);
+	num_msg_sended++;
 }
 
 static void 
@@ -179,6 +181,7 @@ data_msg()
     output_msg_type = DATA;
 	
 	mesh_send(&zoundtracker_conn, &sink_addr);
+	num_msg_sended++;
 }
 
 static unsigned char 
@@ -446,6 +449,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             /* Saving the last broadcast_id as valid */
             valid_broadcast_id = last_broadcast_id;
             
+            num_msg_acked++;
         
     		#ifdef DEBUG_NET
     		  printf("[net]\n 'HELLO_ACK' received\n\n");
@@ -457,6 +461,8 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         else if (packet_received.type == DATA_ACK)
         {	
             ack_waiting = FALSE;
+
+            num_msg_acked++;
 
     		#ifdef DEBUG_NET
     		  printf("[net]\n 'DATA_ACK' received\n\n");
@@ -587,12 +593,12 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
                 }
 
                 /*if (valid_broadcast_id != last_broadcast_id)
-                {
+                {*/
 
                     /* (!) Message received ("HELLO_BS").
                        Changing to "DATA_SEND" from 
-                       "BLOCKED/DATA_COLLECT/DATA_SEND*" state.  
-                    state = DATA_SEND;
+                       "BLOCKED/DATA_COLLECT/DATA_SEND*" state. */  
+                    /*state = DATA_SEND;
                     
                     #ifdef DEBUG_STATE
         			  printf("---\n[state]\n Current state 'DATA_SEND'\n---\n\n");
@@ -600,18 +606,18 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
         			
         			leds_on(LEDS_BLUE);
                            
-                    // Waiting to send "HELLO_MN" message 
-                    // unsigned int random = 2 + rand()%10;
-                    //printf("RANDOM NUMBER: %u\n", random);
-                    //while(random > 0) random--;
+                    Waiting to send "HELLO_MN" message 
+                    unsigned int random = 2 + rand()%10;
+                    printf("RANDOM NUMBER: %u\n", random);
+                    while(random > 0) random--;
                     
-                    // time_remaining = timer_remaining(&(control_timer.timer));
-                    // etimer_set(&control_timer, random*CLOCK_SECOND/10);
-                    // while(!etimer_expired(&control_timer));
-                    // etimer_set(&control_timer, (timer_remaining-random*CLOCK_SECOND/10)>0 ? (timer_remaining-random*CLOCK_SECOND/10):CLOCK_SECOND*0);
+                    time_remaining = timer_remaining(&(control_timer.timer));
+                    etimer_set(&control_timer, random*CLOCK_SECOND/10);
+                    while(!etimer_expired(&control_timer));
+                    etimer_set(&control_timer, (timer_remaining-random*CLOCK_SECOND/10)>0 ? (timer_remaining-random*CLOCK_SECOND/10):CLOCK_SECOND*0);*/
 
-                    // Sending "HELLO_MN" message.
-                    hello_msg();
+                    /* Sending "HELLO_MN" message. */
+                    /*hello_msg();
                 }*/
             }
             else
@@ -722,6 +728,8 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	ack_waiting = FALSE;
 	attempts = 0;
 	valid_broadcast_id = (unsigned char)(rand() % 256);
+	num_msg_sended = 0;
+	num_msg_acked = 0;
 	
     /* CFS */
     etimer_set(&control_timer, NUM_SECONDS_SAMPLE*CLOCK_SECOND);
@@ -805,6 +813,13 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                     send_packet_from_file();
                     
                     sample_interval = 0;                
+ 
+                    /* Net Control Information */
+                    #ifdef DEBUG_NET
+					  printf("[net]\n");
+					  printf(" Number of packets sended: %d\n", num_msg_sended);
+					  printf(" Number of packets acknowledged: %d\n\n", num_msg_acked);
+					#endif
                 }
                 else
                 {
