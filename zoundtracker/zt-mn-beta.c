@@ -107,6 +107,11 @@ hello_msg()
     packet_to_send.counter = HELLO_MSG_COUNTER;
     packet_to_send.checksum = compute_checksum(&packet_to_send);
     
+    /* Net Control Information */
+    packet_to_send.reserved[0] = (unsigned char)num_msg_sended;
+    packet_to_send.reserved[1] = (unsigned char)num_msg_acked;
+    
+    
     /* Preparing "Packet" to send it through "rime". Building the 
        "rime_stream" using the information of "packet_to_send"   */
     mount_packet(&packet_to_send, rime_stream);
@@ -155,6 +160,10 @@ data_msg()
     packet_to_send.counter = (packet_number-1)*DATA_SIZE;
     memcpy(packet_to_send.data, read_buffer, read_bytes);
     packet_to_send.checksum = compute_checksum(&packet_to_send);
+    
+    /* Net Control Information */
+    packet_to_send.reserved[0] = (unsigned char)num_msg_sended;
+    packet_to_send.reserved[1] = (unsigned char)num_msg_acked;
     
 	#ifdef DEBUG_NET
 	  printf("[net]\n 'DATA' packet contents\n");
