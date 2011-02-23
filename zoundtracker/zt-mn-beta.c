@@ -63,7 +63,7 @@ static Sample current_sample;
     
 /* NET */
 static int attempts, flooding_attempts, packet_number, ack_waiting, 
-    output_msg_type, num_msg_sended, num_msg_acked;
+    output_msg_type, num_msg_sended, num_msg_acked, test_time;
 static rimeaddr_t sink_addr;
 static struct mesh_conn zoundtracker_conn;
 static struct broadcast_conn zoundtracker_broadcast_conn;
@@ -124,7 +124,10 @@ hello_msg()
     output_msg_type = HELLO_MN;
 	
 	mesh_send(&zoundtracker_conn, &sink_addr);
-	num_msg_sended++;
+	
+	/* Net Control Information */
+	if (test_time < 30)
+	  num_msg_sended++;
 }
 
 static void 
@@ -181,7 +184,10 @@ data_msg()
     output_msg_type = DATA;
 	
 	mesh_send(&zoundtracker_conn, &sink_addr);
-	num_msg_sended++;
+	
+	/* Net Control Information */
+	if (test_time < 30)
+	  num_msg_sended++;
 }
 
 static unsigned char 
@@ -449,8 +455,10 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             /* Saving the last broadcast_id as valid */
             valid_broadcast_id = last_broadcast_id;
             
-            num_msg_acked++;
-        
+            /* Net Control Information */
+	        if (test_time < 30)
+	          num_msg_acked++;
+
     		#ifdef DEBUG_NET
     		  printf("[net]\n 'HELLO_ACK' received\n\n");
     		#endif        
@@ -462,7 +470,9 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         {	
             ack_waiting = FALSE;
 
-            num_msg_acked++;
+            /* Net Control Information */
+	        if (test_time < 30)
+	          num_msg_acked++;
 
     		#ifdef DEBUG_NET
     		  printf("[net]\n 'DATA_ACK' received\n\n");
@@ -730,6 +740,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	valid_broadcast_id = (unsigned char)(rand() % 256);
 	num_msg_sended = 0;
 	num_msg_acked = 0;
+	test_time = 0;
 	
     /* CFS */
     etimer_set(&control_timer, NUM_SECONDS_SAMPLE*CLOCK_SECOND);
@@ -798,7 +809,10 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
             
                 if (sample_interval == 10)
                 {    
+                    
                     /* Net Control Information */
+                    test_time++;
+                    
                     #ifdef DEBUG_NET
 					  printf("[net]\n");
 					  printf(" Number of packets sended: %d\n", num_msg_sended);
