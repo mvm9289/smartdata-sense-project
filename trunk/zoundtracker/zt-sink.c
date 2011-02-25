@@ -222,6 +222,10 @@ static void received(    struct mesh_conn *c,
                           i++)
                             printf("%d ", recv_packet.data[i]);
                         printf("\n");
+                        printf("NUMBER OF PACKETS SENDED: %d\n", 
+                                recv_packet.reserved[0]);
+                        printf("NUMBER OF PACKETS ACKNOWLEDGED: %d\n", 
+                                recv_packet.reserved[1]);
                         printf( "CHECKSUM: %d\n\n",
                                 recv_packet.checksum);
                     #else
