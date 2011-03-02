@@ -198,7 +198,8 @@ static void received(    struct mesh_conn *c,
                     printf("Mesh received callback: ");
                     printf( "Hello packet received from %d.%d (Hops: %d)\n\n",
                             from->u8[0],
-                            from->u8[1]);
+                            from->u8[1],
+                            hops);
                 #endif
                 is_valid = 1;
                 recv_send_packet = hello_ack_packet();
@@ -206,8 +207,8 @@ static void received(    struct mesh_conn *c,
             else if (recv_packet.type == DATA)
             {
                 rssi = cc2420_rssi();
-                recv_packet.reserved[0] = (char)(rssi>>8);
-                recv_packet.reserved[1] = (char)(rssi);
+                recv_packet.reserved[2] = (char)(rssi>>8);
+                recv_packet.reserved[3] = (char)(rssi);
                 #ifdef DEBUG_NET
                     printf("Mesh received callback: ");
                     printf( "Data packet received from %d.%d\n\n",
