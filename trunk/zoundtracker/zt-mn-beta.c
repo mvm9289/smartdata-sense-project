@@ -34,7 +34,7 @@
 #endif
 
 /* CFS */
-#define NUM_SECONDS_SAMPLE 6
+#define NUM_SECONDS_SAMPLE 3
 #define WORKING_FILE "sample_file"
 #define ERROR -1
 #define NO_NEXT_PACKET -2
