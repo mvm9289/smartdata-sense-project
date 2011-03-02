@@ -64,12 +64,12 @@ static Sample current_sample;
     
 /* NET */
 static int attempts, flooding_attempts, packet_number, ack_waiting, 
-    output_msg_type, num_msg_sended, num_msg_acked;
+    output_msg_type;
 static rimeaddr_t sink_addr;
 static struct mesh_conn zoundtracker_conn;
 static struct broadcast_conn zoundtracker_broadcast_conn;
 static unsigned char rime_stream[PACKET_SIZE], next_packet, 
-    last_broadcast_id, valid_broadcast_id;
+    last_broadcast_id, valid_broadcast_id, num_msg_sended, num_msg_acked;
 static unsigned short packet_checksum;
 static Packet packet_received;
 /*static clock_time_t time_remaining;*/
