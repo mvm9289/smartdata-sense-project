@@ -33,6 +33,14 @@ typedef struct {
   char value; 
 }Sample;
 
+typedef struct {
+  unsigned char number;
+  char minus;
+  int tempint;
+  unsigned int tempfrac;  
+}TempSample;
+
+
 unsigned short compute_checksum(Packet* my_packet);
 // PRE: packet must be an array of PACKET_SIZE bytes
 void mount_packet(Packet * my_packet, unsigned char* packet) ;
