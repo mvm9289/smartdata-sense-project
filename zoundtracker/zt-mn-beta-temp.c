@@ -160,7 +160,7 @@ data_msg()
     packet_to_send.addr2 = MY_ADDR2;
     packet_to_send.type = DATA;
     packet_to_send.size = file_size;    
-    packet_to_send.counter = (packet_number-1)*DATA_SIZE;
+    packet_to_send.counter = (packet_number-1)*2*TEMP_SAMPLE_SIZE;
     memcpy(packet_to_send.data, read_buffer, read_bytes);
     packet_to_send.checksum = compute_checksum(&packet_to_send);
     
