@@ -773,7 +773,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     
     /* Sensor */
     minus = ' ';
-    sign = 1;
+    sign = 1;   // Initially positive temperature
     tmp102_init();
 
     /* State */
