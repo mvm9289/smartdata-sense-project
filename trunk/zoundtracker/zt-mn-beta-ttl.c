@@ -34,7 +34,7 @@
 #endif
 
 /* CFS */
-#define NUM_SECONDS_SAMPLE 3
+#define NUM_SECONDS_SAMPLE 6
 #define WORKING_FILE "sample_file"
 #define ERROR -1
 #define NO_NEXT_PACKET -2
@@ -44,7 +44,7 @@
 #define MAX_FLOODING_ATTEMPTS 1
 #define EMPTY -3
 #define SEND_INTERVAL 10
-#define ROUTE_LIFETIME 25
+#define ROUTE_LIFETIME 120
 
 /* Sensor */
 #define SAMPLE_SIZE 2
@@ -70,7 +70,8 @@ static rimeaddr_t sink_addr;
 static struct mesh_conn zoundtracker_conn;
 static struct broadcast_conn zoundtracker_broadcast_conn;
 static unsigned char rime_stream[PACKET_SIZE], next_packet, 
-    last_broadcast_id, valid_broadcast_id, num_msg_sended, num_msg_acked;
+    last_broadcast_id, valid_broadcast_id, num_msg_sent, num_msg_acked,
+    num_files_sent;
 static unsigned short packet_checksum;
 static Packet packet_received;
 /*static clock_time_t time_remaining;*/
@@ -110,9 +111,9 @@ hello_msg()
     packet_to_send.checksum = compute_checksum(&packet_to_send);
     
     /* Net Control Information */
-    packet_to_send.reserved[0] = (unsigned char)num_msg_sended;
+    packet_to_send.reserved[0] = (unsigned char)num_msg_sent;
     packet_to_send.reserved[1] = (unsigned char)num_msg_acked;
-    
+    packet_to_send.reserved[2] = (unsigned char)num_files_sent;
     
     /* Preparing "Packet" to send it through "rime". Building the 
        "rime_stream" using the information of "packet_to_send"   */
@@ -133,7 +134,7 @@ hello_msg()
 	mesh_send(&zoundtracker_conn, &sink_addr);
 	
 	/* Net Control Information */
-	num_msg_sended++;
+	num_msg_sent++;
 }
 
 static void 
@@ -163,8 +164,9 @@ data_msg()
     packet_to_send.checksum = compute_checksum(&packet_to_send);
     
     /* Net Control Information */
-    packet_to_send.reserved[0] = (unsigned char)num_msg_sended;
+    packet_to_send.reserved[0] = (unsigned char)num_msg_sent;
     packet_to_send.reserved[1] = (unsigned char)num_msg_acked;
+    packet_to_send.reserved[2] = (unsigned char)num_files_sent;
     
 	#ifdef DEBUG_NET
 	  printf("[net]\n 'DATA' packet contents\n");
@@ -196,7 +198,7 @@ data_msg()
 	mesh_send(&zoundtracker_conn, &sink_addr);
 	
 	/* Net Control Information */
-	num_msg_sended++;
+	num_msg_sent++;
 }
 
 static unsigned char 
@@ -297,6 +299,7 @@ send_packet_from_file(void)
 
         cfs_remove(WORKING_FILE);
 
+        num_files_sent++;
         sample_interval = 0;
         file_size = 0;
 
@@ -748,8 +751,9 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	ack_waiting = FALSE;
 	attempts = 0;
 	valid_broadcast_id = (unsigned char)(rand() % 256);
-	num_msg_sended = 0;
+	num_msg_sent = 0;
 	num_msg_acked = 0;
+	num_files_sent = 0;
 	
     /* CFS */
     etimer_set(&control_timer, NUM_SECONDS_SAMPLE*CLOCK_SECOND);
@@ -820,8 +824,9 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                 {    
                     #ifdef DEBUG_NET
 					  printf("[net]\n");
-					  printf(" Number of packets sended: %d\n", num_msg_sended);
+					  printf(" Number of packets sended: %d\n", num_msg_sent);
 					  printf(" Number of packets acknowledged: %d\n\n", num_msg_acked);
+					  printf(" Number of files acknowledged: %d\n\n", num_files_sent);
 					#endif
                 
                     /* (!) We've got 10 sensor samples.
