@@ -1,0 +1,18 @@
+Test 23/3/11 - 25 minutes
+
+http://maps.google.com/maps/ms?ie=UTF8&hl=en&msa=0&msid=207163125922514121812.00049f266ccd3ec1a3df2&ll=41.38565,2.118275&spn=0.000562,0.001206&t=h&z=20
+
+Changes:
+
+RF_CHANNEL = 40
+Route lifetime = 2 minutes
+
+Node 1.1:
+	Loss rate = 0.38
+	Hops = 1
+	Files sent = 11
+	
+Node 1.2:
+	Loss rate = 0.65
+	Hops = 2
+	Files sent = 6
