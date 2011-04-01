@@ -1,0 +1,390 @@
+1298457221 Rime started with address 5.0
+1298457221 MAC 05:00:00:00:00:00:00:00 Contiki 2.5 started. Node id is not set.
+1298457221 CSMA nullrdc, channel check rate 128 Hz, radio channel 26
+1298457221 Starting 'ZoundTracker Sink Process'
+1298457221 HELLO_STATE: Sending hello packet
+1298457221 
+1298457221 Broadcast sent callback: Packet sent
+1298457221 
+1298457221 HELLO_STATE: Hello packet sent
+1298457221 
+1298457222 HELLO_STATE: Sending hello packet
+1298457222 
+1298457222 Broadcast sent callback: Packet sent
+1298457222 
+1298457222 HELLO_STATE: Hello packet sent
+1298457222 
+1298457222 Mesh received callback: Hello packet received from 5.91
+1298457222 
+1298457222 Mesh reveived callback: Sending ACK packet
+1298457222 
+1298457222 Mesh sent callback: Packet sent
+1298457222 
+1298457223 HELLO_STATE: Sending hello packet
+1298457223 
+1298457223 Broadcast sent callback: Packet sent
+1298457223 
+1298457223 HELLO_STATE: Hello packet sent
+1298457223 
+1298457224 HELLO_STATE: Sending hello packet
+1298457224 
+1298457224 Broadcast sent callback: Packet sent
+1298457224 
+1298457224 HELLO_STATE: Hello packet sent
+1298457224 
+1298457224 HELLO_STATE: Sending hello packet
+1298457224 
+1298457225 Broadcast sent callback: Packet sent
+1298457225 
+1298457225 HELLO_STATE: Hello packet sent
+1298457225 
+1298457282 Mesh received callback: Data packet received from 5.91
+1298457282 
+1298457282 Mesh received callback: Packet content:
+1298457282 MOBILE NODE ID: 5.91
+1298457282 MESSAGE TYPE: 3
+1298457282 SIZE: 20
+1298457282 COUNTER: 0
+1298457282 DATA: 0 251 1 252 2 252 3 252 4 251 5 252 6 253 7 253 8 253 9 252 
+1298457282 CHECKSUM: 73
+1298457282 
+1298457282 Mesh reveived callback: Sending ACK packet
+1298457282 
+1298457282 Mesh sent callback: Packet sent
+1298457282 
+1298457305 HELLO_STATE: Sending hello packet
+1298457305 
+1298457305 Broadcast sent callback: Packet sent
+1298457305 
+1298457305 HELLO_STATE: Hello packet sent
+1298457305 
+1298457306 HELLO_STATE: Sending hello packet
+1298457306 
+1298457306 Broadcast sent callback: Packet sent
+1298457306 
+1298457306 HELLO_STATE: Hello packet sent
+1298457306 
+1298457307 HELLO_STATE: Sending hello packet
+1298457307 
+1298457307 Broadcast sent callback: Packet sent
+1298457307 
+1298457307 HELLO_STATE: Hello packet sent
+1298457307 
+1298457308 HELLO_STATE: Sending hello packet
+1298457308 
+1298457308 Broadcast sent callback: Packet sent
+1298457308 
+1298457308 HELLO_STATE: Hello packet sent
+1298457308 
+1298457309 HELLO_STATE: Sending hello packet
+1298457309 
+1298457309 Broadcast sent callback: Packet sent
+1298457309 
+1298457309 HELLO_STATE: Hello packet sent
+1298457309 
+1298457342 Mesh received callback: Data packet received from 5.91
+1298457342 
+1298457342 Mesh received callback: Packet content:
+1298457342 MOBILE NODE ID: 5.91
+1298457342 MESSAGE TYPE: 3
+1298457342 SIZE: 20
+1298457342 COUNTER: 0
+1298457342 DATA: 0 250 1 252 2 251 3 252 4 252 5 253 6 251 7 252 8 252 9 253 
+1298457342 CHECKSUM: 78
+1298457342 
+1298457342 Mesh reveived callback: Sending ACK packet
+1298457342 
+1298457342 Mesh sent callback: Packet sent
+1298457342 
+1298457390 HELLO_STATE: Sending hello packet
+1298457390 
+1298457390 Broadcast sent callback: Packet sent
+1298457390 
+1298457390 HELLO_STATE: Hello packet sent
+1298457390 
+1298457391 HELLO_STATE: Sending hello packet
+1298457391 
+1298457391 Broadcast sent callback: Packet sent
+1298457391 
+1298457391 HELLO_STATE: Hello packet sent
+1298457391 
+1298457391 HELLO_STATE: Sending hello packet
+1298457391 
+1298457391 Broadcast sent callback: Packet sent
+1298457391 
+1298457391 HELLO_STATE: Hello packet sent
+1298457391 
+1298457392 HELLO_STATE: Sending hello packet
+1298457392 
+1298457392 Broadcast sent callback: Packet sent
+1298457392 
+1298457392 HELLO_STATE: Hello packet sent
+1298457392 
+1298457393 HELLO_STATE: Sending hello packet
+1298457393 
+1298457393 Broadcast sent callback: Packet sent
+1298457393 
+1298457393 HELLO_STATE: Hello packet sent
+1298457393 
+1298457402 Mesh received callback: Data packet received from 5.91
+1298457402 
+1298457402 Mesh received callback: Packet content:
+1298457402 MOBILE NODE ID: 5.91
+1298457402 MESSAGE TYPE: 3
+1298457402 SIZE: 20
+1298457402 COUNTER: 0
+1298457402 DATA: 0 252 1 253 2 253 3 252 4 252 5 250 6 253 7 251 8 252 9 252 
+1298457402 CHECKSUM: 72
+1298457402 
+1298457402 Mesh reveived callback: Sending ACK packet
+1298457402 
+1298457402 Mesh sent callback: Packet sent
+1298457402 
+1298457463 Mesh received callback: Data packet received from 5.91
+1298457463 
+1298457463 Mesh received callback: Packet content:
+1298457463 MOBILE NODE ID: 5.91
+1298457463 MESSAGE TYPE: 3
+1298457463 SIZE: 20
+1298457463 COUNTER: 0
+1298457463 DATA: 0 252 1 253 2 253 3 253 4 251 5 252 6 250 7 251 8 253 9 252 
+1298457463 CHECKSUM: 78
+1298457463 
+1298457463 Mesh reveived callback: Sending ACK packet
+1298457463 
+1298457463 Mesh sent callback: Packet sent
+1298457463 
+1298457474 HELLO_STATE: Sending hello packet
+1298457474 
+1298457474 Broadcast sent callback: Packet sent
+1298457474 
+1298457474 HELLO_STATE: Hello packet sent
+1298457474 
+1298457475 HELLO_STATE: Sending hello packet
+1298457475 
+1298457475 Broadcast sent callback: Packet sent
+1298457475 
+1298457475 HELLO_STATE: Hello packet sent
+1298457475 
+1298457476 HELLO_STATE: Sending hello packet
+1298457476 
+1298457476 Broadcast sent callback: Packet sent
+1298457476 
+1298457476 HELLO_STATE: Hello packet sent
+1298457476 
+1298457477 HELLO_STATE: Sending hello packet
+1298457477 
+1298457477 Broadcast sent callback: Packet sent
+1298457477 
+1298457477 HELLO_STATE: Hello packet sent
+1298457477 
+1298457478 HELLO_STATE: Sending hello packet
+1298457478 
+1298457478 Broadcast sent callback: Packet sent
+1298457478 
+1298457478 HELLO_STATE: Hello packet sent
+1298457478 
+1298457523 Mesh received callback: Data packet received from 5.91
+1298457523 
+1298457523 Mesh received callback: Packet content:
+1298457523 MOBILE NODE ID: 5.91
+1298457523 MESSAGE TYPE: 3
+1298457523 SIZE: 20
+1298457523 COUNTER: 0
+1298457523 DATA: 0 253 1 251 2 253 3 251 4 251 5 252 6 253 7 252 8 251 9 252 
+1298457523 CHECKSUM: 73
+1298457523 
+1298457523 Mesh reveived callback: Sending ACK packet
+1298457523 
+1298457523 Mesh sent callback: Packet sent
+1298457523 
+1298457558 HELLO_STATE: Sending hello packet
+1298457558 
+1298457558 Broadcast sent callback: Packet sent
+1298457558 
+1298457558 HELLO_STATE: Hello packet sent
+1298457558 
+1298457559 HELLO_STATE: Sending hello packet
+1298457559 
+1298457559 Broadcast sent callback: Packet sent
+1298457559 
+1298457559 HELLO_STATE: Hello packet sent
+1298457559 
+1298457560 HELLO_STATE: Sending hello packet
+1298457560 
+1298457560 Broadcast sent callback: Packet sent
+1298457560 
+1298457560 HELLO_STATE: Hello packet sent
+1298457560 
+1298457561 HELLO_STATE: Sending hello packet
+1298457561 
+1298457561 Broadcast sent callback: Packet sent
+1298457561 
+1298457561 HELLO_STATE: Hello packet sent
+1298457561 
+1298457562 HELLO_STATE: Sending hello packet
+1298457562 
+1298457562 Broadcast sent callback: Packet sent
+1298457562 
+1298457562 HELLO_STATE: Hello packet sent
+1298457562 
+1298457583 Mesh received callback: Data packet received from 5.91
+1298457583 
+1298457583 Mesh received callback: Packet content:
+1298457583 MOBILE NODE ID: 5.91
+1298457583 MESSAGE TYPE: 3
+1298457583 SIZE: 20
+1298457583 COUNTER: 0
+1298457583 DATA: 0 252 1 252 2 253 3 254 4 252 5 253 6 252 7 254 8 251 9 251 
+1298457583 CHECKSUM: 72
+1298457583 
+1298457583 Mesh reveived callback: Sending ACK packet
+1298457583 
+1298457583 Mesh sent callback: Packet sent
+1298457583 
+1298457643 HELLO_STATE: Sending hello packet
+1298457643 
+1298457643 Broadcast sent callback: Packet sent
+1298457643 
+1298457643 HELLO_STATE: Hello packet sent
+1298457643 
+1298457643 Mesh received callback: Data packet received from 5.91
+1298457643 
+1298457643 Mesh received callback: Packet content:
+1298457643 MOBILE NODE ID: 5.91
+1298457643 MESSAGE TYPE: 3
+1298457643 SIZE: 20
+1298457643 COUNTER: 0
+1298457643 DATA: 0 250 1 252 2 252 3 252 4 252 5 250 6 252 7 252 8 252 9 251 
+1298457643 CHECKSUM: 79
+1298457643 
+1298457643 Mesh reveived callback: Sending ACK packet
+1298457643 
+1298457643 Mesh sent callback: Packet sent
+1298457643 
+1298457644 HELLO_STATE: Sending hello packet
+1298457644 
+1298457644 Broadcast sent callback: Packet sent
+1298457644 
+1298457644 HELLO_STATE: Hello packet sent
+1298457644 
+1298457645 HELLO_STATE: Sending hello packet
+1298457645 
+1298457645 Broadcast sent callback: Packet sent
+1298457645 
+1298457645 HELLO_STATE: Hello packet sent
+1298457645 
+1298457646 HELLO_STATE: Sending hello packet
+1298457646 
+1298457646 Broadcast sent callback: Packet sent
+1298457646 
+1298457646 HELLO_STATE: Hello packet sent
+1298457646 
+1298457647 HELLO_STATE: Sending hello packet
+1298457647 
+1298457647 Broadcast sent callback: Packet sent
+1298457647 
+1298457647 HELLO_STATE: Hello packet sent
+1298457647 
+1298457704 Mesh received callback: Data packet received from 5.91
+1298457704 
+1298457704 Mesh received callback: Packet content:
+1298457704 MOBILE NODE ID: 5.91
+1298457704 MESSAGE TYPE: 3
+1298457704 SIZE: 20
+1298457704 COUNTER: 0
+1298457704 DATA: 0 253 1 251 2 250 3 251 4 252 5 252 6 251 7 253 8 253 9 252 
+1298457704 CHECKSUM: 72
+1298457704 
+1298457704 Mesh reveived callback: Sending ACK packet
+1298457704 
+1298457704 Mesh sent callback: Packet sent
+1298457704 
+1298457727 HELLO_STATE: Sending hello packet
+1298457727 
+1298457727 Broadcast sent callback: Packet sent
+1298457727 
+1298457727 HELLO_STATE: Hello packet sent
+1298457727 
+1298457728 HELLO_STATE: Sending hello packet
+1298457728 
+1298457728 Broadcast sent callback: Packet sent
+1298457728 
+1298457728 HELLO_STATE: Hello packet sent
+1298457728 
+1298457729 HELLO_STATE: Sending hello packet
+1298457729 
+1298457729 Broadcast sent callback: Packet sent
+1298457729 
+1298457729 HELLO_STATE: Hello packet sent
+1298457729 
+1298457730 HELLO_STATE: Sending hello packet
+1298457730 
+1298457730 Broadcast sent callback: Packet sent
+1298457730 
+1298457730 HELLO_STATE: Hello packet sent
+1298457730 
+1298457731 HELLO_STATE: Sending hello packet
+1298457731 
+1298457731 Broadcast sent callback: Packet sent
+1298457731 
+1298457731 HELLO_STATE: Hello packet sent
+1298457731 
+1298457764 Mesh received callback: Data packet received from 5.91
+1298457764 
+1298457764 Mesh received callback: Packet content:
+1298457764 MOBILE NODE ID: 5.91
+1298457764 MESSAGE TYPE: 3
+1298457764 SIZE: 20
+1298457764 COUNTER: 0
+1298457764 DATA: 0 251 1 252 2 252 3 250 4 252 5 252 6 252 7 251 8 253 9 252 
+1298457764 CHECKSUM: 79
+1298457764 
+1298457764 Mesh reveived callback: Sending ACK packet
+1298457764 
+1298457764 Mesh sent callback: Packet sent
+1298457764 
+1298457812 HELLO_STATE: Sending hello packet
+1298457812 
+1298457812 Broadcast sent callback: Packet sent
+1298457812 
+1298457812 HELLO_STATE: Hello packet sent
+1298457812 
+1298457813 HELLO_STATE: Sending hello packet
+1298457813 
+1298457813 Broadcast sent callback: Packet sent
+1298457813 
+1298457813 HELLO_STATE: Hello packet sent
+1298457813 
+1298457814 HELLO_STATE: Sending hello packet
+1298457814 
+1298457814 Broadcast sent callback: Packet sent
+1298457814 
+1298457814 HELLO_STATE: Hello packet sent
+1298457814 
+1298457815 HELLO_STATE: Sending hello packet
+1298457815 
+1298457815 Broadcast sent callback: Packet sent
+1298457815 
+1298457815 HELLO_STATE: Hello packet sent
+1298457815 
+1298457815 HELLO_STATE: Sending hello packet
+1298457815 
+1298457815 Broadcast sent callback: Packet sent
+1298457815 
+1298457815 HELLO_STATE: Hello packet sent
+1298457815 
+1298457824 Mesh received callback: Data packet received from 5.91
+1298457824 
+1298457824 Mesh received callback: Packet content:
+1298457824 MOBILE NODE ID: 5.91
+1298457824 MESSAGE TYPE: 3
+1298457824 SIZE: 20
+1298457824 COUNTER: 0
+1298457824 DATA: 0 252 1 252 2 251 3 251 4 253 5 251 6 251 7 252 8 252 9 250 
+1298457824 CHECKSUM: 79
+1298457824 
+1298457824 Mesh reveived callback: Sending ACK packet
+1298457824 
+1298457824 Mesh sent callback: Packet sent
+1298457824 
