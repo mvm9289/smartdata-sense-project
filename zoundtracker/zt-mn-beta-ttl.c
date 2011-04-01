@@ -745,7 +745,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	mesh_open(&zoundtracker_conn, CHANNEL1, &zoundtracker_callbacks);                                             
 	broadcast_open(&zoundtracker_broadcast_conn, CHANNEL2, 
 	  &zoundtracker_broadcast_callbacks);       
-	route_set_lifetime(ROUTE_LIFETIME);
+	//route_set_lifetime(ROUTE_LIFETIME);
 	
 	output_msg_type = EMPTY;
 	ack_waiting = FALSE;
