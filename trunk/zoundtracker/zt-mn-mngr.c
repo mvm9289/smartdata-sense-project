@@ -39,13 +39,14 @@
 #define ERROR -1
 #define NO_NEXT_PACKET -2
 
-/* NET */
-#define MAX_ATTEMPTS 5
-#define EMPTY -3
-#define PAYLOAD_SIZE DATA_SIZE - DATA_SIZE%SENSOR_SAMPLE
 
 /* Sensor */
 #define SAMPLE_SIZE sizeof(SensorData)
+
+/* NET */
+#define MAX_ATTEMPTS 5
+#define EMPTY -3
+#define PAYLOAD_SIZE DATA_SIZE - DATA_SIZE%SAMPLE_SIZE
 
 /* State */
 #define BLOCKED 1
@@ -61,7 +62,9 @@ static unsigned short file_size;
 static struct etimer control_timer;
 static unsigned char read_buffer[DATA_SIZE];
 static unsigned char write_buffer[SAMPLE_SIZE];
+static unsigned char sample_string[100];
 static SensorData current_sample;
+static SensorData aux_sample;
     
 /* NET */
 static int attempts,packet_number;
@@ -220,6 +223,7 @@ prepare_packet(void)
 	else 
 	{                  
         read_bytes = cfs_read(fd_read, read_buffer, PAYLOAD_SIZE);
+		
 		#ifdef DEBUG_CFS
 	      printf("\n[cfs]------BYTES READED: %d--------\n\n", read_bytes);
 		#endif
@@ -444,8 +448,8 @@ timedout(struct mesh_conn *c)
         
             #ifdef DEBUG_NET
 		      printf("[net] timeout resending the current packet");
-			  printf(" (packet number: %d) from the");
-		      printf(" 'WORKING_FILE'\n\n", packet_number);
+			  printf(" (packet number: %d) from the", packet_number);
+		      printf(" 'WORKING_FILE'\n\n");
 			#endif
         }
 	}
@@ -669,7 +673,7 @@ get_sensor_sample(void)
 
     /* Reading data from sensor */
     current_sample = getSensorData(ACCEL);
-
+    
     /* Writing data into the "WORKING_FILE". */
 	fd_write = cfs_open(WORKING_FILE, CFS_WRITE | CFS_APPEND);       
     if (fd_write == ERROR) 
@@ -681,7 +685,13 @@ get_sensor_sample(void)
     }
     else 
     {
-        sensorDataToBytes(current_sample, write_buffer);
+        sensorDataToBytes(&current_sample, write_buffer);
+        printf("%c%c%c%c", write_buffer[0], write_buffer[1], write_buffer[2], write_buffer[3]); 
+        bytesToSensorData(write_buffer, &aux_sample);
+        printf("Data: %d\n", getX(&aux_sample.data.accel));
+        sensorDataToString(&aux_sample, sample_string);
+        printf("Data: %s\n", sample_string);
+        
         write_bytes = cfs_write(fd_write, &write_buffer, SAMPLE_SIZE);
         if (write_bytes != SAMPLE_SIZE) 
 		{

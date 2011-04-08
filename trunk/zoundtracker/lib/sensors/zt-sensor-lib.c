@@ -112,7 +112,7 @@ SensorData getSensorData(SensorType type)
 
 void sensorDataToBytes(SensorData* data, BYTE* buffer)
 {
-	BYTE *ptr = buffer;
+	/*BYTE *ptr = buffer;
 	
 	((SensorType *)ptr)[0] = data->type;
 	ptr += sizeof(SensorType);
@@ -134,12 +134,14 @@ void sensorDataToBytes(SensorData* data, BYTE* buffer)
 		((int*)ptr)[1] = data->data.accel.y_axis;
 		((int*)ptr)[2] = data->data.accel.z_axis;
 	}
-	#endif
+	#endif*/
+    
+    memcpy(buffer,data,sizeof(SensorData));
 }
 
 void bytesToSensorData(BYTE* buffer, SensorData* data)
 {
-	BYTE *ptr = buffer;
+	/*BYTE *ptr = buffer;
 	
 	data->type = ((SensorType *)ptr)[0];
 	ptr += sizeof(SensorType);
@@ -161,7 +163,9 @@ void bytesToSensorData(BYTE* buffer, SensorData* data)
 		data->data.accel.y_axis = ((int*)ptr)[1];
 		data->data.accel.z_axis = ((int*)ptr)[2];
 	}
-	#endif
+	#endif*/
+	
+    memcpy(data,buffer,sizeof(SensorData));
 }
 
 void sensorDataToString(SensorData* data, char* str)
