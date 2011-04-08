@@ -57,7 +57,7 @@
 
 /* CFS */
 static int write_bytes, read_bytes, fd_read, fd_write, ack_timeout,
-  input_msg_type, output_msg_type;
+  input_msg_type, output_msg_type, index;
 static unsigned short file_size;
 static struct etimer control_timer;
 static unsigned char read_buffer[DATA_SIZE];
@@ -672,40 +672,43 @@ get_sensor_sample(void)
     current_sample.value = sensor_sample; */
 
     /* Reading data from sensor */
-    current_sample = getSensorData(ACCEL);
+    for (index = 0; index <= ACCEL; index++) { 
+        current_sample = getSensorData(index);
     
-    /* Writing data into the "WORKING_FILE". */
-	fd_write = cfs_open(WORKING_FILE, CFS_WRITE | CFS_APPEND);       
-    if (fd_write == ERROR) 
-	{	
-	    #ifdef DEBUG_CFS
-		  printf("[cfs] error openning the 'WORKING_FILE'");
-		  printf(" for write data\n\n");
-		#endif
-    }
-    else 
-    {
-        sensorDataToBytes(&current_sample, write_buffer);
-        printf("%c%c%c%c", write_buffer[0], write_buffer[1], write_buffer[2], write_buffer[3]); 
-        bytesToSensorData(write_buffer, &aux_sample);
-        printf("Data: %d\n", getX(&aux_sample.data.accel));
-        sensorDataToString(&aux_sample, sample_string);
-        printf("Data: %s\n", sample_string);
-        
-        write_bytes = cfs_write(fd_write, &write_buffer, SAMPLE_SIZE);
-        if (write_bytes != SAMPLE_SIZE) 
-		{
-			#ifdef DEBUG_CFS
-			  printf("[cfs] write: error writing into the");
-			  printf(" 'WORKING_FILE'\n\n");
-			#endif
+        /* Writing data into the "WORKING_FILE". */
+        fd_write = cfs_open(WORKING_FILE, CFS_WRITE | CFS_APPEND);       
+        if (fd_write == ERROR) 
+        {	
+            #ifdef DEBUG_CFS
+        	  printf("[cfs] error openning the 'WORKING_FILE'");
+        	  printf(" for write data\n\n");
+        	#endif
         }
-        else
-          file_size += write_bytes;
-                  
-        cfs_close(fd_write);
-        fd_write = EMPTY;
-        
+        else 
+        {
+            sensorDataToBytes(&current_sample, write_buffer);
+            /*printf("%c%c%c%c", write_buffer[0], write_buffer[1], write_buffer[2], write_buffer[3]); 
+            bytesToSensorData(write_buffer, &aux_sample);
+            printf("Data: %d\n", getX(&aux_sample.data.accel));
+            sensorDataToString(&aux_sample, sample_string);
+            printf("Data: %s\n", sample_string);*/
+            
+            write_bytes = cfs_write(fd_write, &write_buffer, SAMPLE_SIZE);
+            if (write_bytes != SAMPLE_SIZE) 
+        	{
+        		#ifdef DEBUG_CFS
+        		  printf("[cfs] write: error writing into the");
+        		  printf(" 'WORKING_FILE'\n\n");
+        		#endif
+            }
+            else
+                file_size += write_bytes;
+                        
+            cfs_close(fd_write);
+            fd_write = EMPTY;
+            
+        }
+
     }
 }
 /* ------------------------------------------------------------------ */
@@ -739,8 +742,9 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     cfs_remove(WORKING_FILE);
     
     /* Sensor */
-    accm_init();
-
+    //accm_init();
+    initSensors();
+    
     /* State */
     state = BLOCKED;
     
