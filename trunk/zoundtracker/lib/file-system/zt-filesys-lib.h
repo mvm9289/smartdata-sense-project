@@ -2,6 +2,7 @@
 #define __ZT_FILESYS_LIB_H__
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "cfs/cfs.h"
 
 #ifdef TRUE
@@ -40,12 +41,12 @@ typedef struct
 } FileManager;
 
 /* Functions */
-char initFileManager(FileManager* fileman);
-int write(FileManager* fileman, const void* data, int size); // Modificated name
-int read(FileManager* fileman, void* data, int size); // Modificated name
-void updateReadFile(FileManager* fileman);
-char readSeekStart(FileManager* fileman); // Modificate to readSeek(int pos)
-void updateWriteFile(FileManager* fileman);
+char initFileManager();
+int write(const void* data, int size);
+int read(void* data, int size);
+void updateReadFile();
+char readSeek(int pos); 
+void updateWriteFile();
 char isValidFD(int fd);
 
 #endif

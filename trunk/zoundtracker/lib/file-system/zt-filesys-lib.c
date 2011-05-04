@@ -1,113 +1,113 @@
-/* Functions */
-char initFileManager(FileManager* fileman) 
-{
-    char initOk;
-    initOk = FALSE;
-    
-    fileman->readFile = 0;
-    itoa(fileman->readFile, fileman->readFileName, DECIMAL_BASE); 
-    fileman->readFD = cfs_open(fileman->readFileName, CFS_READ);
-    
-    fileman->writeFile = 0;
-    itoa(fileman->writeFile, fileman->writeFileName, DECIMAL_BASE);
-    fileman->writeSampleNumber = 0;
-    fileman->writeFD = cfs_open(fileman->writeFileName, CFS_WRITE);
-    
-    fileman->storedFiles = 0;
+#include "zt-filesys-lib.h"
 
-    initOk = isValidFD(fileman->readFD) && isValidFD(fileman->writeFD);
-    return initOk;
+static FileManager fman;
+
+/* Functions */
+char initFileManager() 
+{  
+    fman.readFile = 0;
+    itoa(fman.readFile, fman.readFileName, DECIMAL_BASE); 
+    fman->readFD = cfs_open(fman.readFileName, CFS_READ);
+    
+    fman.writeSampleNumber = 0;
+    fman.writeFile = 0;
+    itoa(fman.writeFile, fman.writeFileName, DECIMAL_BASE);
+    fman.writeFD = cfs_open(fman.writeFileName, CFS_WRITE);
+    
+    fman.storedFiles = 0;
+
+    return isValidFD(fman.readFD) && isValidFD(fman.writeFD);
 }
 
-int write(FileManager* fileman, const void* data, int size)
+int write(const void* data, int size)
 {
   char fdOk;
   int writeBytes;
   
-  fdOk = isValidFD(fileman->writeFD);
+  fdOk = isValidFD(fman.writeFD);
   
   if (fdOk == TRUE) {
-    writeBytes = cfs_write(fileman->writeFD, data, size);
+    writeBytes = cfs_write(fman.writeFD, data, size);
     if (writeBytes >= 0) {
-      updateWriteFile(fileman);
+      updateWriteFile();
       return writeBytes;
     }
     else return ERROR_WRITE_FILE;
   }
   else {
-    fileman->writeFD = cfs_open(fileman->writeFileName, CFS_WRITE | CFS_APPEND);
+    fman.writeFD = cfs_open(fman.writeFileName, CFS_WRITE | CFS_APPEND);
     return ERROR_INVALID_FD;
   }
 }
 
-int read(FileManager* fileman, void* data, int size)
+int read(void* data, int size)
 {
   bool fdOk;
   int readBytes;
   
-  fdOk = isValidFD(fileman->readFD);
+  fdOk = isValidFD(fman.readFD);
   
   if (fdOk == TRUE) {
-    readBytes = cfs_read(fileman->readFD, data, size);
+    readBytes = cfs_read(fman.readFD, data, size);
     if (readBytes >= 0) return readBytes;
     else return ERROR_READ_FILE;
   }
   else {
-    fileman->readFD = cfs_open(fileman->readFileName, CFS_READ);
+    fman.readFD = cfs_open(fman.readFileName, CFS_READ);
     return ERROR_INVALID_FD;
   }
 }
 
-void updateReadFile(FileManager* fileman)
+void updateReadFile()
 {
-  cfs_close(fileman->readFD);
-  cfs_remove(fileman->readFileName);
-  fileman->storedFiles--;
-  fileman->readFile++;
-  itoa(fileman->readFile, fileman->readFileName, DECIMAL_BASE);
-  fileman->readFD = cfs_open(fileman->readFileName, CFS_READ);
+  cfs_close(fman.readFD);
+  cfs_remove(fman.readFileName);
+  fman.storedFiles--;
+  fman.readFile++;
+  itoa(fman.readFile, fman.readFileName, DECIMAL_BASE);
+  fman.readFD = cfs_open(fman.readFileName, CFS_READ);
 }
 
-char readSeek(FileManager* fileman, int pos) 
+char readSeek(int pos) 
 {
   char fdOk;
   int readFilePos;
   
-  fdOk = isValidFD(fileman->readFD);
+  fdOk = isValidFD(fman.readFD);
   
   if (fdOk == TRUE) {
-    readFilePos = cfs_seek(fileman->readFD, pos, CFS_SEEK_SET);
+    readFilePos = cfs_seek(fman.readFD, pos, CFS_SEEK_SET);
     if (readFilePos >= 0) return readFilePos; 
     else return ERROR_READ_SEEK;
   }
   else {
-    fileman->readFD = cfs_open(fileman->readFileName, CFS_READ);
+    fman.readFD = cfs_open(fman.readFileName, CFS_READ);
     return ERROR_INVALID_FD;
   }  
 } 
 
 void updateWriteFile(FileManager* fileman)
 {
-  if (fileman->writeSampleNumber >= MAX_SAMPLE_NUMBER) {
-    cfs_close(fileman->writeFD);
-    fileman->writeFile++;
-    fileman->storedFiles++;
-    fileman->writeSampleNumber = 0;
+  if (fman.writeSampleNumber >= MAX_SAMPLE_NUMBER) {
+    cfs_close(fman.writeFD);
+    fman.writeFile++;
+    fman.storedFiles++;
+    fman.writeSampleNumber = 0;
   
-    itoa(fileman->writeFile, fileman->writeFileName, DECIMAL_BASE);
-    fileman->writeFD = cfs_open(fileman->writeFileName,  CFS_WRITE | CFS_APPEND); 
+    itoa(fman.writeFile, fman.writeFileName, DECIMAL_BASE);
+    fman.writeFD = cfs_open(fman.writeFileName,  CFS_WRITE); 
   }
   else {
-    fileman->writeSampleNumber++;
+    fman.writeSampleNumber++;
   }
   
-  if (fileman->storedFiles >= MAX_STORED_FILES) {
-    cfs_close(fileman->readFD);
-    cfs_remove(fileman->readFileName);
-    fileman->storedFiles--; 
-    fileman->readFile++;
-    itoa(fileman->readFile, fileman->readFileName, DECIMAL_BASE);
-    fileman->readFD = cfs_open(fileman->readFileName, CFS_READ);
+  if (fman.storedFiles >= MAX_STORED_FILES) {
+    cfs_close(fman.readFD);
+    cfs_remove(fman.readFileName);
+    fman.storedFiles--; 
+    fman.readFile++;
+    itoa(fman.readFile, fman.readFileName, DECIMAL_BASE);
+    fman.readFD = cfs_open(fman.readFileName, CFS_READ);
   }
 }
 
