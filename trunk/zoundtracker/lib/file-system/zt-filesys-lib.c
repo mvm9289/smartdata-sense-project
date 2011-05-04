@@ -7,7 +7,7 @@ char initFileManager()
 {  
     fman.readFile = 0;
     itoa(fman.readFile, fman.readFileName, DECIMAL_BASE); 
-    fman->readFD = cfs_open(fman.readFileName, CFS_READ);
+    fman.readFD = cfs_open(fman.readFileName, CFS_READ);
     
     fman.writeSampleNumber = 0;
     fman.writeFile = 0;
@@ -19,7 +19,7 @@ char initFileManager()
     return isValidFD(fman.readFD) && isValidFD(fman.writeFD);
 }
 
-int write(const void* data, int size)
+int writeFile(const void* data, int size)
 {
   char fdOk;
   int writeBytes;
@@ -40,9 +40,9 @@ int write(const void* data, int size)
   }
 }
 
-int read(void* data, int size)
+int readFile(void* data, int size)
 {
-  bool fdOk;
+  char fdOk;
   int readBytes;
   
   fdOk = isValidFD(fman.readFD);

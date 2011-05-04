@@ -30,20 +30,20 @@ typedef struct
 {
   unsigned int readFile;
   int readFD;
-  char[FILENAME_SIZE] readFileName;
+  char readFileName[FILENAME_SIZE];
  
   unsigned int writeFile;
   unsigned char writeSampleNumber;
   int writeFD;
-  char[FILENAME_SIZE] writeFileName;
+  char writeFileName[FILENAME_SIZE];
  
   int storedFiles;
 } FileManager;
 
 /* Functions */
 char initFileManager();
-int write(const void* data, int size);
-int read(void* data, int size);
+int writeFile(const void* data, int size);
+int readFile(void* data, int size);
 void updateReadFile();
 char readSeek(int pos); 
 void updateWriteFile();
