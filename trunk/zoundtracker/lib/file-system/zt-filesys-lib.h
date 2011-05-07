@@ -54,12 +54,12 @@ char initFileManager();
      process, beyond 'PROCESS_BEGIN()'.*/
 
 
-int writeFile(const void* data, int size);
+int write(const void* data, int size);
 /* [Functionality]
      This function stores into the current write file 'size' bytes 
      starting from the begining of 'data' buffer.
      
-     Every call to 'writeFile' function means one sample stored by
+     Every call to 'write' function means one sample stored by
      the Mobile node. Every 'MAX_SAMPLE_NUMBER' the current write file
      is closed and a new write file is opened to write new data.
      
@@ -68,12 +68,12 @@ int writeFile(const void* data, int size);
      sensor, into the file system.*/
 
 
-int readFile(void* data, int size);
+int read(void* data, int size);
 /* [Functionality]
      This functions stores into 'data' buffer 'size' bytes starting 
      from the read offset of the current read file.
      
-     Every call to 'readFile' updates the read offset of the file. 
+     Every call to 'read' updates the read offset of the file. 
      If you need to re-read data from the read file you must use the 
      'readSeek' function to move the read offset pointer of the file.
      
@@ -124,7 +124,7 @@ void updateWriteFile();
      the Basestation.  
    
    [Context]
-     This auxiliary function is used by 'writeFile' function to manage 
+     This auxiliary function is used by 'write' function to manage 
      and update the internal state of the file system.*/
 
 
