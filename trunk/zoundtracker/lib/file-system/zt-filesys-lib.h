@@ -41,12 +41,93 @@ typedef struct
 } FileManager;
 
 /* Functions */
-char initFileManager();
-int writeFile(const void* data, int size);
-int readFile(void* data, int size);
-void updateReadFile();
-char readSeek(int pos); 
-void updateWriteFile();
-char isValidFD(int fd);
 
+char initFileManager();
+/* [Functionality]
+     This function initilizes the file manager.
+     
+   [Context]
+     This function must be called in the initialization section of the
+     process, beyond 'PROCESS_BEGIN()'.*/
+
+
+int writeFile(const void* data, int size);
+/* [Functionality]
+     This function stores into the current write file 'size' bytes 
+     starting from the begining of 'data' buffer.
+     
+     Every call to 'writeFile' function means one sample stored by
+     the Mobile node. Every 'MAX_SAMPLE_NUMBER' the current write file
+     is closed and a new write file is opened to write new data.
+     
+   [Context]
+     This function is used to store a sample/data, measured from one 
+     sensor, into the file system.*/
+
+
+int readFile(void* data, int size);
+/* [Functionality]
+     This functions stores into 'data' buffer 'size' bytes starting 
+     from the read offset of the current read file.
+     
+     Every call to 'readFile' updates the read offset of the file. 
+     If you need to re-read data from the read file you must use the 
+     'readSeek' function to move the read offset pointer of the file.
+     
+     If you want to delete the current read file and be able to read
+     the next stored file of the Mobile node, you must use the 
+     'updateReadFile' function. 
+      
+   [Context]
+     This function is used to get a sample measure, previously stored 
+     into the file system, to send it to the Basestation.*/
+     
+
+void updateReadFile();
+/* [Functionality]
+     This function deletes the current read file and prepares the next 
+     stored file of the node to be readed.
+   
+   [Context]
+     This function is used to delete from the file system a file sent 
+     and acknowledged by the Basestation. The deleted file can not be
+     recovered.*/
+
+
+char readSeek(int pos); 
+/* [Functionality]
+     This function updates the read offset to the 'pos' position 
+     starting from the begining (absolute position) of the current 
+     read file.
+   
+   [Context]
+     This function is used to re-read a sample/data already sent and 
+     not acknowledged by the Basestation.*/
+     
+
+void updateWriteFile();
+/* [Functionality]
+     This function closes the current write file when the number of 
+     writes reachs 'MAX_SAMPLE_NUMBER'. Then opens a new file to
+     write the next samples.
+     
+     If the number of stored files reachs 'MAX_STORED_FILES' the oldest 
+     writed file stored into the file system is deleted. This 
+     functionality prevents the capacity's overflow of the file
+     system and the bottleneck of packets sent through the network to 
+     the Basestation.  
+   
+   [Context]
+     This auxiliary function is used by 'writeFile' function to manage 
+     and update the internal state of the file system.*/
+
+
+char isValidFD(int fd);
+/* [Functionality]
+     This function verifies that the current read/write file, pointed by 
+     the 'fd' file descriptor, is correctly opened. 
+     
+   [Context]
+     This auxiliary function is used on all read/write operations.*/
+     
 #endif
