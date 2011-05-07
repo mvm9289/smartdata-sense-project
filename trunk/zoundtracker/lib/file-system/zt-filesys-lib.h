@@ -18,13 +18,16 @@
 #define MAX_SAMPLE_NUMBER 10
 #define MAX_STORED_FILES 24
 #define MAX_INT 2^16 -1
+
+#define START_POSITION 0
+#define DECIMAL_BASE 10
+#define FILENAME_SIZE 16
+
 #define ERROR_INVALID_FD -2
 #define ERROR_WRITE_FILE -3
 #define ERROR_READ_FILE -4
 #define ERROR_READ_SEEK -5
-#define START_POSITION 0
-#define DECIMAL_BASE 10
-#define FILENAME_SIZE 16
+#define ERROR_NO_FILES_STORED -6
 
 typedef struct
 {
@@ -83,11 +86,14 @@ int readFile(void* data, int size);
      into the file system, to send it to the Basestation.*/
      
 
-void updateReadFile();
+int updateReadFile();
 /* [Functionality]
      This function deletes the current read file and prepares the next 
      stored file of the node to be readed.
-   
+     
+     If there's no any stored file in the file system the current read
+     file is not deleted.
+        
    [Context]
      This function is used to delete from the file system a file sent 
      and acknowledged by the Basestation. The deleted file can not be

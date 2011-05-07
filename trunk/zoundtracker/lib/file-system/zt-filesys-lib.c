@@ -58,14 +58,19 @@ int readFile(void* data, int size)
   }
 }
 
-void updateReadFile()
+int updateReadFile()
 {
-  cfs_close(fman.readFD);
-  cfs_remove(fman.readFileName);
-  fman.storedFiles--;
-  fman.readFile++;
-  itoa(fman.readFile, fman.readFileName, DECIMAL_BASE);
-  fman.readFD = cfs_open(fman.readFileName, CFS_READ);
+  if (storedFiles > 0) {
+    cfs_close(fman.readFD);
+    cfs_remove(fman.readFileName);
+    fman.storedFiles--;
+    fman.readFile++;
+    itoa(fman.readFile, fman.readFileName, DECIMAL_BASE);
+    fman.readFD = cfs_open(fman.readFileName, CFS_READ);
+    if (isValidFD(fman.readFD) return fman.readFD;
+    else return ERROR_INVALID_FD;
+  }
+  else return ERROR_NO_FILES_STORED; 
 }
 
 char readSeek(int pos) 
