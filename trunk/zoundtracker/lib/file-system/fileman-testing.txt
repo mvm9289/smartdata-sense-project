@@ -20,16 +20,33 @@ File Manager Testing
 2. File "/tests/file-system/fileman-test2.c':
   Tests 'readSeek' function.
   
-  a) When the first 'readFile' es completely readed the read file offset
-     pointer is updated to SEEK_POSITION:
+  When the first 'readFile' es completely readed the read file offset
+  pointer is updated to SEEK_POSITION:
      
-     0 <= SEEK_POSITION < MAX_SAMPLE_NUMBER
-       The next 'read' call reads the current 'readFile' from the 
-       SEEK_POSITION position.
-     
-     SEEK_POSITION >= MAX_SAMPLE NUMBER
-       The next 'read' call reads the current 'readFile' from the 
-       last position (the number of bytes readed is zero).
-     
-     SEEK_POSITION < 0
-       The read file offset pointer is not updated.
+    0 <= SEEK_POSITION < MAX_SAMPLE_NUMBER
+      The next 'read' call reads the current 'readFile' from the 
+      SEEK_POSITION position.
+    
+    SEEK_POSITION >= MAX_SAMPLE NUMBER
+      The next 'read' call reads the current 'readFile' from the 
+      last position (the number of bytes readed is zero).
+    
+    SEEK_POSITION < 0
+      The read file offset pointer is not updated.
+
+3. File "/tests/file-system/fileman-test3.c':
+  Tests 'updateReadFile' function.
+  
+  When the first 'readFile' es completely readed the current 'readFile'
+  is updated NUM_READ_UPDATES' times:
+  
+  NUM_READ_UPDATES <= 'storedFiles'
+    The 'readFile' is updated NUM_READ_UPDATES times and the next 'read' 
+    call reads the new 'readFile' from the beginning. The'storedFiles' 
+    is correctly updated.
+       
+  NUM_READ_UPDATES > 'storedFiles'
+    The 'readFile' is updated correctly 'storedFiles' times and the next 
+    'updateReadFile' calls returns an error (there's no more stored 
+    files and 'readFile' can't be updated).
+
