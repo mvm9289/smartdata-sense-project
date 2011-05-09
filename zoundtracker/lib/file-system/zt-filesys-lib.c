@@ -148,7 +148,7 @@ char readSeek(int pos)
     else {
       #ifdef DEBUG_FILEMAN
         printf("[file-man] readSeek:\n");
-        printf("  Error: File manager can't update the read file offset poiter.\n\n");
+        printf("  Error: File manager can't update the read file offset pointer.\n\n");
       #endif
       return ERROR_READ_SEEK;
     }
@@ -165,6 +165,7 @@ char readSeek(int pos)
 
 void updateWriteFile(FileManager* fileman)
 {
+  fman.writeSampleNumber++;
   if (fman.writeSampleNumber >= MAX_SAMPLE_NUMBER) {
     cfs_close(fman.writeFD);
     fman.writeFile++;
@@ -172,9 +173,6 @@ void updateWriteFile(FileManager* fileman)
     fman.writeSampleNumber = 0;
     itoa(fman.writeFile, fman.writeFileName, DECIMAL_BASE);
     fman.writeFD = cfs_open(fman.writeFileName,  CFS_WRITE); 
-  }
-  else {
-    fman.writeSampleNumber++;
   }
   
   if (fman.storedFiles >= MAX_STORED_FILES) {
