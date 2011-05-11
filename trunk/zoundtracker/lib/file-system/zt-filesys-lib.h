@@ -135,5 +135,14 @@ char isValidFD(int fd);
      
    [Context]
      This auxiliary function is used on all read/write operations.*/
+
+
+int getStoredFiles();
+/* [Functionality]
+     This function returns the value of 'storedFiles' attribute. 
+     
+   [Context]
+     This function is used by applications to control how many files are
+     ready to be readed (and possibly to be sent).*/
      
 #endif

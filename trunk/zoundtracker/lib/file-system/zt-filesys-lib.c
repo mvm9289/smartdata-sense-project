@@ -197,3 +197,8 @@ char isValidFD(int fd)
   if (fd >= 0) return TRUE;
   else return FALSE;  
 }
+
+int getStoredFiles()
+{
+  return fman.storedFiles;
+}
