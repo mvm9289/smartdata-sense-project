@@ -2,7 +2,7 @@ File Manager Testing
 --------------------
 
 1. File "/tests/file-system/fileman-test1.c":
-  Tests 'read' and 'write' functions.
+  Tests 'read' and 'write' functions. The data size is one char.
   
   a) When 'writeSampleNumber' reachs MAX_SAMPLE_NUMBER at the first time
      all the next read calls read zero bytes (there's no an explicit 
@@ -49,4 +49,17 @@ File Manager Testing
     The 'readFile' is updated correctly 'storedFiles' times and the next 
     'updateReadFile' calls returns an error (there's no more stored 
     files and 'readFile' can't be updated).
+
+4. File "/tests/file-system/fileman-test4.c':
+  Tests 'read' and 'write' functions. The data size is four chars 
+  (array validation).
+
+  a) When the 'read' call reads zero bytes of the current 'readFile' 
+     the 'updateReadFile' call updates the current 'readFile' to the 
+     next stored file. If 'storeFiles' is zero then the 'updateReadFile'
+     call does nothing (till 'storedFiles' will become greater than 
+     zero).
+     
+  b) When 'read'/'write' call returns an ERROR_INVALID_FD error, the 
+     'readFile'/'writeFile' is reopened to recover from this error.
 
