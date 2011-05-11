@@ -6,15 +6,15 @@ static FileManager fman;
 char initFileManager() 
 {  
   char initOk = FALSE;
-
-  fman.readFile = 0;
-  itoa(fman.readFile, fman.readFileName, DECIMAL_BASE); 
-  fman.readFD = cfs_open(fman.readFileName, CFS_READ);
   
   fman.writeSampleNumber = 0;
   fman.writeFile = 0;
   itoa(fman.writeFile, fman.writeFileName, DECIMAL_BASE);
   fman.writeFD = cfs_open(fman.writeFileName, CFS_WRITE);
+
+  fman.readFile = 0;
+  itoa(fman.readFile, fman.readFileName, DECIMAL_BASE); 
+  fman.readFD = cfs_open(fman.readFileName, CFS_READ);
   
   fman.storedFiles = 0;
 
