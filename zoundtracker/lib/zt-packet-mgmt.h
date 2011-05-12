@@ -13,7 +13,7 @@
 #define DATA_ACK 5
 #define POLL 6
 #define PACKET_SIZE 64
-#define DATA_SIZE 32
+#define DATA_SIZE 40
 #define HELLO_MSG_SIZE 0
 #define HELLO_MSG_COUNTER 0
 
@@ -30,7 +30,11 @@ typedef struct {
 
 typedef struct {
   unsigned char number;
-  char value; 
+  #ifdef ZT
+    char value[2]; 
+  #else
+    char value[3];
+  #endif
 }Sample;
 
 typedef struct {
