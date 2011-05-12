@@ -48,6 +48,7 @@
 #define NO_NEXT_PACKET -2
 #define MAX_READ_ATTEMPTS 5
 #define MAX_WRITE_ATTEMPTS 5
+#define ERROR_CFS -7
 
 /* NET */
 #define MAX_ATTEMPTS 5
@@ -290,18 +291,20 @@ prepare_packet(void)
         }
     }*/
     int pos;
-    pos = readSeek(0);
-    if(pos == ERROR_INVALID_FD) {
-        ++read_attempts;
-        if(read_attempts < MAX_READ_ATTEMPTS)return prepare_packet();
-        else {
-            read_attempts = 0;
-            return ERROR_INVALID_FD;
-        }
-    }
-    else if(pos == ERROR_READ_SEEK) {
-        read_attempts = 0;
-        return ERROR_READ_SEEK;
+    if(read_attempts > 0){
+    	pos = readSeek(0);
+    	if(pos == ERROR_INVALID_FD) {
+        	++read_attempts;
+        	if(read_attempts < MAX_READ_ATTEMPTS)return prepare_packet();
+        	else {
+            	read_attempts = 0;
+            	return ERROR_INVALID_FD;
+        	}
+    	}
+    	else if(pos == ERROR_READ_SEEK) {
+        	read_attempts = 0;
+        	return ERROR_READ_SEEK;
+    	}
     }
     read_bytes = read(read_buffer, DATA_SIZE);
     if(read_bytes > 0) {
@@ -320,10 +323,12 @@ prepare_packet(void)
             return ERROR_INVALID_FD;
         }
     }
-    else return FALSE; //read_bytes = 0
+    else if(read_bytes == 0)return FALSE; //read_bytes = 0
+    else return ERROR_CFS;
     
     /* There's information to send. */
     //return TRUE;
+
 }
 
 static void 
@@ -340,40 +345,45 @@ send_packet_from_file(void)
      the "WORKING_FILE" and when a "DATA_ACK" or "POLL" message is 
      received. */
 
-
-    next_packet = prepare_packet();
-          
-    if (next_packet == TRUE)
-    {              
-        /* "Packet" sending. */
-        //packet_number++;
-        data_msg();
+	int storedFiles = getStoredFiles();
+	
+	//if(storedFiles > 0) {
+		next_packet = prepare_packet();
+		      
+		if (next_packet == TRUE)
+		{              
+		    /* "Packet" sending. */
+		    //packet_number++;
+		    data_msg();
 		
-		#ifdef DEBUG_NET
-		  printf("[net]\n Sending the 'WORKING_FILE'");
-		  printf(" (packet number: %d)\n\n", packet_number);
-		#endif
-    }    
-    else if(next_packet == FALSE) 
-    {       
-        /* 'WORKING_FILE' completely sended, removing it. */
-        /*cfs_close(fd_read);
-        fd_read = EMPTY;
+			#ifdef DEBUG_NET
+			  printf("[net]\n Sending the 'WORKING_FILE'");
+			  printf(" (packet number: %d)\n\n", packet_number);
+			#endif
+		}    
+		else if(next_packet == FALSE) 
+		{       
+		    /* 'WORKING_FILE' completely sended, removing it. */
+		    /*cfs_close(fd_read);
+		    fd_read = EMPTY;
 
-        cfs_remove(WORKING_FILE);
+		    cfs_remove(WORKING_FILE);
 
-        sample_interval = 0;
-        file_size = 0;
+		    sample_interval = 0;
+		    file_size = 0;
 
-		#ifdef DEBUG_NET
-		  printf("[net]\n The 'WORKING_FILE' is completely sended,");
-		  printf(" removing it\n\n");
-        #endif*/
+			#ifdef DEBUG_NET
+			  printf("[net]\n The 'WORKING_FILE' is completely sended,");
+			  printf(" removing it\n\n");
+		    #endif*/
 
-        sample_interval = 0;
-        updateReadFile();
+		    sample_interval = 0;
+		    updateReadFile();
+		    storedFiles = getStoredFiles();
+		    if(storedFiles > 0) send_packet_from_file();
 
-    }
+		}
+	//}
 }
 
 /* ------------------------------------------------------------------ */
@@ -465,6 +475,9 @@ timedout(struct mesh_conn *c)
 
             /* Starting new sample period (10 minutes). */
             sample_interval = 0;
+            
+            
+            readSeek(0);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         
 		    #ifdef DEBUG_NET
 			  printf("[net]\n 'DATA' message lost");
@@ -502,6 +515,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
      mesh connection. */
 
     unsigned char prev_state = state;
+    int storedFiles;
 
     #ifdef DEBUG_NET
 	  printf("[net]\n Message received through 'mesh' connection\n\n");
@@ -578,8 +592,8 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 	          printf("[net]\n Incorrect type of message received\n\n");
 		    #endif
         }
-        
-        if (ack_waiting == FALSE && fd_read == EMPTY)//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        storedFiles = getStoredFiles();
+        if (ack_waiting == FALSE && storedFiles==0)//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         {
             /* We're not pending for an 'ACK' message and the 
             'WORKING_FILE' is not opened for sending. 
