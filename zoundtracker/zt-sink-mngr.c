@@ -66,6 +66,12 @@ static struct broadcast_conn zt_broadcast_conn;
 
 ///////////////////////////////////////////////////////////////////////
 ////////////////////////////// Functions //////////////////////////////
+/*
+	Packet hello_packet()
+	
+	[Functionality]
+	   Creates a hello packet of Sink to send to all mobile nodes
+*/
 inline Packet hello_packet()
 {
     Packet helloBS;
@@ -80,6 +86,12 @@ inline Packet hello_packet()
     return helloBS;
 }
 
+/*
+    Packet hello_ack_packet()
+	
+	[Functionality]
+	   Creates an ack packet to reply a hello packet of a mobile node
+*/
 inline Packet hello_ack_packet()
 {
     Packet helloACK;
@@ -93,6 +105,12 @@ inline Packet hello_ack_packet()
     return helloACK;
 }
 
+/*
+	Packet data_ack_packet()
+	
+	[Functionality]
+	   Creates an ack packet to reply a data packet of a mobile node
+*/
 inline Packet data_ack_packet()
 {
     Packet dataACK;
@@ -106,6 +124,13 @@ inline Packet data_ack_packet()
     return dataACK;
 }
 
+/*
+	Packet poll_packet()
+	
+	[Functionality]
+	   Creates a poll packet to send to a mobile node that his timeout
+	   has expired
+*/
 inline Packet poll_packet()
 {
     Packet poll;
@@ -163,6 +188,30 @@ static void timedout(    struct mesh_conn *c    )
     #endif
 }
 
+/*
+	static void received()
+	
+	[Functionality]
+	   This function is called when a packet is receiven by the mesh
+	   connection. This function test if the packet size of received
+	   packet is correct, in this case, it test the checksum of packet
+	   to verify if the packet has been received correctly.
+	   
+	   If the checksum is incorrect, then, the function sends a poll
+	   packet to the sender. Otherwise, test if the packet is a hello
+	   packet or a data packet.
+	   
+	   If packet is a hello packet, then the function search in the
+	   node table the sender to update his timestamp. If sender is
+	   not in the table, add it. After update the timestamp of the
+	   sender, then send an ack packet of hello packet to sender.
+	   
+	   If packet is a data packet, then the function search in the
+	   node table the sender to update his timestamp. If sender is
+	   not in the table, add it. After update the timestamp of the
+	   sender, then print data (or send by serial line port) and
+	   send an ack packet of data packet to sender.
+*/
 static void received(    struct mesh_conn *c,
                          const rimeaddr_t *from,
                          uint8_t hops    )
@@ -329,52 +378,50 @@ static void received(    struct mesh_conn *c,
         }
     #endif
     
-    if (c->queued_data != NULL)
-    {
-        #ifdef DEBUG_NET
-            printf("     Mesh received callback: ");
-            printf("Queued data is not NULL!!!!");
-        #endif
-        queuebuf_to_packetbuf(c->queued_data);
-        recv_packet = unmount_packet(
-            (unsigned char*)packetbuf_dataptr());
-        #ifdef DEBUG_NET
-            printf("       Mesh received callback: ");
-            printf("Data packet received from %d.%d\n\n",
-                    from->u8[0],
-                    from->u8[1]);
-            printf("       Mesh received callback: ");
-            printf("       Packet content:\n");
-            printf("       MOBILE NODE ID: %d.%d\n",
-                    recv_packet.addr1,
-                    recv_packet.addr2);
-            printf("       MESSAGE TYPE: %d\n", recv_packet.type);
-            printf("       SIZE: %d\n", recv_packet.size);
-            printf("       COUNTER: %d\n", recv_packet.counter);
-            printf("       DATA: ");
-            for (i = 0; i < DATA_SIZE &&
-              recv_packet.counter + i + sizeof(SensorData)
-              <= recv_packet.size;
-              i += sizeof(SensorData))
-            {
-                SensorData data;
-                bytesToSensorData((BYTE*)(&recv_packet.data[i]), &data);
-                sensorDataToString(&data, buffer);
-                printf("%s ", buffer);
-            }
-            printf("\n");
-            printf("       HOPS: %d\n", hops);
-            printf("       NUMBER OF PACKETS SENDED: %d\n",
-                    recv_packet.reserved[0]);
-            printf("       NUMBER OF PACKETS ACKNOWLEDGED: %d\n",
-                    recv_packet.reserved[1]);
-            printf("       CHECKSUM: %d\n\n",
-                    recv_packet.checksum);
-            printf("       TO: %d.%d\n",
-                    recv_packet.reserved[4],
-                    recv_packet.reserved[5]);
-        #endif
-    }
+    #ifdef DEBUG_NET
+		if (c->queued_data != NULL)
+		{
+			printf("     Mesh received callback: ");
+			printf("Queued data is not NULL!!!!");
+			queuebuf_to_packetbuf(c->queued_data);
+			recv_packet = unmount_packet(
+				(unsigned char*)packetbuf_dataptr());
+			printf("       Mesh received callback: ");
+			printf("Data packet received from %d.%d\n\n",
+					from->u8[0],
+					from->u8[1]);
+			printf("       Mesh received callback: ");
+			printf("       Packet content:\n");
+			printf("       MOBILE NODE ID: %d.%d\n",
+					recv_packet.addr1,
+					recv_packet.addr2);
+			printf("       MESSAGE TYPE: %d\n", recv_packet.type);
+			printf("       SIZE: %d\n", recv_packet.size);
+			printf("       COUNTER: %d\n", recv_packet.counter);
+			printf("       DATA: ");
+			for (i = 0; i < DATA_SIZE &&
+			  recv_packet.counter + i + sizeof(SensorData)
+			  <= recv_packet.size;
+			  i += sizeof(SensorData))
+			{
+				SensorData data;
+				bytesToSensorData((BYTE*)(&recv_packet.data[i]), &data);
+				sensorDataToString(&data, buffer);
+				printf("%s ", buffer);
+			}
+			printf("\n");
+			printf("       HOPS: %d\n", hops);
+			printf("       NUMBER OF PACKETS SENDED: %d\n",
+					recv_packet.reserved[0]);
+			printf("       NUMBER OF PACKETS ACKNOWLEDGED: %d\n",
+					recv_packet.reserved[1]);
+			printf("       CHECKSUM: %d\n\n",
+					recv_packet.checksum);
+			printf("       TO: %d.%d\n",
+					recv_packet.reserved[4],
+					recv_packet.reserved[5]);
+		}
+    #endif
 }
 
 const static struct mesh_callbacks zoundtracker_sink_callbacks =
@@ -387,6 +434,42 @@ const static struct mesh_callbacks zoundtracker_sink_callbacks =
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////// Main ////////////////////////////////
+/*
+	PROCESS_THREAD(zoundtracker_sink_process, ev, data)
+	
+	[Functionality]
+	   The main thread controles the states machine of the application.
+	   
+	   At first, this make needed initializations of data structures
+	   (Node_Table, Rime addresses,...) and the modules needed (mesh
+	   connection, broadcast connection,...).
+	   
+	   Then, the first state is HELLO_STATE. The thread sends a
+	   broadcast hello message to all mobile nodes. Then switch state
+	   to UPDATE_STATE.
+	   
+	   In the UPDATE_STATE the thread visit all positions in the node
+	   table to find not empty entries and update timestamp of these
+	   positions. Then switch state to TEST_STATE.
+	   
+	   In the TEST_STATE the thread visit all positions to test if
+	   some not empty entry reached the maximum timestamp. In this
+	   case, switch state to POLL_STATE. Otherwise, switch state to
+	   WAIT_STATE.
+	   
+	   In the POLL_STATE the thread send a poll packet to all nodes
+	   stored in the node table that has been reached the maximum
+	   timestamp. Then, if the hello period has been reached, the
+	   thread switch state to HELLO_STATE, else, if the update period
+	   has been reached, switch state to UPDATE_STATE. Otherwise switch
+	   state to TEST_STATE.
+	   
+	   In the WAIT_STATE the thread waits until the hello period or
+	   update period have been reached. If hello period has been
+	   reached, the thread switch state to HELLO_STATE, else, if the
+	   update period has been reached, switch to UPDATE_STATE.
+	   Otherwise, the state remains in WAIT_STATE.
+*/
 PROCESS_THREAD(    zoundtracker_sink_process, ev, data    )
 {
     PROCESS_EXITHANDLER(mesh_close(&zoundtracker_conn);)
