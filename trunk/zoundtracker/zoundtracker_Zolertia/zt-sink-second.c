@@ -36,6 +36,10 @@
 #define UPDATE_STATE 3
 #define TEST_STATE 4
 #define POLL_STATE 5
+
+//#define WAITING_MINUTES 2160
+#define WAITING_MINUTES 5
+
 ///////////////////////////////////////////////////////////////////////
 
 PROCESS(    zoundtracker_sink_process,
@@ -58,6 +62,10 @@ static Node_table_entry node_table[NODE_TABLE_SIZE];
 
 static struct mesh_conn zoundtracker_conn;
 static struct broadcast_conn zt_broadcast_conn;
+
+static unsigned int waitingSeconds;
+static unsigned int waitingMinutes;
+
 ///////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////
@@ -171,196 +179,199 @@ static void received(    struct mesh_conn *c,
     unsigned char found;
     unsigned char is_valid;
     
-    if (packetbuf_datalen() >= PACKET_SIZE)
-    {
+	if (waitingMinutes > WAITING_MINUTES)
+	{
+	    if (packetbuf_datalen() >= PACKET_SIZE)
+	    {
 
-        recv_packet = unmount_packet(
-            (unsigned char*)packetbuf_dataptr());
-        recv_checksum = compute_checksum(&recv_packet);
-        if (recv_checksum != recv_packet.checksum)
-        {
-            #ifdef DEBUG_NET
-                printf("             Mesh received callback: ");
-                printf("Computed checksum dont match with packet ");
-                printf("checksum\n\n");
-                printf("             Mesh reveived callback: Sending POLL ");
-                printf("packet\n\n");
-            #endif
-            recv_send_packet = poll_packet();
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            recv_send_packet.reserved[4] = from->u8[0];
-            recv_send_packet.reserved[5] = from->u8[1];
-            mount_packet(&recv_send_packet, recv_packet_buff);
-            packetbuf_copyfrom((void *)recv_packet_buff, PACKET_SIZE);
-            mesh_send(&zoundtracker_conn, from);
-        }
-        else
-        {
-            is_valid = 0;
-            if (recv_packet.type == HELLO_MN)
-            {
-                #ifdef DEBUG_NET
-                    printf("             Mesh received callback: ");
-                    printf("Hello packet received from %d.%d (Hops: %d)\n\n",
-                            from->u8[0],
-                            from->u8[1],
-                            hops);
-                #endif
-                is_valid = 1;
-                recv_send_packet = hello_ack_packet();
-                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                recv_send_packet.reserved[4] = from->u8[0];
-                recv_send_packet.reserved[5] = from->u8[1];
-            }
-            else if (recv_packet.type == DATA)
-            {
-                rssi = cc2420_rssi();
-                recv_packet.reserved[2] = (char)(rssi>>8);
-                recv_packet.reserved[3] = (char)(rssi);
-                #ifdef DEBUG_NET
-                    printf("             Mesh received callback: ");
-                    printf("Data packet received from %d.%d\n\n",
-                            from->u8[0],
-                            from->u8[1]);
-                    printf("             Mesh received callback: ");
-                    printf("Packet content:\n");
-                    printf("             MOBILE NODE ID: %d.%d\n",
-                            recv_packet.addr1,
-                            recv_packet.addr2);
-                    printf("             MESSAGE TYPE: %d\n", recv_packet.type);
-                    printf("             SIZE: %d\n", recv_packet.size);
-                    printf("             COUNTER: %d\n", recv_packet.counter);
-                    printf("             DATA: ");
-                    for (i = 0; i < DATA_SIZE &&
-                      recv_packet.counter + i < recv_packet.size;
-                      i++)
-                        printf("%d ", recv_packet.data[i]);
-                    printf("             \n");
-                    printf("             RSSI: %d\n", rssi);
-                    printf("             HOPS: %d\n", hops);
-                    printf("             NUMBER OF PACKETS SENDED: %d\n",
-                            recv_packet.reserved[0]);
-                    printf("             NUMBER OF PACKETS ACKNOWLEDGED: %d\n",
-                            recv_packet.reserved[1]);
-                    printf("             CHECKSUM: %d\n",
-                            recv_packet.checksum);
-                    printf("             BATTERY: %d\n\n",
-                            ((recv_packet.reserved[20]<<8) + recv_packet.reserved[21]));
-                #else
-                    mount_packet(&recv_packet, recv_packet_buff);
-                    for (i = 0; i < PACKET_SIZE; i++)
-                        putchar(recv_packet_buff[i]);
-                #endif
-                is_valid = 1;
-                recv_send_packet = data_ack_packet();
-                //////////////////////////////////////////////////////////////////////////////////////////////////////////
-                recv_send_packet.reserved[4] = from->u8[0];
-                recv_send_packet.reserved[5] = from->u8[1];
-            }
-            else
-            {
-                #ifdef DEBUG_NET
-                    printf("             Mesh received callback: ");
-                    printf( "Unknown message type (%c)\n\n",
-                            recv_packet.type);
-                #endif
-            }
-            if (is_valid)
-            {
-                first_empty_entry = -1;
-                found = 0;
-                found_node = -1;
-                for (i = 0; i < NODE_TABLE_SIZE && !found; i++)
-                {
-                    if (node_table[i].empty && first_empty_entry == -1)
-                        first_empty_entry = i;
-                    else if (!node_table[i].empty &&
-                      node_table[i].addr1 == from->u8[0] &&
-                      node_table[i].addr2 == from->u8[1])
-                    {
-                        found = 1;
-                        found_node = i;
-                    }
-                }
-                if (found)
-                {
-                    node_table[found_node].timestamp = 0;
-                    node_table[found_node].resends = 0;
-                    node_table[found_node].poll_wait = 0;
-                }
-                else if (first_empty_entry != -1)
-                {
-                    node_table[first_empty_entry].empty = 0;
-                    node_table[first_empty_entry].timestamp = 0;
-                    node_table[first_empty_entry].resends = 0;
-                    node_table[first_empty_entry].poll_wait = 0;
-                    node_table[first_empty_entry].addr1 = from->u8[0];
-                    node_table[first_empty_entry].addr2 = from->u8[1];
-                }
-                #ifdef DEBUG_NET
-                    else
-                    {
-                        printf("             Mesh received callback: ");
-                        printf("Node table is full\n\n");
-                    }
-                    printf("             Mesh reveived callback: ");
-                    printf("Sending ACK packet\n\n");
-                #endif
-                mount_packet(&recv_send_packet, recv_packet_buff);
-                packetbuf_copyfrom( (void *)recv_packet_buff,
-                                    PACKET_SIZE);
-                mesh_send(&zoundtracker_conn, from);
-            }
-        }
-    }
-    #ifdef DEBUG_NET
-        else
-        {
-            printf("             Mesh received callback: ");
-            printf("Error with received packet size\n\n");
-        }
-    #endif
-    
-    if (c->queued_data != NULL)
-    {
-        #ifdef DEBUG_NET
-            printf("     Mesh received callback: ");
-            printf("Queued data is not NULL!!!!");
-        #endif
-        queuebuf_to_packetbuf(c->queued_data);
-        recv_packet = unmount_packet(
-            (unsigned char*)packetbuf_dataptr());
-        #ifdef DEBUG_NET
-            printf("       Mesh received callback: ");
-            printf("Data packet received from %d.%d\n\n",
-                    from->u8[0],
-                    from->u8[1]);
-            printf("       Mesh received callback: ");
-            printf("       Packet content:\n");
-            printf("       MOBILE NODE ID: %d.%d\n",
-                    recv_packet.addr1,
-                    recv_packet.addr2);
-            printf("       MESSAGE TYPE: %d\n", recv_packet.type);
-            printf("       SIZE: %d\n", recv_packet.size);
-            printf("       COUNTER: %d\n", recv_packet.counter);
-            printf("       DATA: ");
-            for (i = 0; i < DATA_SIZE &&
-              recv_packet.counter + i < recv_packet.size;
-              i++)
-                printf("%d ", recv_packet.data[i]);
-            printf("\n");
-            printf("       HOPS: %d\n", hops);
-            printf("       NUMBER OF PACKETS SENDED: %d\n",
-                    recv_packet.reserved[0]);
-            printf("       NUMBER OF PACKETS ACKNOWLEDGED: %d\n",
-                    recv_packet.reserved[1]);
-            printf("       CHECKSUM: %d\n\n",
-                    recv_packet.checksum);
-            printf("       TO: %d.%d\n",
-                    recv_packet.reserved[4],
-                    recv_packet.reserved[5]);
-        #endif
-    }
+		recv_packet = unmount_packet(
+		    (unsigned char*)packetbuf_dataptr());
+		recv_checksum = compute_checksum(&recv_packet);
+		if (recv_checksum != recv_packet.checksum)
+		{
+		    #ifdef DEBUG_NET
+			printf("             Mesh received callback: ");
+			printf("Computed checksum dont match with packet ");
+			printf("checksum\n\n");
+			printf("             Mesh reveived callback: Sending POLL ");
+			printf("packet\n\n");
+		    #endif
+		    recv_send_packet = poll_packet();
+		    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		    recv_send_packet.reserved[4] = from->u8[0];
+		    recv_send_packet.reserved[5] = from->u8[1];
+		    mount_packet(&recv_send_packet, recv_packet_buff);
+		    packetbuf_copyfrom((void *)recv_packet_buff, PACKET_SIZE);
+		    mesh_send(&zoundtracker_conn, from);
+		}
+		else
+		{
+		    is_valid = 0;
+		    if (recv_packet.type == HELLO_MN)
+		    {
+			#ifdef DEBUG_NET
+			    printf("             Mesh received callback: ");
+			    printf("Hello packet received from %d.%d (Hops: %d)\n\n",
+				    from->u8[0],
+				    from->u8[1],
+				    hops);
+			#endif
+			is_valid = 1;
+			recv_send_packet = hello_ack_packet();
+			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			recv_send_packet.reserved[4] = from->u8[0];
+			recv_send_packet.reserved[5] = from->u8[1];
+		    }
+		    else if (recv_packet.type == DATA)
+		    {
+			rssi = cc2420_rssi();
+			recv_packet.reserved[2] = (char)(rssi>>8);
+			recv_packet.reserved[3] = (char)(rssi);
+			#ifdef DEBUG_NET
+			    printf("             Mesh received callback: ");
+			    printf("Data packet received from %d.%d\n\n",
+				    from->u8[0],
+				    from->u8[1]);
+			    printf("             Mesh received callback: ");
+			    printf("Packet content:\n");
+			    printf("             MOBILE NODE ID: %d.%d\n",
+				    recv_packet.addr1,
+				    recv_packet.addr2);
+			    printf("             MESSAGE TYPE: %d\n", recv_packet.type);
+			    printf("             SIZE: %d\n", recv_packet.size);
+			    printf("             COUNTER: %d\n", recv_packet.counter);
+			    printf("             DATA: ");
+			    for (i = 0; i < DATA_SIZE &&
+			      recv_packet.counter + i < recv_packet.size;
+			      i++)
+				printf("%d ", recv_packet.data[i]);
+			    printf("             \n");
+			    printf("             RSSI: %d\n", rssi);
+			    printf("             HOPS: %d\n", hops);
+			    printf("             NUMBER OF PACKETS SENDED: %d\n",
+				    recv_packet.reserved[0]);
+			    printf("             NUMBER OF PACKETS ACKNOWLEDGED: %d\n",
+				    recv_packet.reserved[1]);
+			    printf("             CHECKSUM: %d\n",
+				    recv_packet.checksum);
+			    printf("             BATTERY: %d\n\n",
+				    ((recv_packet.reserved[20]<<8) + recv_packet.reserved[21]));
+			#else
+			    mount_packet(&recv_packet, recv_packet_buff);
+			    for (i = 0; i < PACKET_SIZE; i++)
+				putchar(recv_packet_buff[i]);
+			#endif
+			is_valid = 1;
+			recv_send_packet = data_ack_packet();
+			//////////////////////////////////////////////////////////////////////////////////////////////////////////
+			recv_send_packet.reserved[4] = from->u8[0];
+			recv_send_packet.reserved[5] = from->u8[1];
+		    }
+		    else
+		    {
+			#ifdef DEBUG_NET
+			    printf("             Mesh received callback: ");
+			    printf( "Unknown message type (%c)\n\n",
+				    recv_packet.type);
+			#endif
+		    }
+		    if (is_valid)
+		    {
+			first_empty_entry = -1;
+			found = 0;
+			found_node = -1;
+			for (i = 0; i < NODE_TABLE_SIZE && !found; i++)
+			{
+			    if (node_table[i].empty && first_empty_entry == -1)
+				first_empty_entry = i;
+			    else if (!node_table[i].empty &&
+			      node_table[i].addr1 == from->u8[0] &&
+			      node_table[i].addr2 == from->u8[1])
+			    {
+				found = 1;
+				found_node = i;
+			    }
+			}
+			if (found)
+			{
+			    node_table[found_node].timestamp = 0;
+			    node_table[found_node].resends = 0;
+			    node_table[found_node].poll_wait = 0;
+			}
+			else if (first_empty_entry != -1)
+			{
+			    node_table[first_empty_entry].empty = 0;
+			    node_table[first_empty_entry].timestamp = 0;
+			    node_table[first_empty_entry].resends = 0;
+			    node_table[first_empty_entry].poll_wait = 0;
+			    node_table[first_empty_entry].addr1 = from->u8[0];
+			    node_table[first_empty_entry].addr2 = from->u8[1];
+			}
+			#ifdef DEBUG_NET
+			    else
+			    {
+				printf("             Mesh received callback: ");
+				printf("Node table is full\n\n");
+			    }
+			    printf("             Mesh reveived callback: ");
+			    printf("Sending ACK packet\n\n");
+			#endif
+			mount_packet(&recv_send_packet, recv_packet_buff);
+			packetbuf_copyfrom( (void *)recv_packet_buff,
+					    PACKET_SIZE);
+			mesh_send(&zoundtracker_conn, from);
+		    }
+		}
+	    }
+	    #ifdef DEBUG_NET
+		else
+		{
+		    printf("             Mesh received callback: ");
+		    printf("Error with received packet size\n\n");
+		}
+	    #endif
+	    
+	    if (c->queued_data != NULL)
+	    {
+		#ifdef DEBUG_NET
+		    printf("     Mesh received callback: ");
+		    printf("Queued data is not NULL!!!!");
+		#endif
+		queuebuf_to_packetbuf(c->queued_data);
+		recv_packet = unmount_packet(
+		    (unsigned char*)packetbuf_dataptr());
+		#ifdef DEBUG_NET
+		    printf("       Mesh received callback: ");
+		    printf("Data packet received from %d.%d\n\n",
+			    from->u8[0],
+			    from->u8[1]);
+		    printf("       Mesh received callback: ");
+		    printf("       Packet content:\n");
+		    printf("       MOBILE NODE ID: %d.%d\n",
+			    recv_packet.addr1,
+			    recv_packet.addr2);
+		    printf("       MESSAGE TYPE: %d\n", recv_packet.type);
+		    printf("       SIZE: %d\n", recv_packet.size);
+		    printf("       COUNTER: %d\n", recv_packet.counter);
+		    printf("       DATA: ");
+		    for (i = 0; i < DATA_SIZE &&
+		      recv_packet.counter + i < recv_packet.size;
+		      i++)
+			printf("%d ", recv_packet.data[i]);
+		    printf("\n");
+		    printf("       HOPS: %d\n", hops);
+		    printf("       NUMBER OF PACKETS SENDED: %d\n",
+			    recv_packet.reserved[0]);
+		    printf("       NUMBER OF PACKETS ACKNOWLEDGED: %d\n",
+			    recv_packet.reserved[1]);
+		    printf("       CHECKSUM: %d\n\n",
+			    recv_packet.checksum);
+		    printf("       TO: %d.%d\n",
+			    recv_packet.reserved[4],
+			    recv_packet.reserved[5]);
+		#endif
+	    }
+	}
 }
 
 const static struct mesh_callbacks zoundtracker_sink_callbacks =
@@ -411,6 +422,10 @@ PROCESS_THREAD(    zoundtracker_sink_process, ev, data    )
     // Set first state
     hello_sends = 0;
     state = HELLO_STATE;
+    
+    waitingSeconds = 0;
+    waitingMinutes = 0;
+    
     ///////////////////////////////////////////////////////////////////
 
     etimer_set(&timer, STATE_TRANSITION_PERIOD);
@@ -457,6 +472,12 @@ PROCESS_THREAD(    zoundtracker_sink_process, ev, data    )
                 if (partial_seconds >= SECOND_PARTITION)
                 {
                     seconds++;
+			waitingSeconds++;
+			if (waitingSeconds >= 60)
+			{
+				waitingSeconds = 0;
+				waitingMinutes++;
+			}
                     partial_seconds = 0;
                     // <----------------------------------------------------------------------------------------------------------
                     //~ seconds += partial_seconds/SECOND_PARTITION;
@@ -562,6 +583,12 @@ PROCESS_THREAD(    zoundtracker_sink_process, ev, data    )
                 if (partial_seconds >= SECOND_PARTITION)
                 {
                     seconds++;
+			waitingSeconds++;
+			if (waitingSeconds >= 60)
+			{
+				waitingSeconds = 0;
+				waitingMinutes++;
+			}
                     partial_seconds = 0;
                     // <----------------------------------------------------------------------------------------------------------
                     //~ seconds += partial_seconds/SECOND_PARTITION;
