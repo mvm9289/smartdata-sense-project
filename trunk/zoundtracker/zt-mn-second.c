@@ -175,7 +175,7 @@ data_msg()
     packet_to_send.addr1 = MY_ADDR1;
     packet_to_send.addr2 = MY_ADDR2;
     packet_to_send.type = DATA;
-    packet_to_send.size = 40; //file_size;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    
+    packet_to_send.size = DATA_SIZE; //file_size;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    
     packet_to_send.counter = (packet_number-1)*DATA_SIZE;
     memcpy(packet_to_send.data, read_buffer, read_bytes);
     packet_to_send.checksum = compute_checksum(&packet_to_send);
@@ -292,7 +292,7 @@ prepare_packet(void)
     }*/
     int pos;
     if(read_attempts > 0){
-    	pos = readSeek(0);
+    	pos = readSeek(START_POSITION);
     	if(pos == ERROR_INVALID_FD) {
         	++read_attempts;
         	if(read_attempts < MAX_READ_ATTEMPTS)return prepare_packet();
@@ -477,7 +477,7 @@ timedout(struct mesh_conn *c)
             sample_interval = 0;
             
             
-            readSeek(0);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            readSeek(START_POSITION);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         
 		    #ifdef DEBUG_NET
 			  printf("[net]\n 'DATA' message lost");
@@ -964,6 +964,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
      
                         /* Starting a new sample period */
                         sample_interval = 0;
+                        readSeek(START_POSITION);
                         
                         /* Changing to "BLOCKED" from "DATA_SEND" 
                            state. */
