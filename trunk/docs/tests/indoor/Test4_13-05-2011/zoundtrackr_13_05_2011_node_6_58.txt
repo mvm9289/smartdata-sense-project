@@ -1,0 +1,1243 @@
+/¬*******************************************************************************************************************************************/
+1305426418              Mesh received callback: Data packet received from 6.58
+1305426418 
+1305426418              Mesh received callback: Packet content:
+1305426418              MOBILE NODE ID: 6.58
+1305426418              MESSAGE TYPE: 3
+1305426418              SIZE: 40
+1305426418              COUNTER: 0
+1305426418              DATA: 0 0 203 71 1 0 183 30 2 0 154 137 3 0 193 18 4 0 205 225 5 0 184 221 6 0 189 240 7 0 200 139 138 0 255 208 9 0 199 120              
+1305426418              RSSI: -48
+1305426418              HOPS: 2
+1305426418              NUMBER OF PACKETS SENDED: 138
+1305426418              NUMBER OF PACKETS ACKNOWLEDGED: 0
+1305426418              CHECKSUM: 181
+1305426418              BATTERY: 2157
+1305426418 
+1305426418              Mesh reveived callback: Sending ACK packet
+1305426418 
+1305426418              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426418 
+1305426419              Mesh received callback: Data packet received from 6.58
+1305426419 
+1305426419              Mesh received callback: Packet content:
+1305426419              MOBILE NODE ID: 6.58
+1305426419              MESSAGE TYPE: 3
+1305426419              SIZE: 40
+1305426419              COUNTER: 0
+1305426419              DATA: 0 0 180 25 1 0 163 240 2 0 161 247 3 0 177 250 4 0 178 22 5 0 205 221 6 0 192 139 7 0 182 225 139 1 255 209 9 0 196 183              
+1305426419              RSSI: -47
+1305426419              HOPS: 2
+1305426419              NUMBER OF PACKETS SENDED: 139
+1305426419              NUMBER OF PACKETS ACKNOWLEDGED: 1
+1305426419              CHECKSUM: 92
+1305426419              BATTERY: 2157
+1305426419 
+1305426419              Mesh reveived callback: Sending ACK packet
+1305426419 
+1305426419              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426419 
+1305426419              Mesh received callback: Data packet received from 6.58
+1305426419 
+1305426419              Mesh received callback: Packet content:
+1305426419              MOBILE NODE ID: 6.58
+1305426419              MESSAGE TYPE: 3
+1305426419              SIZE: 40
+1305426419              COUNTER: 0
+1305426419              DATA: 0 0 178 217 1 0 191 159 2 0 172 119 3 0 188 45 4 0 171 158 5 0 187 58 6 0 196 51 7 0 191 248 140 2 255 209 9 0 162 38              
+1305426419              RSSI: -47
+1305426419              HOPS: 2
+1305426419              NUMBER OF PACKETS SENDED: 140
+1305426419              NUMBER OF PACKETS ACKNOWLEDGED: 2
+1305426419              CHECKSUM: 18
+1305426419              BATTERY: 2157
+1305426419 
+1305426419              Mesh reveived callback: Sending ACK packet
+1305426419 
+1305426419              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426419 
+1305426420              Mesh received callback: Data packet received from 6.58
+1305426420 
+1305426420              Mesh received callback: Packet content:
+1305426420              MOBILE NODE ID: 6.58
+1305426420              MESSAGE TYPE: 3
+1305426420              SIZE: 40
+1305426420              COUNTER: 0
+1305426420              DATA: 0 0 180 244 1 0 191 135 2 0 176 174 3 0 191 43 4 0 189 47 5 0 201 31 6 0 188 98 7 0 168 182 141 3 255 208 9 0 171 81              
+1305426420              RSSI: -48
+1305426420              HOPS: 2
+1305426420              NUMBER OF PACKETS SENDED: 141
+1305426420              NUMBER OF PACKETS ACKNOWLEDGED: 3
+1305426420              CHECKSUM: 97
+1305426420              BATTERY: 2157
+1305426420 
+1305426420              Mesh reveived callback: Sending ACK packet
+1305426420 
+1305426420              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426420 
+1305426420              Mesh received callback: Data packet received from 6.58
+1305426420 
+1305426420              Mesh received callback: Packet content:
+1305426420              MOBILE NODE ID: 6.58
+1305426420              MESSAGE TYPE: 3
+1305426420              SIZE: 40
+1305426420              COUNTER: 0
+1305426420              DATA: 0 0 184 85 1 0 188 26 2 0 166 116 3 0 146 245 4 0 177 160 5 0 184 206 6 0 186 41 7 0 182 225 142 4 255 209 9 0 169 142              
+1305426420              RSSI: -47
+1305426420              HOPS: 2
+1305426420              NUMBER OF PACKETS SENDED: 142
+1305426420              NUMBER OF PACKETS ACKNOWLEDGED: 4
+1305426420              CHECKSUM: 74
+1305426420              BATTERY: 2157
+1305426420 
+1305426420              Mesh reveived callback: Sending ACK packet
+1305426420 
+1305426420              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426420 
+1305426421              Mesh received callback: Data packet received from 6.58
+1305426421 
+1305426421              Mesh received callback: Packet content:
+1305426421              MOBILE NODE ID: 6.58
+1305426421              MESSAGE TYPE: 3
+1305426421              SIZE: 40
+1305426421              COUNTER: 0
+1305426421              DATA: 0 0 179 0 1 0 189 17 2 0 212 63 3 0 189 182 4 0 199 81 5 0 179 47 6 0 192 73 7 0 184 141 143 5 255 208 9 0 189 82              
+1305426421              RSSI: -48
+1305426421              HOPS: 2
+1305426421              NUMBER OF PACKETS SENDED: 143
+1305426421              NUMBER OF PACKETS ACKNOWLEDGED: 5
+1305426421              CHECKSUM: 94
+1305426421              BATTERY: 2157
+1305426421 
+1305426421              Mesh reveived callback: Sending ACK packet
+1305426421 
+1305426421              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426421 
+1305426421              Mesh received callback: Data packet received from 6.58
+1305426421 
+1305426421              Mesh received callback: Packet content:
+1305426421              MOBILE NODE ID: 6.58
+1305426421              MESSAGE TYPE: 3
+1305426421              SIZE: 40
+1305426421              COUNTER: 0
+1305426421              DATA: 0 0 187 37 1 0 187 70 2 0 179 95 3 0 188 214 4 0 195 128 5 0 203 169 6 0 182 177 7 0 188 193 144 6 255 208 9 0 184 7              
+1305426421              RSSI: -48
+1305426421              HOPS: 2
+1305426421              NUMBER OF PACKETS SENDED: 144
+1305426421              NUMBER OF PACKETS ACKNOWLEDGED: 6
+1305426421              CHECKSUM: 169
+1305426421              BATTERY: 2156
+1305426421 
+1305426421              Mesh reveived callback: Sending ACK packet
+1305426421 
+1305426421              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426421 
+1305426422              Mesh received callback: Data packet received from 6.58
+1305426422 
+1305426422              Mesh received callback: Packet content:
+1305426422              MOBILE NODE ID: 6.58
+1305426422              MESSAGE TYPE: 3
+1305426422              SIZE: 40
+1305426422              COUNTER: 0
+1305426422              DATA: 0 0 195 244 1 0 183 186 2 0 191 205 3 0 191 109 4 0 207 231 5 0 174 174 6 0 174 216 7 0 184 96 145 7 255 208 9 0 208 77              
+1305426422              RSSI: -48
+1305426422              HOPS: 2
+1305426422              NUMBER OF PACKETS SENDED: 145
+1305426422              NUMBER OF PACKETS ACKNOWLEDGED: 7
+1305426422              CHECKSUM: 11
+1305426422              BATTERY: 2156
+1305426422 
+1305426422              Mesh reveived callback: Sending ACK packet
+1305426422 
+1305426422              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426422 
+1305426422              Mesh received callback: Data packet received from 6.58
+1305426422 
+1305426422              Mesh received callback: Packet content:
+1305426422              MOBILE NODE ID: 6.58
+1305426422              MESSAGE TYPE: 3
+1305426422              SIZE: 40
+1305426422              COUNTER: 0
+1305426422              DATA: 0 0 180 25 1 0 169 89 2 0 203 173 3 0 188 128 4 0 207 44 5 0 217 46 6 0 209 219 7 0 202 111 146 8 255 208 9 0 203 59              
+1305426422              RSSI: -48
+1305426422              HOPS: 2
+1305426422              NUMBER OF PACKETS SENDED: 146
+1305426422              NUMBER OF PACKETS ACKNOWLEDGED: 8
+1305426422              CHECKSUM: 171
+1305426422              BATTERY: 2157
+1305426422 
+1305426422              Mesh reveived callback: Sending ACK packet
+1305426422 
+1305426422              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426422 
+1305426423              Mesh received callback: Data packet received from 6.58
+1305426423 
+1305426423              Mesh received callback: Packet content:
+1305426423              MOBILE NODE ID: 6.58
+1305426423              MESSAGE TYPE: 3
+1305426423              SIZE: 40
+1305426423              COUNTER: 0
+1305426423              DATA: 0 0 201 128 1 0 218 164 2 0 212 227 3 0 205 29 4 0 208 255 5 0 199 49 6 0 211 236 7 0 222 138 147 9 255 208 9 0 209 139              
+1305426423              RSSI: -48
+1305426423              HOPS: 2
+1305426423              NUMBER OF PACKETS SENDED: 147
+1305426423              NUMBER OF PACKETS ACKNOWLEDGED: 9
+1305426423              CHECKSUM: 117
+1305426423              BATTERY: 2156
+1305426423 
+1305426423              Mesh reveived callback: Sending ACK packet
+1305426423 
+1305426423              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426423 
+1305426423              Mesh received callback: Data packet received from 6.58
+1305426423 
+1305426423              Mesh received callback: Packet content:
+1305426423              MOBILE NODE ID: 6.58
+1305426423              MESSAGE TYPE: 3
+1305426423              SIZE: 40
+1305426423              COUNTER: 0
+1305426423              DATA: 0 0 198 115 1 0 187 125 2 0 213 212 3 0 207 190 4 0 200 185 5 0 195 139 6 0 197 199 7 0 188 95 148 10 255 208 9 0 197 131              
+1305426423              RSSI: -48
+1305426423              HOPS: 2
+1305426423              NUMBER OF PACKETS SENDED: 148
+1305426423              NUMBER OF PACKETS ACKNOWLEDGED: 10
+1305426423              CHECKSUM: 204
+1305426423              BATTERY: 2157
+1305426423 
+1305426423              Mesh reveived callback: Sending ACK packet
+1305426423 
+1305426423              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426423 
+1305426424              Mesh received callback: Data packet received from 6.58
+1305426424 
+1305426424              Mesh received callback: Packet content:
+1305426424              MOBILE NODE ID: 6.58
+1305426424              MESSAGE TYPE: 3
+1305426424              SIZE: 40
+1305426424              COUNTER: 0
+1305426424              DATA: 0 0 200 148 1 0 184 236 2 0 192 182 3 0 211 209 4 0 196 12 5 0 203 229 6 0 150 185 7 0 214 233 149 11 255 208 9 0 199 177              
+1305426424              RSSI: -48
+1305426424              HOPS: 2
+1305426424              NUMBER OF PACKETS SENDED: 149
+1305426424              NUMBER OF PACKETS ACKNOWLEDGED: 11
+1305426424              CHECKSUM: 157
+1305426424              BATTERY: 2157
+1305426424 
+1305426424              Mesh reveived callback: Sending ACK packet
+1305426424 
+1305426424              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426424 
+1305426424              Mesh received callback: Data packet received from 6.58
+1305426424 
+1305426424              Mesh received callback: Packet content:
+1305426424              MOBILE NODE ID: 6.58
+1305426424              MESSAGE TYPE: 3
+1305426424              SIZE: 40
+1305426424              COUNTER: 0
+1305426424              DATA: 0 0 196 28 1 0 204 68 2 0 211 93 3 0 192 208 4 0 183 101 5 0 181 28 6 0 215 184 7 0 197 168 150 12 255 209 9 0 175 200              
+1305426424              RSSI: -47
+1305426424              HOPS: 2
+1305426424              NUMBER OF PACKETS SENDED: 150
+1305426424              NUMBER OF PACKETS ACKNOWLEDGED: 12
+1305426424              CHECKSUM: 160
+1305426424              BATTERY: 2156
+1305426424 
+1305426424              Mesh reveived callback: Sending ACK packet
+1305426424 
+1305426424              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426424 
+1305426425              Mesh received callback: Data packet received from 6.58
+1305426425 
+1305426425              Mesh received callback: Packet content:
+1305426425              MOBILE NODE ID: 6.58
+1305426425              MESSAGE TYPE: 3
+1305426425              SIZE: 40
+1305426425              COUNTER: 0
+1305426425              DATA: 0 0 188 241 1 0 206 57 2 0 221 67 3 0 213 250 4 0 200 153 5 0 223 8 6 0 209 32 7 0 207 187 151 13 255 209 9 0 223 222              
+1305426425              RSSI: -47
+1305426425              HOPS: 2
+1305426425              NUMBER OF PACKETS SENDED: 151
+1305426425              NUMBER OF PACKETS ACKNOWLEDGED: 13
+1305426425              CHECKSUM: 31
+1305426425              BATTERY: 2156
+1305426425 
+1305426425              Mesh reveived callback: Sending ACK packet
+1305426425 
+1305426425              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426425 
+1305426425              Mesh received callback: Data packet received from 6.58
+1305426425 
+1305426425              Mesh received callback: Packet content:
+1305426425              MOBILE NODE ID: 6.58
+1305426425              MESSAGE TYPE: 3
+1305426425              SIZE: 40
+1305426425              COUNTER: 0
+1305426425              DATA: 0 0 188 139 1 0 198 95 2 0 211 190 3 0 226 168 4 0 212 4 5 0 217 63 6 0 214 64 7 0 210 181 152 14 255 209 9 0 172 46              
+1305426425              RSSI: -47
+1305426425              HOPS: 2
+1305426425              NUMBER OF PACKETS SENDED: 152
+1305426425              NUMBER OF PACKETS ACKNOWLEDGED: 14
+1305426425              CHECKSUM: 89
+1305426425              BATTERY: 2155
+1305426425 
+1305426425              Mesh reveived callback: Sending ACK packet
+1305426425 
+1305426425              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426425 
+1305426426              Mesh received callback: Data packet received from 6.58
+1305426426 
+1305426426              Mesh received callback: Packet content:
+1305426426              MOBILE NODE ID: 6.58
+1305426426              MESSAGE TYPE: 3
+1305426426              SIZE: 40
+1305426426              COUNTER: 0
+1305426426              DATA: 0 0 199 95 1 0 219 231 2 0 203 71 3 0 210 241 4 0 208 60 5 0 197 69 6 0 158 3 7 0 224 101 153 15 255 208 9 0 205 65              
+1305426426              RSSI: -48
+1305426426              HOPS: 2
+1305426426              NUMBER OF PACKETS SENDED: 153
+1305426426              NUMBER OF PACKETS ACKNOWLEDGED: 15
+1305426426              CHECKSUM: 104
+1305426426              BATTERY: 2156
+1305426426 
+1305426426              Mesh reveived callback: Sending ACK packet
+1305426426 
+1305426426              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426426 
+1305426426              Mesh received callback: Data packet received from 6.58
+1305426426 
+1305426426              Mesh received callback: Packet content:
+1305426426              MOBILE NODE ID: 6.58
+1305426426              MESSAGE TYPE: 3
+1305426426              SIZE: 40
+1305426426              COUNTER: 0
+1305426426              DATA: 0 0 192 102 1 0 219 217 2 0 212 69 3 0 201 100 4 0 199 219 5 0 205 120 6 0 209 112 7 0 210 89 154 16 255 208 9 0 204 183              
+1305426426              RSSI: -48
+1305426426              HOPS: 2
+1305426426              NUMBER OF PACKETS SENDED: 154
+1305426426              NUMBER OF PACKETS ACKNOWLEDGED: 16
+1305426426              CHECKSUM: 12
+1305426426              BATTERY: 2156
+1305426426 
+1305426426              Mesh reveived callback: Sending ACK packet
+1305426426 
+1305426426              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426426 
+1305426427              Mesh received callback: Data packet received from 6.58
+1305426427 
+1305426427              Mesh received callback: Packet content:
+1305426427              MOBILE NODE ID: 6.58
+1305426427              MESSAGE TYPE: 3
+1305426427              SIZE: 40
+1305426427              COUNTER: 0
+1305426427              DATA: 0 0 196 40 1 0 198 255 2 0 187 18 3 0 207 245 4 0 214 48 5 0 218 92 6 0 208 133 7 0 215 203 155 17 255 208 9 0 217 82              
+1305426427              RSSI: -48
+1305426427              HOPS: 2
+1305426427              NUMBER OF PACKETS SENDED: 155
+1305426427              NUMBER OF PACKETS ACKNOWLEDGED: 17
+1305426427              CHECKSUM: 120
+1305426427              BATTERY: 2156
+1305426427 
+1305426427              Mesh reveived callback: Sending ACK packet
+1305426427 
+1305426427              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426427 
+1305426427              Mesh received callback: Data packet received from 6.58
+1305426427 
+1305426427              Mesh received callback: Packet content:
+1305426427              MOBILE NODE ID: 6.58
+1305426427              MESSAGE TYPE: 3
+1305426427              SIZE: 40
+1305426427              COUNTER: 0
+1305426427              DATA: 0 0 207 102 1 0 214 62 2 0 204 250 3 0 213 41 4 0 206 114 5 0 215 163 6 0 221 97 7 0 206 143 156 18 255 208 9 0 184 155              
+1305426427              RSSI: -48
+1305426427              HOPS: 2
+1305426427              NUMBER OF PACKETS SENDED: 156
+1305426427              NUMBER OF PACKETS ACKNOWLEDGED: 18
+1305426427              CHECKSUM: 169
+1305426427              BATTERY: 2156
+1305426427 
+1305426427              Mesh reveived callback: Sending ACK packet
+1305426427 
+1305426428              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426428 
+1305426428              Mesh received callback: Data packet received from 6.58
+1305426428 
+1305426428              Mesh received callback: Packet content:
+1305426428              MOBILE NODE ID: 6.58
+1305426428              MESSAGE TYPE: 3
+1305426428              SIZE: 40
+1305426428              COUNTER: 0
+1305426428              DATA: 0 0 202 144 1 0 192 126 2 0 208 179 3 0 202 99 4 0 217 187 5 0 208 166 6 0 217 232 7 0 204 211 157 19 255 209 9 0 178 30              
+1305426428              RSSI: -47
+1305426428              HOPS: 2
+1305426428              NUMBER OF PACKETS SENDED: 157
+1305426428              NUMBER OF PACKETS ACKNOWLEDGED: 19
+1305426428              CHECKSUM: 3
+1305426428              BATTERY: 2156
+1305426428 
+1305426428              Mesh reveived callback: Sending ACK packet
+1305426428 
+1305426428              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426428 
+1305426428              Mesh received callback: Data packet received from 6.58
+1305426428 
+1305426428              Mesh received callback: Packet content:
+1305426429              MOBILE NODE ID: 6.58
+1305426429              MESSAGE TYPE: 3
+1305426429              SIZE: 40
+1305426429              COUNTER: 0
+1305426429              DATA: 0 0 203 108 1 0 201 249 2 0 208 197 3 0 205 43 4 0 211 252 5 0 196 190 6 0 211 225 7 0 212 225 158 20 255 208 9 0 217 3              
+1305426429              RSSI: -48
+1305426429              HOPS: 2
+1305426429              NUMBER OF PACKETS SENDED: 158
+1305426429              NUMBER OF PACKETS ACKNOWLEDGED: 20
+1305426429              CHECKSUM: 33
+1305426429              BATTERY: 2156
+1305426429 
+1305426429              Mesh reveived callback: Sending ACK packet
+1305426429 
+1305426429              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426429 
+1305426429              Mesh received callback: Data packet received from 6.58
+1305426429 
+1305426429              Mesh received callback: Packet content:
+1305426429              MOBILE NODE ID: 6.58
+1305426429              MESSAGE TYPE: 3
+1305426429              SIZE: 40
+1305426429              COUNTER: 0
+1305426429              DATA: 0 0 200 18 1 0 206 117 2 0 213 139 3 0 196 108 4 0 207 224 5 0 192 153 6 0 208 203 7 0 206 50 159 21 255 208 9 0 219 185              
+1305426429              RSSI: -48
+1305426429              HOPS: 2
+1305426429              NUMBER OF PACKETS SENDED: 159
+1305426429              NUMBER OF PACKETS ACKNOWLEDGED: 21
+1305426429              CHECKSUM: 17
+1305426429              BATTERY: 2157
+1305426429 
+1305426429              Mesh reveived callback: Sending ACK packet
+1305426429 
+1305426429              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426429 
+1305426430              Mesh received callback: Data packet received from 6.58
+1305426430 
+1305426430              Mesh received callback: Packet content:
+1305426430              MOBILE NODE ID: 6.58
+1305426430              MESSAGE TYPE: 3
+1305426430              SIZE: 40
+1305426430              COUNTER: 0
+1305426430              DATA: 0 0 211 165 1 0 208 247 2 0 198 227 3 0 202 24 4 0 204 16 5 0 212 139 6 0 213 132 7 0 214 245 160 22 255 208 9 0 202 111              
+1305426430              RSSI: -48
+1305426430              HOPS: 2
+1305426430              NUMBER OF PACKETS SENDED: 160
+1305426430              NUMBER OF PACKETS ACKNOWLEDGED: 22
+1305426430              CHECKSUM: 64
+1305426430              BATTERY: 2156
+1305426430 
+1305426430              Mesh reveived callback: Sending ACK packet
+1305426430 
+1305426430              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426430 
+1305426430              Mesh received callback: Data packet received from 6.58
+1305426430 
+1305426430              Mesh received callback: Packet content:
+1305426430              MOBILE NODE ID: 6.58
+1305426430              MESSAGE TYPE: 3
+1305426430              SIZE: 40
+1305426430              COUNTER: 0
+1305426430              DATA: 0 0 204 249 1 0 207 77 2 0 208 187 3 0 216 66 4 0 215 190 5 0 205 200 6 0 216 97 7 0 205 119 161 23 255 208 9 0 206 240              
+1305426430              RSSI: -48
+1305426430              HOPS: 2
+1305426430              NUMBER OF PACKETS SENDED: 161
+1305426430              NUMBER OF PACKETS ACKNOWLEDGED: 23
+1305426430              CHECKSUM: 62
+1305426430              BATTERY: 2157
+1305426430 
+1305426430              Mesh reveived callback: Sending ACK packet
+1305426430 
+1305426430              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426430 
+1305426431              Mesh received callback: Data packet received from 6.58
+1305426431 
+1305426431              Mesh received callback: Packet content:
+1305426431              MOBILE NODE ID: 6.58
+1305426431              MESSAGE TYPE: 3
+1305426431              SIZE: 40
+1305426431              COUNTER: 0
+1305426431              DATA: 0 0 215 154 1 0 213 54 2 0 197 237 3 0 216 73 4 0 192 216 5 0 218 173 6 0 208 91 7 0 191 90 162 24 255 208 9 0 214 103              
+1305426431              RSSI: -48
+1305426431              HOPS: 2
+1305426431              NUMBER OF PACKETS SENDED: 162
+1305426431              NUMBER OF PACKETS ACKNOWLEDGED: 24
+1305426431              CHECKSUM: 1
+1305426431              BATTERY: 2157
+1305426431 
+1305426431              Mesh reveived callback: Sending ACK packet
+1305426431 
+1305426431              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426431 
+1305426431              Mesh received callback: Data packet received from 6.58
+1305426431 
+1305426431              Mesh received callback: Packet content:
+1305426431              MOBILE NODE ID: 6.58
+1305426431              MESSAGE TYPE: 3
+1305426431              SIZE: 40
+1305426431              COUNTER: 0
+1305426431              DATA: 0 0 204 17 1 0 210 99 2 0 203 128 3 0 199 175 4 0 198 129 5 0 202 238 6 0 190 27 7 0 208 51 163 25 255 208 9 0 209 108              
+1305426431              RSSI: -48
+1305426431              HOPS: 2
+1305426431              NUMBER OF PACKETS SENDED: 163
+1305426431              NUMBER OF PACKETS ACKNOWLEDGED: 25
+1305426431              CHECKSUM: 125
+1305426431              BATTERY: 2157
+1305426431 
+1305426431              Mesh reveived callback: Sending ACK packet
+1305426431 
+1305426431              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426431 
+1305426432              Mesh received callback: Data packet received from 6.58
+1305426432 
+1305426432              Mesh received callback: Packet content:
+1305426432              MOBILE NODE ID: 6.58
+1305426432              MESSAGE TYPE: 3
+1305426432              SIZE: 40
+1305426432              COUNTER: 0
+1305426432              DATA: 0 0 202 60 1 0 219 16 2 0 216 136 3 0 208 227 4 0 200 7 5 0 206 51 6 0 217 199 7 0 209 184 164 26 255 208 9 0 212 63              
+1305426432              RSSI: -48
+1305426432              HOPS: 2
+1305426432              NUMBER OF PACKETS SENDED: 164
+1305426432              NUMBER OF PACKETS ACKNOWLEDGED: 26
+1305426432              CHECKSUM: 12
+1305426432              BATTERY: 2156
+1305426432 
+1305426432              Mesh reveived callback: Sending ACK packet
+1305426432 
+1305426432              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426432 
+1305426432              Mesh received callback: Data packet received from 6.58
+1305426432 
+1305426432              Mesh received callback: Packet content:
+1305426432              MOBILE NODE ID: 6.58
+1305426432              MESSAGE TYPE: 3
+1305426432              SIZE: 40
+1305426432              COUNTER: 0
+1305426432              DATA: 0 0 208 253 1 0 220 71 2 0 197 244 3 0 207 252 4 0 214 64 5 0 209 152 6 0 214 81 7 0 195 94 165 27 255 208 9 0 219 176              
+1305426432              RSSI: -48
+1305426432              HOPS: 2
+1305426432              NUMBER OF PACKETS SENDED: 165
+1305426432              NUMBER OF PACKETS ACKNOWLEDGED: 27
+1305426432              CHECKSUM: 102
+1305426432              BATTERY: 2156
+1305426432 
+1305426432              Mesh reveived callback: Sending ACK packet
+1305426432 
+1305426432              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426432 
+1305426433              Mesh received callback: Data packet received from 6.58
+1305426433 
+1305426433              Mesh received callback: Packet content:
+1305426433              MOBILE NODE ID: 6.58
+1305426433              MESSAGE TYPE: 3
+1305426433              SIZE: 40
+1305426433              COUNTER: 0
+1305426433              DATA: 0 0 218 159 1 0 212 115 2 0 209 177 3 0 219 166 4 0 211 184 5 0 208 234 6 0 217 18 7 0 219 107 166 28 255 209 9 0 209 136              
+1305426433              RSSI: -47
+1305426433              HOPS: 2
+1305426433              NUMBER OF PACKETS SENDED: 166
+1305426433              NUMBER OF PACKETS ACKNOWLEDGED: 28
+1305426433              CHECKSUM: 194
+1305426433              BATTERY: 2156
+1305426433 
+1305426433              Mesh reveived callback: Sending ACK packet
+1305426433 
+1305426433              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426433 
+1305426433              Mesh received callback: Data packet received from 6.58
+1305426433 
+1305426433              Mesh received callback: Packet content:
+1305426433              MOBILE NODE ID: 6.58
+1305426433              MESSAGE TYPE: 3
+1305426433              SIZE: 40
+1305426433              COUNTER: 0
+1305426433              DATA: 0 0 182 214 1 0 214 27 2 0 159 185 3 0 202 99 4 0 206 222 5 0 189 228 6 0 176 155 7 0 209 194 167 29 255 208 9 0 171 56              
+1305426433              RSSI: -48
+1305426433              HOPS: 2
+1305426433              NUMBER OF PACKETS SENDED: 167
+1305426433              NUMBER OF PACKETS ACKNOWLEDGED: 29
+1305426433              CHECKSUM: 68
+1305426433              BATTERY: 2156
+1305426433 
+1305426433              Mesh reveived callback: Sending ACK packet
+1305426433 
+1305426433              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426433 
+1305426434              Mesh received callback: Data packet received from 6.58
+1305426434 
+1305426434              Mesh received callback: Packet content:
+1305426434              MOBILE NODE ID: 6.58
+1305426434              MESSAGE TYPE: 3
+1305426434              SIZE: 40
+1305426434              COUNTER: 0
+1305426434              DATA: 0 0 202 227 1 0 208 22 2 0 202 129 3 0 194 217 4 0 183 248 5 0 206 150 6 0 199 103 7 0 214 150 168 30 255 208 9 0 215 241              
+1305426434              RSSI: -48
+1305426434              HOPS: 2
+1305426434              NUMBER OF PACKETS SENDED: 168
+1305426434              NUMBER OF PACKETS ACKNOWLEDGED: 30
+1305426434              CHECKSUM: 95
+1305426434              BATTERY: 2156
+1305426434 
+1305426434              Mesh reveived callback: Sending ACK packet
+1305426434 
+1305426434              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426434 
+1305426434              Mesh received callback: Data packet received from 6.58
+1305426434 
+1305426434              Mesh received callback: Packet content:
+1305426434              MOBILE NODE ID: 6.58
+1305426434              MESSAGE TYPE: 3
+1305426434              SIZE: 40
+1305426434              COUNTER: 0
+1305426434              DATA: 0 0 198 32 1 0 200 58 2 0 213 102 3 0 205 69 4 0 199 239 5 0 198 123 6 0 204 161 7 0 204 204 169 31 255 208 9 0 222 248              
+1305426434              RSSI: -48
+1305426434              HOPS: 2
+1305426434              NUMBER OF PACKETS SENDED: 169
+1305426434              NUMBER OF PACKETS ACKNOWLEDGED: 31
+1305426434              CHECKSUM: 192
+1305426434              BATTERY: 2157
+1305426434 
+1305426434              Mesh reveived callback: Sending ACK packet
+1305426434 
+1305426434              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426434 
+1305426435              Mesh received callback: Data packet received from 6.58
+1305426435 
+1305426435              Mesh received callback: Packet content:
+1305426435              MOBILE NODE ID: 6.58
+1305426435              MESSAGE TYPE: 3
+1305426435              SIZE: 40
+1305426435              COUNTER: 0
+1305426435              DATA: 0 0 221 228 1 0 218 159 2 0 204 139 3 0 206 232 4 0 196 100 5 0 207 228 6 0 216 24 7 0 210 183 170 32 255 208 9 0 203 9              
+1305426435              RSSI: -48
+1305426435              HOPS: 2
+1305426435              NUMBER OF PACKETS SENDED: 170
+1305426435              NUMBER OF PACKETS ACKNOWLEDGED: 32
+1305426435              CHECKSUM: 36
+1305426435              BATTERY: 2157
+1305426435 
+1305426435              Mesh reveived callback: Sending ACK packet
+1305426435 
+1305426435              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426435 
+1305426436              Mesh received callback: Data packet received from 6.58
+1305426436 
+1305426436              Mesh received callback: Packet content:
+1305426436              MOBILE NODE ID: 6.58
+1305426436              MESSAGE TYPE: 3
+1305426436              SIZE: 40
+1305426436              COUNTER: 0
+1305426436              DATA: 0 0 217 114 1 0 208 86 2 0 214 13 3 0 214 89 4 0 202 46 5 0 216 175 6 0 213 54 7 0 209 102 171 33 255 209 9 0 201 42              
+1305426436              RSSI: -47
+1305426436              HOPS: 2
+1305426436              NUMBER OF PACKETS SENDED: 171
+1305426436              NUMBER OF PACKETS ACKNOWLEDGED: 33
+1305426436              CHECKSUM: 169
+1305426436              BATTERY: 2156
+1305426436 
+1305426436              Mesh reveived callback: Sending ACK packet
+1305426436 
+1305426436              Mesh sent callback: Packet sent
+/#*Anterior 5.96 - Paquete 60******************************************************************************************************************/
+/¬*******************************************************************************************************************************************/
+1305426750              Mesh received callback: Data packet received from 6.58
+1305426750 
+1305426750              Mesh received callback: Packet content:
+1305426750              MOBILE NODE ID: 6.58
+1305426750              MESSAGE TYPE: 3
+1305426750              SIZE: 40
+1305426750              COUNTER: 0
+1305426750              DATA: 0 0 207 183 1 0 195 37 2 0 207 129 3 0 210 250 4 0 202 116 5 0 203 10 6 0 181 199 7 0 212 176 173 34 255 208 9 0 212 145              
+1305426750              RSSI: -48
+1305426750              HOPS: 2
+1305426750              NUMBER OF PACKETS SENDED: 173
+1305426750              NUMBER OF PACKETS ACKNOWLEDGED: 34
+1305426750              CHECKSUM: 134
+1305426750              BATTERY: 2156
+1305426750 
+1305426750              Mesh reveived callback: Sending ACK packet
+1305426750 
+1305426750              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426750 
+1305426751              Mesh received callback: Data packet received from 6.58
+1305426751 
+1305426751              Mesh received callback: Packet content:
+1305426751              MOBILE NODE ID: 6.58
+1305426751              MESSAGE TYPE: 3
+1305426751              SIZE: 40
+1305426751              COUNTER: 0
+1305426751              DATA: 0 0 217 125 1 0 219 129 2 0 213 33 3 0 200 212 4 0 217 251 5 0 205 96 6 0 204 71 7 0 208 211 174 35 255 208 9 0 204 47              
+1305426751              RSSI: -48
+1305426751              HOPS: 2
+1305426751              NUMBER OF PACKETS SENDED: 174
+1305426751              NUMBER OF PACKETS ACKNOWLEDGED: 35
+1305426751              CHECKSUM: 6
+1305426751              BATTERY: 2156
+1305426751 
+1305426751              Mesh reveived callback: Sending ACK packet
+1305426751 
+1305426751              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426751 
+1305426751              Mesh received callback: Data packet received from 6.58
+1305426751 
+1305426751              Mesh received callback: Packet content:
+1305426751              MOBILE NODE ID: 6.58
+1305426751              MESSAGE TYPE: 3
+1305426751              SIZE: 40
+1305426751              COUNTER: 0
+1305426751              DATA: 0 0 200 189 1 0 197 115 2 0 204 127 3 0 189 117 4 0 212 233 5 0 202 112 6 0 213 229 7 0 211 116 175 36 255 208 9 0 198 183              
+1305426751              RSSI: -48
+1305426751              HOPS: 2
+1305426751              NUMBER OF PACKETS SENDED: 175
+1305426751              NUMBER OF PACKETS ACKNOWLEDGED: 36
+1305426751              CHECKSUM: 191
+1305426751              BATTERY: 2156
+1305426751 
+1305426751              Mesh reveived callback: Sending ACK packet
+1305426751 
+1305426751              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426751 
+1305426752              Mesh received callback: Data packet received from 6.58
+1305426752 
+1305426752              Mesh received callback: Packet content:
+1305426752              MOBILE NODE ID: 6.58
+1305426752              MESSAGE TYPE: 3
+1305426752              SIZE: 40
+1305426752              COUNTER: 0
+1305426752              DATA: 0 0 208 243 1 0 214 69 2 0 216 169 3 0 198 45 4 0 200 173 5 0 210 40 6 0 200 243 7 0 202 182 176 37 255 209 9 0 191 112              
+1305426752              RSSI: -47
+1305426752              HOPS: 2
+1305426752              NUMBER OF PACKETS SENDED: 176
+1305426752              NUMBER OF PACKETS ACKNOWLEDGED: 37
+1305426752              CHECKSUM: 229
+1305426752              BATTERY: 2156
+1305426752 
+1305426752              Mesh reveived callback: Sending ACK packet
+1305426752 
+1305426752              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426752 
+1305426752              Mesh received callback: Data packet received from 6.58
+1305426752 
+1305426752              Mesh received callback: Packet content:
+1305426752              MOBILE NODE ID: 6.58
+1305426752              MESSAGE TYPE: 3
+1305426752              SIZE: 40
+1305426752              COUNTER: 0
+1305426752              DATA: 0 0 211 210 1 0 216 242 2 0 197 45 3 0 201 244 4 0 203 78 5 0 204 119 6 0 212 202 7 0 209 71 177 38 255 209 9 0 210 56              
+1305426752              RSSI: -47
+1305426752              HOPS: 2
+1305426752              NUMBER OF PACKETS SENDED: 177
+1305426752              NUMBER OF PACKETS ACKNOWLEDGED: 38
+1305426752              CHECKSUM: 95
+1305426752              BATTERY: 2156
+1305426752 
+1305426752              Mesh reveived callback: Sending ACK packet
+1305426752 
+1305426752              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426752 
+1305426753              Mesh received callback: Data packet received from 6.58
+1305426753 
+1305426753              Mesh received callback: Packet content:
+1305426753              MOBILE NODE ID: 6.58
+1305426753              MESSAGE TYPE: 3
+1305426753              SIZE: 40
+1305426753              COUNTER: 0
+1305426753              DATA: 0 0 229 69 1 0 202 91 2 0 207 123 3 0 222 157 4 0 213 253 5 0 210 128 6 0 219 180 7 0 204 95 178 39 255 209 9 0 210 219              
+1305426753              RSSI: -47
+1305426753              HOPS: 2
+1305426753              NUMBER OF PACKETS SENDED: 178
+1305426753              NUMBER OF PACKETS ACKNOWLEDGED: 39
+1305426753              CHECKSUM: 87
+1305426753              BATTERY: 2155
+1305426753 
+1305426753              Mesh reveived callback: Sending ACK packet
+1305426753 
+1305426753              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426753 
+1305426753              Mesh received callback: Data packet received from 6.58
+1305426753 
+1305426753              Mesh received callback: Packet content:
+1305426753              MOBILE NODE ID: 6.58
+1305426753              MESSAGE TYPE: 3
+1305426753              SIZE: 40
+1305426753              COUNTER: 0
+1305426753              DATA: 0 0 217 233 1 0 212 250 2 0 214 70 3 0 216 1 4 0 212 228 5 0 206 182 6 0 211 94 7 0 213 107 179 40 255 208 9 0 204 156              
+1305426753              RSSI: -48
+1305426753              HOPS: 2
+1305426753              NUMBER OF PACKETS SENDED: 179
+1305426753              NUMBER OF PACKETS ACKNOWLEDGED: 40
+1305426753              CHECKSUM: 59
+1305426753              BATTERY: 2156
+1305426753 
+1305426753              Mesh reveived callback: Sending ACK packet
+1305426753 
+1305426753              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426753 
+1305426754              Mesh received callback: Data packet received from 6.58
+1305426754 
+1305426754              Mesh received callback: Packet content:
+1305426754              MOBILE NODE ID: 6.58
+1305426754              MESSAGE TYPE: 3
+1305426754              SIZE: 40
+1305426754              COUNTER: 0
+1305426754              DATA: 0 0 198 209 1 0 190 101 2 0 208 199 3 0 204 235 4 0 203 9 5 0 214 205 6 0 200 156 7 0 206 42 180 41 255 209 9 0 204 246              
+1305426754              RSSI: -47
+1305426754              HOPS: 2
+1305426754              NUMBER OF PACKETS SENDED: 180
+1305426754              NUMBER OF PACKETS ACKNOWLEDGED: 41
+1305426754              CHECKSUM: 130
+1305426754              BATTERY: 2155
+1305426754 
+1305426754              Mesh reveived callback: Sending ACK packet
+1305426754 
+1305426754              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426754 
+1305426754              Mesh received callback: Data packet received from 6.58
+1305426754 
+1305426754              Mesh received callback: Packet content:
+1305426754              MOBILE NODE ID: 6.58
+1305426754              MESSAGE TYPE: 3
+1305426754              SIZE: 40
+1305426754              COUNTER: 0
+1305426754              DATA: 0 0 206 161 1 0 215 239 2 0 220 51 3 0 213 165 4 0 217 248 5 0 210 157 6 0 206 208 7 0 213 53 181 42 255 208 9 0 205 151              
+1305426754              RSSI: -48
+1305426754              HOPS: 2
+1305426754              NUMBER OF PACKETS SENDED: 181
+1305426754              NUMBER OF PACKETS ACKNOWLEDGED: 42
+1305426754              CHECKSUM: 79
+1305426754              BATTERY: 2156
+1305426754 
+1305426754              Mesh reveived callback: Sending ACK packet
+1305426754 
+1305426754              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426754 
+1305426755              Mesh received callback: Data packet received from 6.58
+1305426755 
+1305426755              Mesh received callback: Packet content:
+1305426755              MOBILE NODE ID: 6.58
+1305426755              MESSAGE TYPE: 3
+1305426755              SIZE: 40
+1305426755              COUNTER: 0
+1305426755              DATA: 0 0 220 254 1 0 212 158 2 0 212 170 3 0 217 117 4 0 202 141 5 0 213 56 6 0 206 0 7 0 217 93 182 43 255 208 9 0 188 172              
+1305426755              RSSI: -48
+1305426755              HOPS: 2
+1305426755              NUMBER OF PACKETS SENDED: 182
+1305426755              NUMBER OF PACKETS ACKNOWLEDGED: 43
+1305426755              CHECKSUM: 77
+1305426755              BATTERY: 2156
+1305426755 
+1305426755              Mesh reveived callback: Sending ACK packet
+1305426755 
+1305426755              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426755 
+1305426755              Mesh received callback: Data packet received from 6.58
+1305426755 
+1305426755              Mesh received callback: Packet content:
+1305426755              MOBILE NODE ID: 6.58
+1305426755              MESSAGE TYPE: 3
+1305426755              SIZE: 40
+1305426755              COUNTER: 0
+1305426755              DATA: 0 0 222 107 1 0 206 56 2 0 216 143 3 0 208 131 4 0 225 23 5 0 217 96 6 0 223 153 7 0 226 228 183 44 255 208 9 0 225 131              
+1305426755              RSSI: -48
+1305426755              HOPS: 2
+1305426755              NUMBER OF PACKETS SENDED: 183
+1305426755              NUMBER OF PACKETS ACKNOWLEDGED: 44
+1305426755              CHECKSUM: 95
+1305426755              BATTERY: 2156
+1305426755 
+1305426756              Mesh reveived callback: Sending ACK packet
+1305426756 
+1305426756              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426756 
+1305426756              Mesh received callback: Data packet received from 6.58
+1305426756 
+1305426756              Mesh received callback: Packet content:
+1305426756              MOBILE NODE ID: 6.58
+1305426756              MESSAGE TYPE: 3
+1305426756              SIZE: 40
+1305426756              COUNTER: 0
+1305426756              DATA: 0 0 208 161 1 0 217 182 2 0 199 108 3 0 208 179 4 0 212 16 5 0 213 87 6 0 198 145 7 0 202 251 184 45 255 209 9 0 214 230              
+1305426756              RSSI: -47
+1305426756              HOPS: 2
+1305426756              NUMBER OF PACKETS SENDED: 184
+1305426756              NUMBER OF PACKETS ACKNOWLEDGED: 45
+1305426756              CHECKSUM: 225
+1305426756              BATTERY: 2156
+1305426756 
+1305426756              Mesh reveived callback: Sending ACK packet
+1305426756 
+1305426756              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426756 
+1305426757              Mesh received callback: Data packet received from 6.58
+1305426757 
+1305426757              Mesh received callback: Packet content:
+1305426757              MOBILE NODE ID: 6.58
+1305426757              MESSAGE TYPE: 3
+1305426757              SIZE: 40
+1305426757              COUNTER: 0
+1305426757              DATA: 0 0 205 214 1 0 219 142 2 0 200 208 3 0 209 249 4 0 224 138 5 0 212 180 6 0 205 54 7 0 208 135 185 46 255 208 9 0 208 188              
+1305426757              RSSI: -48
+1305426757              HOPS: 2
+1305426757              NUMBER OF PACKETS SENDED: 185
+1305426757              NUMBER OF PACKETS ACKNOWLEDGED: 46
+1305426757              CHECKSUM: 207
+1305426757              BATTERY: 2157
+1305426757 
+1305426757              Mesh reveived callback: Sending ACK packet
+1305426757 
+1305426757              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426757 
+1305426757              Mesh received callback: Data packet received from 6.58
+1305426757 
+1305426757              Mesh received callback: Packet content:
+1305426757              MOBILE NODE ID: 6.58
+1305426757              MESSAGE TYPE: 3
+1305426757              SIZE: 40
+1305426757              COUNTER: 0
+1305426757              DATA: 0 0 207 201 1 0 216 132 2 0 213 57 3 0 222 178 4 0 201 227 5 0 212 85 6 0 218 95 7 0 203 19 186 47 255 208 9 0 222 89              
+1305426757              RSSI: -48
+1305426757              HOPS: 2
+1305426757              NUMBER OF PACKETS SENDED: 186
+1305426757              NUMBER OF PACKETS ACKNOWLEDGED: 47
+1305426757              CHECKSUM: 59
+1305426757              BATTERY: 2156
+1305426757 
+1305426757              Mesh reveived callback: Sending ACK packet
+1305426757 
+1305426757              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426757 
+1305426758              Mesh received callback: Data packet received from 6.58
+1305426758 
+1305426758              Mesh received callback: Packet content:
+1305426758              MOBILE NODE ID: 6.58
+1305426758              MESSAGE TYPE: 3
+1305426758              SIZE: 40
+1305426758              COUNTER: 0
+1305426758              DATA: 0 0 192 197 1 0 208 100 2 0 216 114 3 0 211 163 4 0 199 164 5 0 203 142 6 0 212 0 7 0 201 163 187 48 255 208 9 0 203 199              
+1305426758              RSSI: -48
+1305426758              HOPS: 2
+1305426758              NUMBER OF PACKETS SENDED: 187
+1305426758              NUMBER OF PACKETS ACKNOWLEDGED: 48
+1305426758              CHECKSUM: 228
+1305426758              BATTERY: 2156
+1305426758 
+1305426758              Mesh reveived callback: Sending ACK packet
+1305426758 
+1305426758              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426758 
+1305426758              Mesh received callback: Data packet received from 6.58
+1305426758 
+1305426758              Mesh received callback: Packet content:
+1305426758              MOBILE NODE ID: 6.58
+1305426758              MESSAGE TYPE: 3
+1305426758              SIZE: 40
+1305426758              COUNTER: 0
+1305426758              DATA: 0 0 213 234 1 0 208 1 2 0 209 100 3 0 219 5 4 0 213 116 5 0 212 32 6 0 194 107 7 0 204 161 188 49 255 208 9 0 207 172              
+1305426758              RSSI: -48
+1305426758              HOPS: 2
+1305426758              NUMBER OF PACKETS SENDED: 188
+1305426758              NUMBER OF PACKETS ACKNOWLEDGED: 49
+1305426758              CHECKSUM: 3
+1305426758              BATTERY: 2156
+1305426758 
+1305426758              Mesh reveived callback: Sending ACK packet
+1305426758 
+1305426758              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426758 
+1305426759              Mesh received callback: Data packet received from 6.58
+1305426759 
+1305426759              Mesh received callback: Packet content:
+1305426759              MOBILE NODE ID: 6.58
+1305426759              MESSAGE TYPE: 3
+1305426759              SIZE: 40
+1305426759              COUNTER: 0
+1305426759              DATA: 0 0 223 50 1 0 212 232 2 0 193 203 3 0 211 179 4 0 215 22 5 0 212 212 6 0 212 182 7 0 204 235 189 50 255 209 9 0 210 208              
+1305426759              RSSI: -47
+1305426759              HOPS: 2
+1305426759              NUMBER OF PACKETS SENDED: 189
+1305426759              NUMBER OF PACKETS ACKNOWLEDGED: 50
+1305426759              CHECKSUM: 40
+1305426759              BATTERY: 2157
+1305426759 
+1305426759              Mesh reveived callback: Sending ACK packet
+1305426759 
+1305426759              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426759 
+1305426759              Mesh received callback: Data packet received from 6.58
+1305426759 
+1305426759              Mesh received callback: Packet content:
+1305426759              MOBILE NODE ID: 6.58
+1305426759              MESSAGE TYPE: 3
+1305426759              SIZE: 40
+1305426759              COUNTER: 0
+1305426759              DATA: 0 0 207 217 1 0 219 175 2 0 217 92 3 0 212 139 4 0 178 20 5 0 217 189 6 0 205 113 7 0 218 225 190 51 255 208 9 0 223 39              
+1305426759              RSSI: -48
+1305426759              HOPS: 2
+1305426759              NUMBER OF PACKETS SENDED: 190
+1305426759              NUMBER OF PACKETS ACKNOWLEDGED: 51
+1305426759              CHECKSUM: 234
+1305426759              BATTERY: 2156
+1305426759 
+1305426759              Mesh reveived callback: Sending ACK packet
+1305426759 
+1305426759              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426759 
+1305426760              Mesh received callback: Data packet received from 6.58
+1305426760 
+1305426760              Mesh received callback: Packet content:
+1305426760              MOBILE NODE ID: 6.58
+1305426760              MESSAGE TYPE: 3
+1305426760              SIZE: 40
+1305426760              COUNTER: 0
+1305426760              DATA: 0 0 209 17 1 0 219 31 2 0 215 3 3 0 219 231 4 0 208 233 5 0 213 240 6 0 213 198 7 0 212 10 191 52 255 209 9 0 209 202              
+1305426760              RSSI: -47
+1305426760              HOPS: 2
+1305426760              NUMBER OF PACKETS SENDED: 191
+1305426760              NUMBER OF PACKETS ACKNOWLEDGED: 52
+1305426760              CHECKSUM: 42
+1305426760              BATTERY: 2156
+1305426760 
+1305426760              Mesh reveived callback: Sending ACK packet
+1305426760 
+1305426760              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426760 
+1305426760              Mesh received callback: Data packet received from 6.58
+1305426760 
+1305426760              Mesh received callback: Packet content:
+1305426760              MOBILE NODE ID: 6.58
+1305426760              MESSAGE TYPE: 3
+1305426760              SIZE: 40
+1305426760              COUNTER: 0
+1305426760              DATA: 0 0 191 230 1 0 218 162 2 0 204 226 3 0 218 129 4 0 215 233 5 0 219 41 6 0 220 164 7 0 204 91 192 53 255 209 9 0 183 109              
+1305426760              RSSI: -47
+1305426760              HOPS: 2
+1305426760              NUMBER OF PACKETS SENDED: 192
+1305426760              NUMBER OF PACKETS ACKNOWLEDGED: 53
+1305426760              CHECKSUM: 96
+1305426760              BATTERY: 2156
+1305426760 
+1305426760              Mesh reveived callback: Sending ACK packet
+1305426760 
+1305426760              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426760 
+1305426761              Mesh received callback: Data packet received from 6.58
+1305426761 
+1305426761              Mesh received callback: Packet content:
+1305426761              MOBILE NODE ID: 6.58
+1305426761              MESSAGE TYPE: 3
+1305426761              SIZE: 40
+1305426761              COUNTER: 0
+1305426761              DATA: 0 0 194 16 1 0 208 89 2 0 200 76 3 0 192 245 4 0 197 212 5 0 202 209 6 0 204 38 7 0 213 53 193 54 255 208 9 0 216 97              
+1305426761              RSSI: -48
+1305426761              HOPS: 2
+1305426761              NUMBER OF PACKETS SENDED: 193
+1305426761              NUMBER OF PACKETS ACKNOWLEDGED: 54
+1305426761              CHECKSUM: 253
+1305426761              BATTERY: 2156
+1305426761 
+1305426761              Mesh reveived callback: Sending ACK packet
+1305426761 
+1305426761              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426761 
+1305426761              Mesh received callback: Data packet received from 6.58
+1305426761 
+1305426761              Mesh received callback: Packet content:
+1305426761              MOBILE NODE ID: 6.58
+1305426761              MESSAGE TYPE: 3
+1305426761              SIZE: 40
+1305426761              COUNTER: 0
+1305426761              DATA: 0 0 198 15 1 0 199 191 2 0 210 158 3 0 213 67 4 0 212 146 5 0 212 142 6 0 207 194 7 0 217 189 194 55 255 209 9 0 220 9              
+1305426761              RSSI: -47
+1305426761              HOPS: 2
+1305426761              NUMBER OF PACKETS SENDED: 194
+1305426761              NUMBER OF PACKETS ACKNOWLEDGED: 55
+1305426761              CHECKSUM: 9
+1305426761              BATTERY: 2156
+1305426761 
+1305426761              Mesh reveived callback: Sending ACK packet
+1305426761 
+1305426761              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426761 
+1305426761              Mesh received callback: Data packet received from 6.58
+1305426761 
+1305426761              Mesh received callback: Packet content:
+1305426761              MOBILE NODE ID: 6.58
+1305426761              MESSAGE TYPE: 3
+1305426761              SIZE: 40
+1305426761              COUNTER: 0
+1305426761              DATA: 0 0 216 160 1 0 217 177 2 0 216 10 3 0 203 83 4 0 207 103 5 0 213 168 6 0 216 0 7 0 217 171 195 56 255 209 9 0 217 152              
+1305426761              RSSI: -47
+1305426761              HOPS: 2
+1305426761              NUMBER OF PACKETS SENDED: 195
+1305426761              NUMBER OF PACKETS ACKNOWLEDGED: 56
+1305426761              CHECKSUM: 50
+1305426761              BATTERY: 2157
+1305426761 
+1305426761              Mesh reveived callback: Sending ACK packet
+1305426761 
+1305426761              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426761 
+1305426762              Mesh received callback: Data packet received from 6.58
+1305426762 
+1305426762              Mesh received callback: Packet content:
+1305426762              MOBILE NODE ID: 6.58
+1305426762              MESSAGE TYPE: 3
+1305426762              SIZE: 40
+1305426762              COUNTER: 0
+1305426762              DATA: 0 0 224 183 1 0 211 213 2 0 204 124 3 0 211 252 4 0 181 47 5 0 206 69 6 0 224 121 7 0 217 98 196 57 255 209 9 0 222 108              
+1305426762              RSSI: -47
+1305426762              HOPS: 2
+1305426762              NUMBER OF PACKETS SENDED: 196
+1305426762              NUMBER OF PACKETS ACKNOWLEDGED: 57
+1305426762              CHECKSUM: 234
+1305426762              BATTERY: 2157
+1305426762 
+1305426762              Mesh reveived callback: Sending ACK packet
+1305426762 
+1305426762              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426762 
+1305426762              Mesh received callback: Data packet received from 6.58
+1305426762 
+1305426762              Mesh received callback: Packet content:
+1305426762              MOBILE NODE ID: 6.58
+1305426762              MESSAGE TYPE: 3
+1305426762              SIZE: 40
+1305426762              COUNTER: 0
+1305426762              DATA: 0 0 210 178 1 0 200 212 2 0 209 151 3 0 198 48 4 0 207 240 5 0 194 15 6 0 201 56 7 0 194 209 197 58 255 208 9 0 172 144              
+1305426762              RSSI: -48
+1305426762              HOPS: 2
+1305426762              NUMBER OF PACKETS SENDED: 197
+1305426762              NUMBER OF PACKETS ACKNOWLEDGED: 58
+1305426762              CHECKSUM: 203
+1305426762              BATTERY: 2156
+1305426762 
+1305426762              Mesh reveived callback: Sending ACK packet
+1305426762 
+1305426762              Mesh sent callback: Packet sent
+/¬*******************************************************************************************************************************************/
+1305426762 
+1305426763              Mesh received callback: Data packet received from 6.58
+1305426763 
+1305426763              Mesh received callback: Packet content:
+1305426763              MOBILE NODE ID: 6.58
+1305426763              MESSAGE TYPE: 3
+1305426763              SIZE: 40
+1305426763              COUNTER: 0
+1305426763              DATA: 0 0 223 131 1 0 222 191 2 0 212 124 3 0 209 81 4 0 216 71 5 0 210 67 6 0 214 213 7 0 202 191 198 59 255 208 9 0 227 4              
+1305426763              RSSI: -48
+1305426763              HOPS: 2
+1305426763              NUMBER OF PACKETS SENDED: 198
+1305426763              NUMBER OF PACKETS ACKNOWLEDGED: 59
+1305426763              CHECKSUM: 122
+1305426763              BATTERY: 2155
+1305426763 
+1305426763              Mesh reveived callback: Sending ACK packet
+1305426763 
+1305426763              Mesh sent callback: Packet sent
+/#*Anterior 5.96 - Paquete 61******************************************************************************************************************/
+/¬*******************************************************************************************************************************************/
+1305427052              Mesh received callback: Data packet received from 6.58
+1305427052 
+1305427052              Mesh received callback: Packet content:
+1305427052              MOBILE NODE ID: 6.58
+1305427052              MESSAGE TYPE: 3
+1305427052              SIZE: 40
+1305427052              COUNTER: 0
+1305427052              DATA: 0 0 209 76 1 0 212 14 2 0 210 157 3 0 202 243 4 0 205 237 5 0 203 171 6 0 217 165 7 0 200 113 199 60 255 209 9 0 205 31              
+1305427052              RSSI: -47
+1305427052              HOPS: 2
+1305427052              NUMBER OF PACKETS SENDED: 199
+1305427052              NUMBER OF PACKETS ACKNOWLEDGED: 60
+1305427052              CHECKSUM: 163
+1305427052              BATTERY: 2157
+1305427052 
+1305427052              Mesh reveived callback: Sending ACK packet
+1305427052 
+1305427052              Mesh sent callback: Packet sent
+/#*Anterior 5.96 - Paquete 62******************************************************************************************************************/
+/¬*******************************************************************************************************************************************/
+1305427354              Mesh received callback: Data packet received from 6.58
+1305427354 
+1305427354              Mesh received callback: Packet content:
+1305427354              MOBILE NODE ID: 6.58
+1305427354              MESSAGE TYPE: 3
+1305427354              SIZE: 40
+1305427354              COUNTER: 0
+1305427354              DATA: 0 0 212 27 1 0 204 80 2 0 215 145 3 0 204 148 4 0 200 212 5 0 210 228 6 0 215 167 7 0 202 141 200 61 255 208 9 0 207 101              
+1305427354              RSSI: -48
+1305427354              HOPS: 2
+1305427354              NUMBER OF PACKETS SENDED: 200
+1305427354              NUMBER OF PACKETS ACKNOWLEDGED: 61
+1305427354              CHECKSUM: 71
+1305427354              BATTERY: 2157
+1305427354 
+1305427354              Mesh reveived callback: Sending ACK packet
+1305427354 
+1305427354              Mesh sent callback: Packet sent
+
+.......
+
+Packets acknowledged: 256 + 122
