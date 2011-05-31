@@ -1,0 +1,30 @@
+This document briefs the branches currently implemented by Zolertia Labs.
+
+-------------------------------------------------------------------------
+ZT-Main:
+-------------------------------------------------------------------------
+Contains the basic ZoundTracker implementation, which features the following:
+- ZoundTracker sound board, currently used as a phidget (analog sensor).
+- Moderate sense rate (every minute).
+- Moderate send rate (every 10 minutes, or 10 samples).
+- Radio Channel 26.
+- Powered by batteries, solar panel and directly connected to VAC/VDC and 
+  rechargable batteries.
+- 15 motes.
+- Has its own BS.
+
+-------------------------------------------------------------------------
+ZT-Rapid:
+-------------------------------------------------------------------------
+Contains a specific ZoundTracker implementation, as later requested, will 
+sense data at high speed and will send the data really fast, which features 
+the following:
+
+- ZoundTracker sound board, currently used as a ziglet (digital sensor).
+- Fast sense rate (~88ms).
+- Fast send rate (~1sec).
+- Radio Channel 15.
+- Directly connected to VAC/VDC and rechargable batteries.
+- 5 motes.
+- Has its own BS.
+
