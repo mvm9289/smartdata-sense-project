@@ -1,5 +1,5 @@
 /* File: "zt-mn.c"
-   Date (last rev.): 30/03/2011 13:41 AM                               */
+   Date (last rev.): 20/07/2011                                */
    
 #include "contiki.h"
 #include "leds.h"
@@ -42,7 +42,7 @@
 #endif
 
 /* CFS */
-#define NUM_SECONDS_SAMPLE 10  // Default 60 (1 sample/min)
+#define NUM_SECONDS_SAMPLE 60  // Default 60 (1 sample/min)
 #define WORKING_FILE "sample_file"
 #define ERROR -1
 #define NO_NEXT_PACKET -2
@@ -175,7 +175,7 @@ data_msg()
     packet_to_send.addr1 = MY_ADDR1;
     packet_to_send.addr2 = MY_ADDR2;
     packet_to_send.type = DATA;
-    packet_to_send.size = DATA_SIZE; //file_size;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    
+    packet_to_send.size = DATA_SIZE;    
     packet_to_send.counter = (packet_number-1)*DATA_SIZE;
     memcpy(packet_to_send.data, read_buffer, read_bytes);
     packet_to_send.checksum = compute_checksum(&packet_to_send);
@@ -250,46 +250,6 @@ prepare_packet(void)
      Otherwise the return value will be FALSE */
 
 
-    /* Reading from the "WORKING_FILE". */
-    //if (fd_read == EMPTY)
-    //{
-        /* That's the first packet of "WORKING_FILE". */
-		/*#ifdef DEBUG_CFS
-	      printf("[cfs]\n Trying to prepare the first packet of the");
-	      printf(" 'WORKING_FILE'\n\n");
-		#endif
-        packet_number = 0;
-        fd_read = cfs_open(WORKING_FILE, CFS_READ);
-	}*/
-	/* else currently sending the 'WORKING_FILE'. */
-	
-	/*if (fd_read == ERROR)
-	{
-		#ifdef DEBUG_CFS
-	      printf("[cfs]\n Error openning the 'WORKING_FILE'");
-	      printf(" for read data\n\n");
-	    #endif
-		return FALSE;
-	}
-	else 
-	{                  
-        read_bytes = cfs_read(fd_read, read_buffer, DATA_SIZE);
-		#ifdef DEBUG_CFS
-	      printf("[cfs]\n Num. bytes readed: %d\n\n", read_bytes);
-		#endif
-        
-        if (read_bytes == ERROR)
-        {
-			#ifdef DEBUG_CFS
-			  printf("[cfs]\n Error reading from the");
-			  printf(" 'WORKING_FILE'\n\n");
-			#endif
-            return FALSE;  
-        }
-        else if (read_bytes == 0) {
-          return FALSE;
-        }
-    }*/
     int pos;
     if(read_attempts > 0){
     	pos = readSeek(START_POSITION);
@@ -323,11 +283,9 @@ prepare_packet(void)
             return ERROR_INVALID_FD;
         }
     }
-    else if(read_bytes == 0)return FALSE; //read_bytes = 0
+    else if(read_bytes == 0)return FALSE;
     else return ERROR_CFS;
     
-    /* There's information to send. */
-    //return TRUE;
 
 }
 
@@ -347,43 +305,27 @@ send_packet_from_file(void)
 
 	int storedFiles = getStoredFiles();
 	
-	//if(storedFiles > 0) {
-		next_packet = prepare_packet();
-		      
-		if (next_packet == TRUE)
-		{              
-		    /* "Packet" sending. */
-		    //packet_number++;
-		    data_msg();
-		
-			#ifdef DEBUG_NET
-			  printf("[net]\n Sending the 'WORKING_FILE'");
-			  printf(" (packet number: %d)\n\n", packet_number);
-			#endif
-		}    
-		else if(next_packet == FALSE) 
-		{       
-		    /* 'WORKING_FILE' completely sended, removing it. */
-		    /*cfs_close(fd_read);
-		    fd_read = EMPTY;
+	next_packet = prepare_packet();
+	      
+	if (next_packet == TRUE)
+	{              
+	    /* "Packet" sending. */
+	    //packet_number++;
+	    data_msg();
+	
+		#ifdef DEBUG_NET
+		  printf("[net]\n Sending the 'WORKING_FILE'");
+		  printf(" (packet number: %d)\n\n", packet_number);
+		#endif
+	}    
+	else if(next_packet == FALSE) 
+	{       
+	    sample_interval = 0;
+	    updateReadFile();
+	    storedFiles = getStoredFiles();
+	    if(storedFiles > 0) send_packet_from_file();
 
-		    cfs_remove(WORKING_FILE);
-
-		    sample_interval = 0;
-		    file_size = 0;
-
-			#ifdef DEBUG_NET
-			  printf("[net]\n The 'WORKING_FILE' is completely sended,");
-			  printf(" removing it\n\n");
-		    #endif*/
-
-		    sample_interval = 0;
-		    updateReadFile();
-		    storedFiles = getStoredFiles();
-		    if(storedFiles > 0) send_packet_from_file();
-
-		}
-	//}
+	}
 }
 
 /* ------------------------------------------------------------------ */
@@ -468,16 +410,13 @@ timedout(struct mesh_conn *c)
 	    else if (output_msg_type == DATA)
 
 		{	
-            /* Current sending message lost. We can't erase the 
-               "WORKING_FILE". */
-            //cfs_close(fd_read);
-            //fd_read = EMPTY;       
+            /* Current sending message lost.*/
 
             /* Starting new sample period (10 minutes). */
             sample_interval = 0;
             
             
-            readSeek(START_POSITION);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            readSeek(START_POSITION);
         
 		    #ifdef DEBUG_NET
 			  printf("[net]\n 'DATA' message lost");
@@ -573,7 +512,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
     		  printf("[net]\n 'POLL' received\n\n");
     		#endif
 
-            if (prev_state == DATA_SEND)//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            if (prev_state == DATA_SEND)
             {
                 /* "POLL" message on reply to a "DATA" message 
                     sended and lost. Resending the last packet. */
@@ -593,7 +532,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 		    #endif
         }
         storedFiles = getStoredFiles();
-        if (ack_waiting == FALSE && storedFiles==0)//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        if (ack_waiting == FALSE && storedFiles==0)
         {
             /* We're not pending for an 'ACK' message and the 
             'WORKING_FILE' is not opened for sending. 
@@ -733,58 +672,6 @@ get_sensor_sample(void)
      This function is executed when the node enters into "DATA_COLLECT" 
      state to take a sensor sample, every sample period. */
      	
-	/* Reading data from sensor.  */
-/*        int16_t raw = 0;
-        zt_write_reg (0xB0, 0xC0FE);
-        raw = zt_read_spl_raw();
-	sensor_sample = (char)raw;
-*/
-      /*int32_t t_buffer = 0;
-      uint32_t bigassbuffer = 0;
-      uint8_t i, j = 0;
-
-      for (i=0;i<200;i++){
-        t_buffer = phidgets.value(PHIDGET3V_2);
-          t_buffer -= 2031;
-          bigassbuffer += (uint32_t)(t_buffer * t_buffer);
-      }
-      bigassbuffer /= 200;
-      printf("[ZT]\n Raw mean square: %lu\n", bigassbuffer);     
-      bigassbuffer = (bigassbuffer >> 1);
-
-     Building the 'Sample' structure for writing.
-    current_sample.number = sample_interval;
-    current_sample.value[0] = (char)((bigassbuffer & 0xFF0000)>>16);
-    current_sample.value[1] = (char)((bigassbuffer & 0x00FF00)>>8);
-    current_sample.value[2] = (char)(bigassbuffer & 0x0000FF);
-
-    Writing data into the "WORKING_FILE".
-	fd_write = cfs_open(WORKING_FILE, CFS_WRITE | CFS_APPEND);       
-    if (fd_write == ERROR) 
-	{	
-	    #ifdef DEBUG_CFS
-		  printf("[cfs]\n Error openning the 'WORKING_FILE'");
-		  printf(" for write data\n\n");
-		#endif
-    }
-    else 
-    {
-        write_bytes = cfs_write(fd_write, &current_sample, SAMPLE_SIZE);
-        if (write_bytes != SAMPLE_SIZE) 
-		{
-			#ifdef DEBUG_CFS
-			  printf("[cfs]\n Write: error writing into the");
-			  printf(" 'WORKING_FILE'\n\n");
-			#endif
-        }
-        else
-          file_size += write_bytes;
-                  
-        cfs_close(fd_write);
-        fd_write = EMPTY;
-        
-    }*/
-    
     if(write_attempts == 0) {
         int32_t t_buffer = 0;
         uint32_t bigassbuffer = 0;
@@ -844,11 +731,6 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     /* CFS */
     etimer_set(&control_timer, NUM_SECONDS_SAMPLE*CLOCK_SECOND);
     sample_interval = 0;
-    //file_size = 0;
-    //fd_read = fd_write = EMPTY;
-    //cfs_remove(WORKING_FILE);
-    packet_number = 1;//----------------->Ahora se enviará un solo paquete por fichero.
-    //Cambiar DATA_SIZE de 32 a 40
     initOk = initFileManager();
     read_attempts = 0;
     write_attempts = 0;
@@ -861,6 +743,11 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     /* State */
     state = BLOCKED;
     
+    #ifdef DEBUG_FILEMAN
+	  if(initOk == 1) printf("---\n[file-man]\n Init File Manager OK\n---\n\n");
+      else printf("---\n[file-man]\n Init File Manager failed\n---\n\n");
+	#endif
+
     #ifdef DEBUG_STATE
 	  printf("---\n[state]\n Current state 'BLOCKED'\n---\n\n");
 	#endif
@@ -955,10 +842,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                         #ifdef DEBUG_NET
     					  printf("[net]\n 'DATA_ACK' message lost\n\n");
     					#endif
-                        /* ACK message lost. We can't erase the 
-                           "WORKING_FILE". */
-                        //cfs_close(fd_read);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        //fd_read = EMPTY;       
+                        /* ACK message lost. */      
 
                         ack_waiting = FALSE;
      
