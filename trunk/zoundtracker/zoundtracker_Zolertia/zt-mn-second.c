@@ -67,12 +67,14 @@
 /* ------------------------------------------------------------------ */
 
 /* CFS */
-static int write_bytes, read_bytes, fd_read, fd_write;
-static unsigned short file_size;
+static FileManager fmanLocal;
+static FileManager fmanNet;
+static int write_bytes, read_bytes;
 static struct etimer control_timer;
 static unsigned char read_buffer[DATA_SIZE];
 static Sample current_sample;
-static char initOk;
+static char initOkLocal;
+static char initOkNet;
 static int read_attempts;
 static int write_attempts;
 
@@ -90,9 +92,7 @@ static Packet packet_received;
 /*static clock_time_t time_remaining;*/
 
 /* Sensor */
-static char sensor_sample;
 static int sample_interval;
-static struct etimer bm;
 
 /* State */
 static unsigned char state;
@@ -252,7 +252,7 @@ prepare_packet(void)
 
     int pos;
     if(read_attempts > 0){
-    	pos = readSeek(START_POSITION);
+    	pos = readSeek(&fmanLocal, START_POSITION);
     	if(pos == ERROR_INVALID_FD) {
         	++read_attempts;
         	if(read_attempts < MAX_READ_ATTEMPTS)return prepare_packet();
@@ -266,7 +266,7 @@ prepare_packet(void)
         	return ERROR_READ_SEEK;
     	}
     }
-    read_bytes = read(read_buffer, DATA_SIZE);
+    read_bytes = read(&fmanLocal, read_buffer, DATA_SIZE);
     if(read_bytes > 0) {
         read_attempts = 0;
         return TRUE;
@@ -303,7 +303,7 @@ send_packet_from_file(void)
      the "WORKING_FILE" and when a "DATA_ACK" or "POLL" message is 
      received. */
 
-	int storedFiles = getStoredFiles();
+	int storedFiles = getStoredFiles(&fmanLocal);
 	
 	next_packet = prepare_packet();
 	      
@@ -321,8 +321,8 @@ send_packet_from_file(void)
 	else if(next_packet == FALSE) 
 	{       
 	    sample_interval = 0;
-	    updateReadFile();
-	    storedFiles = getStoredFiles();
+	    updateReadFile(&fmanLocal);
+	    storedFiles = getStoredFiles(&fmanLocal);
 	    if(storedFiles > 0) send_packet_from_file();
 
 	}
@@ -416,7 +416,7 @@ timedout(struct mesh_conn *c)
             sample_interval = 0;
             
             
-            readSeek(START_POSITION);
+            readSeek(&fmanLocal, START_POSITION);
         
 		    #ifdef DEBUG_NET
 			  printf("[net]\n 'DATA' message lost");
@@ -531,7 +531,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 	          printf("[net]\n Incorrect type of message received\n\n");
 		    #endif
         }
-        storedFiles = getStoredFiles();
+        storedFiles = getStoredFiles(&fmanLocal);
         if (ack_waiting == FALSE && storedFiles==0)
         {
             /* We're not pending for an 'ACK' message and the 
@@ -693,7 +693,7 @@ get_sensor_sample(void)
         current_sample.value[2] = (char)(bigassbuffer & 0x0000FF);
     }
 
-    write_bytes = write(&current_sample,SAMPLE_SIZE);
+    write_bytes = write(&fmanLocal, &current_sample,SAMPLE_SIZE);
     if(write_bytes == ERROR_INVALID_FD) {
         ++write_attempts;
         if(write_attempts < MAX_WRITE_ATTEMPTS) get_sensor_sample();
@@ -726,12 +726,15 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	valid_broadcast_id = (unsigned char)(rand() % 256);
 	num_msg_sended = 0;
 	num_msg_acked = 0;
-    initOk = FALSE;
+    packet_number = 1;
 	
     /* CFS */
     etimer_set(&control_timer, NUM_SECONDS_SAMPLE*CLOCK_SECOND);
     sample_interval = 0;
-    initOk = initFileManager();
+    initOkLocal = FALSE;
+    initOkNet = FALSE;
+    initOkLocal = initFileManager(&fmanLocal, 'l', 10, 60);
+    initOkNet = initFileManager(&fmanLocal, 'n', 1, 60);
     read_attempts = 0;
     write_attempts = 0;
     
@@ -744,7 +747,9 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     state = BLOCKED;
     
     #ifdef DEBUG_FILEMAN
-	  if(initOk == 1) printf("---\n[file-man]\n Init File Manager OK\n---\n\n");
+	  if(initOkLocal == TRUE) printf("---\n[file-man]\n Init File Manager Local OK\n---\n\n");
+      else printf("---\n[file-man]\n Init File Manager failed\n---\n\n");
+	  if(initOkNet == TRUE) printf("---\n[file-man]\n Init File Manager Net OK\n---\n\n");
       else printf("---\n[file-man]\n Init File Manager failed\n---\n\n");
 	#endif
 
@@ -848,7 +853,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
      
                         /* Starting a new sample period */
                         sample_interval = 0;
-                        readSeek(START_POSITION);
+                        readSeek(&fmanLocal, START_POSITION);
                         
                         /* Changing to "BLOCKED" from "DATA_SEND" 
                            state. */

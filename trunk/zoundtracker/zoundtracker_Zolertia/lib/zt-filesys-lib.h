@@ -17,11 +17,11 @@
 
 #define MAX_SAMPLE_NUMBER 10
 #define MAX_STORED_FILES 60
-#define MAX_INT 2^16 -1
+
 
 #define START_POSITION 0
 #define DECIMAL_BASE 10
-#define FILENAME_SIZE 16
+#define FILENAME_SIZE 6
 
 #define ERROR_INVALID_FD -2
 #define ERROR_WRITE_FILE -3
@@ -40,12 +40,17 @@ typedef struct
   int writeFD;
   char writeFileName[FILENAME_SIZE];
  
+  int maxSampleNumber;
+  int maxStoredFiles;
   int storedFiles;
+  char prefix;
 } FileManager;
 
 /* Functions */
 
-char initFileManager();
+char initFileManager(FileManager *fman, char prefix, 
+                     int maxSampleNumber, 
+                     int maxStoredFiles);
 /* [Functionality]
      This function initilizes the file manager.
      
@@ -54,7 +59,7 @@ char initFileManager();
      process, beyond 'PROCESS_BEGIN()'.*/
 
 
-int write(const void* data, int size);
+int write(FileManager *fman, const void* data, int size);
 /* [Functionality]
      This function stores into the current write file 'size' bytes 
      starting from the begining of 'data' buffer.
@@ -68,7 +73,7 @@ int write(const void* data, int size);
      sensor, into the file system.*/
 
 
-int read(void* data, int size);
+int read(FileManager *fman, void* data, int size);
 /* [Functionality]
      This functions stores into 'data' buffer 'size' bytes starting 
      from the read offset of the current read file.
@@ -86,7 +91,7 @@ int read(void* data, int size);
      into the file system, to send it to the Basestation.*/
      
 
-int updateReadFile();
+int updateReadFile(FileManager *fman);
 /* [Functionality]
      This function deletes the current read file and prepares the next 
      stored file of the node to be readed.
@@ -100,7 +105,7 @@ int updateReadFile();
      recovered.*/
 
 
-char readSeek(int pos); 
+char readSeek(FileManager *fman, int pos); 
 /* [Functionality]
      This function updates the read offset to the 'pos' position 
      starting from the begining (absolute position) of the current 
@@ -111,7 +116,7 @@ char readSeek(int pos);
      not acknowledged by the Basestation.*/
      
 
-void updateWriteFile();
+void updateWriteFile(FileManager *fman);
 /* [Functionality]
      This function closes the current write file when the number of 
      writes reachs 'MAX_SAMPLE_NUMBER'. Then opens a new file to
@@ -128,7 +133,7 @@ void updateWriteFile();
      and update the internal state of the file system.*/
 
 
-char isValidFD(int fd);
+char isValidFD(FileManager *fman, int fd);
 /* [Functionality]
      This function verifies that the current read/write file, pointed by 
      the 'fd' file descriptor, is correctly opened. 
@@ -137,7 +142,7 @@ char isValidFD(int fd);
      This auxiliary function is used on all read/write operations.*/
 
 
-int getStoredFiles();
+int getStoredFiles(FileManager *fman);
 /* [Functionality]
      This function returns the value of 'storedFiles' attribute. 
      
