@@ -1,8 +1,0 @@
-To run:
-
-python DataHarvester_TXT.py /dev/ttyUSBX.
-
-Saves the data in the same directory, creates the following files:
-
-- DataReceived.xls (sensor Data)
-- noDataKindReceived.xls (Misc data)
