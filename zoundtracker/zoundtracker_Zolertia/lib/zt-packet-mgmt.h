@@ -1,9 +1,13 @@
 #ifndef __ZT_PACKET_MGMT_H__
 #define __ZT_PACKET_MGMT_H__
 
+#ifndef SINK_ADDR1
+    #define SINK_ADDR1 111
+#endif
+#ifndef SINK_ADDR2
+    #define SINK_ADDR2 111
+#endif
 
-#define SINK_ADDR1 111
-#define SINK_ADDR2 111
 #define CHANNEL1 111
 #define CHANNEL2 222
 #define HELLO_BS 1
@@ -15,7 +19,8 @@
 #define PACKET_SIZE 64
 #define DATA_SIZE 40
 #define HEADER_SIZE 7
-#define RESERVED_SIZE (PACKET_SIZE - HEADER_SIZE - DATA_SIZE)
+#define TAIL_SIZE 2
+#define RESERVED_SIZE (PACKET_SIZE - HEADER_SIZE - DATA_SIZE - TAIL_SIZE)
 #define HELLO_MSG_SIZE 0
 #define HELLO_MSG_COUNTER 0
 
