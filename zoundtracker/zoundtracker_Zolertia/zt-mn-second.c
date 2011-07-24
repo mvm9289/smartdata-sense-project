@@ -42,7 +42,7 @@
 #endif
 
 /* CFS */
-#define NUM_SECONDS_SAMPLE 60  // Default 60 (1 sample/min)
+#define NUM_SECONDS_SAMPLE 10  // Default 60 (1 sample/min)
 #define WORKING_FILE "sample_file"
 #define ERROR -1
 #define NO_NEXT_PACKET -2
@@ -88,7 +88,7 @@ static struct broadcast_conn zoundtracker_broadcast_conn;
 static unsigned char rime_stream[PACKET_SIZE], next_packet, 
     last_broadcast_id, valid_broadcast_id, num_msg_sended, num_msg_acked;
 static unsigned short packet_checksum;
-static Packet packet_received;
+static Packet packet_received, ack_packet;
 /*static clock_time_t time_remaining;*/
 
 /* Sensor */
@@ -232,6 +232,22 @@ data_msg()
 	/* Net Control Information */
 	num_msg_sended++;
 }
+
+
+static void ACK_msg() {
+
+
+    /* "Packet" construction. */
+    ack_packet.addr1 = MY_ADDR1;
+    ack_packet.addr2 = MY_ADDR2;
+    ack_packet.type = DATA_ACK;
+    ack_packet.size = 0;    
+    ack_packet.counter = 0;
+    ack_packet.checksum = compute_checksum(&ack_packet);
+       
+}
+
+
 
 static unsigned char 
 prepare_packet(void)
@@ -454,7 +470,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
      mesh connection. */
 
     unsigned char prev_state = state;
-    int storedFiles;
+    int storedFiles,i;
 
     #ifdef DEBUG_NET
 	  printf("[net]\n Message received through 'mesh' connection\n\n");
@@ -524,6 +540,68 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
                     exceed. Sending the "WORKING_FILE". */
                 send_packet_from_file();
             }
+        }
+        else if (packet_received.type == DATA) {
+            //DATA message received. Resending to the SINK
+
+            //rssi = cc2420_rssi();
+            //packet_received.reserved[2] = (char)(rssi>>8);
+            //packet_received.reserved[3] = (char)(rssi);
+            #ifdef DEBUG_NET
+                printf("             Mesh received callback: ");
+               printf("Data packet received from %d.%d\n\n",
+                        from->u8[0],
+                        from->u8[1]);
+                printf("             Mesh received callback: ");
+                printf("Packet content:\n");
+                printf("             MOBILE NODE ID: %d.%d\n",
+                        packet_received.addr1,
+                        packet_received.addr2);
+                printf("             MESSAGE TYPE: %d\n", packet_received.type);
+                printf("             SIZE: %d\n", packet_received.size);
+                printf("             COUNTER: %d\n", packet_received.counter);
+                printf("             DATA: ");
+                for (i = 0; i < DATA_SIZE &&
+                  packet_received.counter + i < packet_received.size;
+                  i++)
+                    printf("%d ", packet_received.data[i]);
+                printf("             \n");
+                //printf("             RSSI: %d\n", rssi);
+                printf("             HOPS: %d\n", hops);
+                printf("             NUMBER OF PACKETS SENDED: %d\n",
+                        packet_received.reserved[0]);
+                printf("             NUMBER OF PACKETS ACKNOWLEDGED: %d\n",
+                        packet_received.reserved[1]);
+                printf("             CHECKSUM: %d\n\n",
+                        packet_received.checksum);
+            #endif
+                //Mounting ACK message
+                ACK_msg();
+
+                //Preparing "Packet" to send it through "rime". Building the 
+               //"rime_stream" using the information of "ack_packet"   
+                mount_packet(&ack_packet, rime_stream);
+                packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
+	
+
+                #ifdef DEBUG_NET
+            	  printf("[net]\n Sending 'ACK' message\n\n");
+                #endif
+
+            	// Configuring type of message
+                output_msg_type = DATA_ACK;
+	
+            	mesh_send(&zoundtracker_conn, from);
+	
+            	// Net Control Information
+            	num_msg_sended++;
+
+
+                //if(prev_state == BLOCKED) {
+                    
+                    //packetbuf_copyfrom(packetbuf_dataptr(), PACKET_SIZE);
+                        
+                //}
         }
         else 
         {
@@ -734,7 +812,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     initOkLocal = FALSE;
     initOkNet = FALSE;
     initOkLocal = initFileManager(&fmanLocal, 'l', 10, 60);
-    initOkNet = initFileManager(&fmanLocal, 'n', 1, 60);
+    initOkNet = initFileManager(&fmanNet, 'n', 1, 60);
     read_attempts = 0;
     write_attempts = 0;
     
