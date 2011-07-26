@@ -1,8 +1,10 @@
 #ifndef __ZT_DEBUG_LIB_H__
 #define __ZT_DEBUG_LIB_H__
 
+#include "zt-packet-mgmt.h"
+
 //NET messages
-void debug_debug_net_sending_message(char* message);
+void debug_net_sending_message(char* message);
 void debug_net_packet_content(Packet *packet);
 void debug_net_sending_WORKING_FILE(int packet_number);
 void debug_net_timeout(int type,int packet_number);

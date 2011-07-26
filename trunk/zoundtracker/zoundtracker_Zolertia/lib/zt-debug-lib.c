@@ -1,9 +1,10 @@
 #include "zt-debug-lib.h"
 #include "zt-packet-mgmt.h"
+#include "string.h"
 
 //NET messages
-void debug_net_sending_message(char* message) {
-	printf("[net]\nSending '%s' message\n\n");
+void debug_net_sending_message(char* message){
+	printf("[net]\nSending '%s' message\n\n",message);
 }
 
 void debug_net_packet_content(Packet *packet){
@@ -52,18 +53,25 @@ void debug_net_message_lost(int type, int packet_number){
 		printf("[net]\n 'DATA' message lost");
 		printf(" (packet number: %d)\n\n", packet_number);
 	}
+    else if(type == DATA_ACK)
+        printf("[net]\n 'DATA_ACK' message lost\n\n");
+   else if(type == HELLO_ACK)
+        printf("[net]\n 'DATA_ACK' message lost\n\n");
+
+   else
+        printf("[net]\n Unknown type message lost\n\n");
 }
 
 
 void debug_net_message_received_connection(char* connection){
-	printf("[net]\n Message received through '%s' connection\n\n",mesh);
+	printf("[net]\n Message received through '%s' connection\n\n",connection);
 }
 
 
 void debug_net_message_received(char* message){
-	if(strcmp(message,"incorrect") == 1)
+	if(strcmp(message,"incorrect") == 0)
 		printf("[net]\n Incorrect type of message received\n\n");
-	else printf("[net]\n '%s' received\n\n",message)
+	else printf("[net]\n '%s' received\n\n",message);
 }
 
 

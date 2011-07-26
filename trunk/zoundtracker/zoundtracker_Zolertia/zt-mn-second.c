@@ -21,6 +21,9 @@
 /*File Manager*/
 #include "lib/zt-filesys-lib.h"
 
+/*Debug lib*/
+#include "lib/zt-debug-lib.h"
+
 /* ------------------------------------------------------------------ */
 
 #ifdef TRUE
@@ -139,7 +142,7 @@ hello_msg()
 	sink_addr.u8[1] = SINK_ADDR2;
 
     #ifdef DEBUG_NET
-	  printf("[net]\n Sending 'HELLO_MN' message\n\n");
+	  debug_net_sending_message("HELLO_MN");
     #endif
 
 	/* Configuring type of message */
@@ -200,15 +203,7 @@ data_msg()
      packet_to_send.reserved[21] = (unsigned char) (batt & 0x00FF);
     
 	#ifdef DEBUG_NET
-	  printf("[net]\n 'DATA' packet contents\n");
-	  printf("  Addr1: %d\n", packet_to_send.addr1);
-	  printf("  Addr2: %d\n", packet_to_send.addr2);
-	  printf("  Type: %d\n", packet_to_send.type);
-	  printf("  Size: %d\n", packet_to_send.size);
-	  printf("  Counter: %d\n", packet_to_send.counter);
-	  printf("  Data: %d-%d-%d-%d\n", packet_to_send.data[0], packet_to_send.data[1], packet_to_send.data[2], packet_to_send.data[3]);
-	  printf("  Checksum: %d\n", packet_to_send.checksum);
-          printf("  Battery: %d-%d\n\n", packet_to_send.reserved[20], packet_to_send.reserved[21]);
+        debug_net_packet_content(&packet_to_send);
 	#endif
 	
     /* Preparing "Packet" to send it through "rime". Building the 
@@ -221,7 +216,7 @@ data_msg()
 	sink_addr.u8[1] = SINK_ADDR2;
 
 	#ifdef DEBUG_NET
-	  printf("[net]\n Sending 'DATA' message\n\n");
+	  debug_net_sending_message("DATA");
 	#endif
     
 	/* Configuring type of message */
@@ -330,8 +325,7 @@ send_packet_from_file(void)
 	    data_msg();
 	
 		#ifdef DEBUG_NET
-		  printf("[net]\n Sending the 'WORKING_FILE'");
-		  printf(" (packet number: %d)\n\n", packet_number);
+            debug_net_sending_WORKING_FILE(packet_number);
 		#endif
 	}    
 	else if(next_packet == FALSE) 
@@ -397,7 +391,7 @@ timedout(struct mesh_conn *c)
 	        hello_msg();
 	        
 			#ifdef DEBUG_NET
-			  printf("[net]\n Timeout resending 'HELLO_MN' message\n\n");
+			  debug_net_timeout(HELLO_MN, 0);
 			#endif
 	    }
 	    else if (output_msg_type == DATA)
@@ -406,21 +400,19 @@ timedout(struct mesh_conn *c)
 	        data_msg();
         
             #ifdef DEBUG_NET
-		      printf("[net]\n Timeout resending the current packet");
-		      printf(" (packet number: %d)", packet_number);
-		      printf(" from the 'WORKING_FILE'\n\n");
+                debug_net_timeout(DATA, packet_number);
 			#endif
         }
 	}
 	else
 	{
 	    #ifdef DEBUG_NET
-		  printf("[net]\n Maximum number of attempts reached\n");
+		  debug_net_max_attempts();
 		#endif
 	    if (output_msg_type == HELLO_MN)
 		{	    
 		    #ifdef DEBUG_NET
-			  printf("[net]\n 'HELLO_MN' message lost\n\n");
+			  debug_net_message_lost(HELLO_MN,0);
 			#endif
 	    }
 	    else if (output_msg_type == DATA)
@@ -435,8 +427,7 @@ timedout(struct mesh_conn *c)
             readSeek(&fmanLocal, START_POSITION);
         
 		    #ifdef DEBUG_NET
-			  printf("[net]\n 'DATA' message lost");
-			  printf(" (packet number: %d)\n\n", packet_number);
+			  debug_net_message_lost(DATA,packet_number);
 			#endif
         }
                 
@@ -445,7 +436,7 @@ timedout(struct mesh_conn *c)
         state = BLOCKED;
         
         #ifdef DEBUG_STATE
-	      printf("---\n[state]\n Current state 'BLOCKED'\n---\n\n");
+            debug_state_current_state("BLOCKED");
 	    #endif
 
         attempts = 0;
@@ -473,7 +464,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
     int storedFiles,i;
 
     #ifdef DEBUG_NET
-	  printf("[net]\n Message received through 'mesh' connection\n\n");
+	  debug_net_message_received_connection("mesh");
 	#endif
            
     /* Obtaining the "Packet" and checking checksum. */
@@ -488,7 +479,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         state = DATA_SEND;
         
         #ifdef DEBUG_STATE
-		  printf("---\n[state]\n Current state 'DATA_SEND'\n---\n\n");
+		  debug_state_current_state("DATA_SEND");
 		#endif
 		
     
@@ -503,7 +494,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 	        num_msg_acked++;
 
     		#ifdef DEBUG_NET
-    		  printf("[net]\n 'HELLO_ACK' received\n\n");
+    		  debug_net_message_received("HELLO_ACK");
     		#endif        
 
         }
@@ -515,7 +506,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 	        num_msg_acked++;
 
     		#ifdef DEBUG_NET
-    		  printf("[net]\n 'DATA_ACK' received\n\n");
+    		  debug_net_message_received("DATA_ACK");
     		#endif
 
             
@@ -525,7 +516,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         else if (packet_received.type == POLL)
         {
     		#ifdef DEBUG_NET
-    		  printf("[net]\n 'POLL' received\n\n");
+    		  debug_net_message_received("POLL");
     		#endif
 
             if (prev_state == DATA_SEND)
@@ -585,11 +576,11 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 	
 
                 #ifdef DEBUG_NET
-            	  printf("[net]\n Sending 'ACK' message\n\n");
+            	  debug_net_sending_message("ACK");
                 #endif
 
             	// Configuring type of message
-                output_msg_type = DATA_ACK;
+                //output_msg_type = DATA_ACK;
 	
             	mesh_send(&zoundtracker_conn, from);
 	
@@ -606,7 +597,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         else 
         {
             #ifdef DEBUG_NET
-	          printf("[net]\n Incorrect type of message received\n\n");
+	          debug_net_message_received("incorrect");
 		    #endif
         }
         storedFiles = getStoredFiles(&fmanLocal);
@@ -618,7 +609,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             state = BLOCKED;
             
             #ifdef DEBUG_STATE
-		      printf("---\n[state]\n Current state 'BLOCKED'\n---\n\n");
+		      debug_state_current_state("BLOCKED");
 		    #endif
 		    
         }
@@ -626,7 +617,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
     else 
     {
         #ifdef DEBUG_NET
-	      printf("[net]\n Incorrect checksum invalid message\n\n");
+	      debug_net_incorrect_checksum();
 		#endif
     }
 }
@@ -655,7 +646,7 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
     
     
     #ifdef DEBUG_NET
-	  printf("[net]\n Message received trough 'broadcast' connection\n\n");
+	  debug_net_message_received_connection("broadcast");
 	#endif
     
     if (state != DATA_SEND)
@@ -671,7 +662,7 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
             if (packet_received.type == HELLO_BS)
             {
                 #ifdef DEBUG_NET
-    			  printf("[net]\n 'HELLO_BS' message received\n\n");
+    			  debug_net_message_received("HELLO_BS");
                 #endif
                 
                 /* New Broadcast burst */
@@ -706,7 +697,7 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
             else
             {
                 #ifdef DEBUG_NET
-    	          printf("[net]\n Incorrect type of message received\n\n");
+    	          debug_net_message_received("incorrect");
     		    #endif
             }
         }
@@ -714,7 +705,7 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
         {
             /* Invalid message. */ 
             #ifdef DEBUG_NET
-			  printf("[net]\n Incorrect checksum. Invalid message\n\n");
+			  debug_net_incorrect_checksum();
 			#endif
         }
     }
@@ -832,7 +823,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	#endif
 
     #ifdef DEBUG_STATE
-	  printf("---\n[state]\n Current state 'BLOCKED'\n---\n\n");
+	  debug_state_current_state("BLOCKED");
 	#endif
 	
     
@@ -841,7 +832,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     state = DATA_SEND;    
     
     #ifdef DEBUG_STATE
-	  printf("---\n[state]\n Current state 'DATA_SEND'\n---\n\n");
+	  debug_state_current_state("DATA SEND");
 	#endif
     
     
@@ -854,7 +845,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
         if (ev == PROCESS_EVENT_TIMER)
         {
             #ifdef DEBUG_EVENT
-			  printf("[event]\n Timer expired event\n\n");
+			  debug_event_timer_expired();
 			#endif
             
             if (state == BLOCKED)
@@ -864,15 +855,13 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                 state = DATA_COLLECT;
                 
                 #ifdef DEBUG_STATE
-				  printf("---\n[state]\n");
-				  printf(" Current state 'DATA_COLLECT'\n---\n\n");
+				  debug_state_current_state("DATA COLLECT");
 				#endif
                       
                 get_sensor_sample();
                 
                 #ifdef DEBUG_SENSOR
-				  printf("[sensor]\n Sample measured");
-				  printf(" (sample number: %d)\n\n", sample_interval); 
+				  debug_sensor_sample_measured(sample_interval);
 				#endif
                 /* 'sample_interval' starts on zero. */
                 
@@ -882,9 +871,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                 if (sample_interval == SEND_INTERVAL)
                 {    
                     #ifdef DEBUG_NET
-					  printf("[net]\n");
-					  printf(" Number of packets sended: %d\n", num_msg_sended);
-					  printf(" Number of packets acknowledged: %d\n\n", num_msg_acked);
+                      debug_net_info_net(num_msg_sended, num_msg_acked);
 					#endif
                 
                     /* (!) We've got 10 sensor samples.
@@ -893,9 +880,8 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                     state = DATA_SEND;
                     
                     #ifdef DEBUG_STATE
-					  printf("---\n[state]\n");
-					  printf(" Current state 'DATA_SEND'\n---\n\n");
-					#endif
+                        debug_state_current_state("DATA SEND");	
+                    #endif
                     
                     send_packet_from_file();
                     
@@ -909,8 +895,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                     state = BLOCKED;
                     
                     #ifdef DEBUG_STATE
-					  printf("---\n[state]\n");
-					  printf(" Current state 'BLOCKED'\n---\n\n");
+                        debug_state_current_state("BLOCKED");
 					#endif
 
                 }
@@ -923,7 +908,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                     if (output_msg_type == DATA)
                     {
                         #ifdef DEBUG_NET
-    					  printf("[net]\n 'DATA_ACK' message lost\n\n");
+    					  debug_net_message_lost(DATA_ACK,0);
     					#endif
                         /* ACK message lost. */      
 
@@ -938,15 +923,14 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                         state = BLOCKED;
     					
     					#ifdef DEBUG_STATE
-    					  printf("---\n[state]\n");
-    					  printf(" current state 'BLOCKED'\n---\n\n");
+                            debug_state_current_state("BLOCKED");
     					#endif
 
                     }
                     else if (output_msg_type == HELLO_MN)
                     {
                         #ifdef DEBUG_NET
-    					  printf("[net]\n 'HELLO_ACK' message lost\n\n");
+    					  debug_net_message_lost(HELLO_ACK,0);
     					#endif
     					
     					ack_waiting = FALSE;
@@ -956,8 +940,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                         state = BLOCKED;
     					
     					#ifdef DEBUG_STATE
-    					  printf("---\n[state]\n");
-    					  printf(" Current state 'BLOCKED'\n---\n\n");
+    					  debug_state_current_state("BLOCKED");
     					#endif  
      
                     }
