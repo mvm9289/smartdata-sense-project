@@ -580,19 +580,17 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
                 #endif
 
             	// Configuring type of message
-                //output_msg_type = DATA_ACK;
+                output_msg_type = DATA_ACK;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	
             	mesh_send(&zoundtracker_conn, from);
+
+                //------------Save the packet into the net filesystem---------------
+                //write(&fmanNet, packetbuf_dataptr(),PACKET_SIZE);
+                
 	
             	// Net Control Information
             	num_msg_sended++;
 
-
-                //if(prev_state == BLOCKED) {
-                    
-                    //packetbuf_copyfrom(packetbuf_dataptr(), PACKET_SIZE);
-                        
-                //}
         }
         else 
         {
@@ -603,6 +601,30 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         storedFiles = getStoredFiles(&fmanLocal);
         if (ack_waiting == FALSE && storedFiles==0)
         {
+
+            //There are any file in the net filesystem manager?
+            if(getStoredFiles(&fmanNet) > 0) {//Yes
+                read(&fmanNet,read_buffer,PACKET_SIZE);
+                packetbuf_copyfrom((void *)read_buffer, PACKET_SIZE);
+               
+	            /* "Packet" send to the "Basestation" */
+            	sink_addr.u8[0] = SINK_ADDR1;
+            	sink_addr.u8[1] = SINK_ADDR2;
+
+	            #ifdef DEBUG_NET
+	              debug_net_sending_message("DATA (FORWARD)");
+	            #endif
+                
+	            /* Configuring type of message */
+                output_msg_type = DATA;
+	
+	            mesh_send(&zoundtracker_conn, &sink_addr);
+	
+	            /* Net Control Information */
+	            num_msg_sended++;
+    
+		    }
+
             /* We're not pending for an 'ACK' message and the 
             'WORKING_FILE' is not opened for sending. 
             Net work finalized */
@@ -611,7 +633,8 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             #ifdef DEBUG_STATE
 		      debug_state_current_state("BLOCKED");
 		    #endif
-		    
+            
+
         }
     }
     else 
@@ -846,6 +869,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
         {
             #ifdef DEBUG_EVENT
 			  debug_event_timer_expired();
+              printf("state = %d", state);
 			#endif
             
             if (state == BLOCKED)
