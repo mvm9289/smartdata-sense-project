@@ -356,7 +356,8 @@ sent(struct mesh_conn *c)
     /* Checksum comprobation is needed on receiver. */
     
     attempts = 0;
-    ack_waiting = TRUE;
+    if(output_msg_type == DATA || output_msg_type == HELLO_MN)
+    	ack_waiting = TRUE;
     
     #ifdef DEBUG_NET
 	  printf("[net]\n Sent message\n\n"); 
@@ -551,7 +552,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             #endif
 
         	// Configuring type of message
-            output_msg_type = HELLO_ACK;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            output_msg_type = HELLO_ACK;
 
         	mesh_send(&zoundtracker_conn, from);
 
@@ -605,12 +606,13 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
                 #endif
 
             	// Configuring type of message
-                output_msg_type = DATA_ACK;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                output_msg_type = DATA_ACK;
 	
             	mesh_send(&zoundtracker_conn, from);
 
                 //------------Save the packet into the net filesystem---------------
-                //write(&fmanNet, packetbuf_dataptr(),PACKET_SIZE);
+                //i = write(&fmanNet, packetbuf_dataptr(),PACKET_SIZE);
+                //printf("%d bytes written\n",i);
                 
 	
             	// Net Control Information
@@ -628,11 +630,11 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         {
 
             //There are any file in the net filesystem manager?
-            if(getStoredFiles(&fmanNet) > 0) {//Yes
+            /*if(getStoredFiles(&fmanNet) > 0) {//Yes
                 read(&fmanNet,read_buffer,PACKET_SIZE);
                 packetbuf_copyfrom((void *)read_buffer, PACKET_SIZE);
                
-	            /* "Packet" send to the "Basestation" */
+	            // "Packet" send to the "Basestation"
             	sink_addr.u8[0] = SINK_ADDR1;
             	sink_addr.u8[1] = SINK_ADDR2;
 
@@ -640,15 +642,15 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 	              debug_net_sending_message("DATA (FORWARD)");
 	            #endif
                 
-	            /* Configuring type of message */
+	            // Configuring type of message
                 output_msg_type = DATA;
 	
 	            mesh_send(&zoundtracker_conn, &sink_addr);
 	
-	            /* Net Control Information */
+	            // Net Control Information
 	            num_msg_sended++;
     
-		    }
+		    }*/
 
             /* We're not pending for an 'ACK' message and the 
             'WORKING_FILE' is not opened for sending. 
@@ -894,7 +896,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
         {
             #ifdef DEBUG_EVENT
 			  debug_event_timer_expired();
-              printf("\nstate = %d", state);
+              printf("state = %d\n", state);
 			#endif
             
             if (state == BLOCKED)
@@ -993,6 +995,16 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     					#endif  
      
                     }
+                    else if(output_msg_type == DATA_ACK)
+                    {
+                    	printf("State: DATA SEND\n");
+                    	printf("Output message type: DATA ACK\n");
+                    }
+                    else if(output_msg_type == HELLO_ACK)
+                    {
+                    	printf("State: DATA SEND\n");
+                    	printf("Output message type: HELLO ACK\n");
+                    }                    
                 }
             }       
         }
