@@ -611,8 +611,8 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             	mesh_send(&zoundtracker_conn, from);
 
                 //------------Save the packet into the net filesystem---------------
-                //i = write(&fmanNet, packetbuf_dataptr(),PACKET_SIZE);
-                //printf("%d bytes written\n",i);
+                i = write(&fmanNet, packetbuf_dataptr(),PACKET_SIZE);
+                printf("%d bytes written\n",i);
                 
 	
             	// Net Control Information
@@ -626,11 +626,11 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 		    #endif
         }
         storedFiles = getStoredFiles(&fmanLocal);
-        if (ack_waiting == FALSE && storedFiles==0)
+        if ((ack_waiting == FALSE && storedFiles==0) || output_msg_type == DATA_ACK || output_msg_type == HELLO_ACK)
         {
 
             //There are any file in the net filesystem manager?
-            /*if(getStoredFiles(&fmanNet) > 0) {//Yes
+            if(getStoredFiles(&fmanNet) > 0) {//Yes
                 read(&fmanNet,read_buffer,PACKET_SIZE);
                 packetbuf_copyfrom((void *)read_buffer, PACKET_SIZE);
                
@@ -650,7 +650,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 	            // Net Control Information
 	            num_msg_sended++;
     
-		    }*/
+		    }
 
             /* We're not pending for an 'ACK' message and the 
             'WORKING_FILE' is not opened for sending. 
