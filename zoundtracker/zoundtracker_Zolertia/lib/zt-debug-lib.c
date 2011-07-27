@@ -56,7 +56,7 @@ void debug_net_message_lost(int type, int packet_number){
     else if(type == DATA_ACK)
         printf("[net]\n 'DATA_ACK' message lost\n\n");
    else if(type == HELLO_ACK)
-        printf("[net]\n 'DATA_ACK' message lost\n\n");
+        printf("[net]\n 'HELLO_ACK' message lost\n\n");
 
    else
         printf("[net]\n Unknown type message lost\n\n");

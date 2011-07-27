@@ -229,13 +229,13 @@ data_msg()
 }
 
 
-static void ACK_msg() {
+static void ACK_msg(int type) {
 
 
     /* "Packet" construction. */
     ack_packet.addr1 = MY_ADDR1;
     ack_packet.addr2 = MY_ADDR2;
-    ack_packet.type = DATA_ACK;
+    ack_packet.type = type;
     ack_packet.size = 0;    
     ack_packet.counter = 0;
     ack_packet.checksum = compute_checksum(&ack_packet);
@@ -532,7 +532,32 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
                 send_packet_from_file();
             }
         }
-        else if (packet_received.type == DATA) {
+        else if(packet_received.type == HELLO_MN)
+        {
+        	#ifdef DEBUG_NET
+        		debug_net_message_received("HELLO_MN");        		
+        	#endif
+        	//Mounting ACK message
+            ACK_msg(HELLO_ACK);
+
+            //Preparing "Packet" to send it through "rime". Building the 
+            //"rime_stream" using the information of "ack_packet"   
+            mount_packet(&ack_packet, rime_stream);
+            packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
+	
+
+            #ifdef DEBUG_NET
+        	  debug_net_sending_message("HELLO ACK");
+            #endif
+
+        	// Configuring type of message
+            output_msg_type = HELLO_ACK;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+        	mesh_send(&zoundtracker_conn, from);
+
+        }
+        else if(packet_received.type == DATA)
+        {
             //DATA message received. Resending to the SINK
 
             //rssi = cc2420_rssi();
@@ -567,7 +592,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
                         packet_received.checksum);
             #endif
                 //Mounting ACK message
-                ACK_msg();
+                ACK_msg(DATA_ACK);
 
                 //Preparing "Packet" to send it through "rime". Building the 
                //"rime_stream" using the information of "ack_packet"   
@@ -576,7 +601,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 	
 
                 #ifdef DEBUG_NET
-            	  debug_net_sending_message("ACK");
+            	  debug_net_sending_message("DATA ACK");
                 #endif
 
             	// Configuring type of message
@@ -869,7 +894,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
         {
             #ifdef DEBUG_EVENT
 			  debug_event_timer_expired();
-              printf("state = %d", state);
+              printf("\nstate = %d", state);
 			#endif
             
             if (state == BLOCKED)
