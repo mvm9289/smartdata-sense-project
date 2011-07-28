@@ -611,7 +611,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             	mesh_send(&zoundtracker_conn, from);
 
                 //------------Save the packet into the net filesystem---------------
-                i = write(&fmanNet, packetbuf_dataptr(),PACKET_SIZE);
+                i = write(&fmanNet, packet_received.data,DATA_SIZE);
                 printf("%d bytes written\n",i);
                 
 	
@@ -626,16 +626,16 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 		    #endif
         }
         storedFiles = getStoredFiles(&fmanLocal);
-        if ((ack_waiting == FALSE && storedFiles==0) || output_msg_type == DATA_ACK || output_msg_type == HELLO_ACK)
+        if ((ack_waiting == FALSE && storedFiles==0) || output_msg_type == DATA_ACK)
         {
 
             //There are any file in the net filesystem manager?
             if(getStoredFiles(&fmanNet) > 0) {//Yes
-                read(&fmanNet,read_buffer,PACKET_SIZE);
-                packetbuf_copyfrom((void *)read_buffer, PACKET_SIZE);
+                read(&fmanNet,read_buffer,DATA_SIZE);
+                //packetbuf_copyfrom((void *)read_buffer, PACKET_SIZE);
                
 	            // "Packet" send to the "Basestation"
-            	sink_addr.u8[0] = SINK_ADDR1;
+            	/*sink_addr.u8[0] = SINK_ADDR1;
             	sink_addr.u8[1] = SINK_ADDR2;
 
 	            #ifdef DEBUG_NET
@@ -648,7 +648,70 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 	            mesh_send(&zoundtracker_conn, &sink_addr);
 	
 	            // Net Control Information
-	            num_msg_sended++;
+	            num_msg_sended++;*/
+	            
+	            
+	            //Modificar funcion data_msg() para permitir enviar 
+	            //mensajes del net filesystem!!!!!!!!!!!!!!!!!!!!!!
+	            SENSORS_DEACTIVATE(phidgets);
+
+				Packet packet_to_send;
+				 
+				/* "Packet" construction. */
+				packet_to_send.addr1 = 30;
+				packet_to_send.addr2 = 9;
+				packet_to_send.type = DATA;
+				packet_to_send.size = DATA_SIZE;    
+				packet_to_send.counter = 0;
+				memcpy(packet_to_send.data, read_buffer, DATA_SIZE);
+				packet_to_send.checksum = compute_checksum(&packet_to_send);
+		
+				/* Net Control Information */
+				packet_to_send.reserved[0] = (unsigned char)num_msg_sended;
+				packet_to_send.reserved[1] = (unsigned char)num_msg_acked;
+
+				/* Adding battery sensor reading */
+
+				SENSORS_ACTIVATE(battery_sensor);
+				uint16_t batt = battery_sensor.value(0);
+		
+				#ifdef DEBUG_NET
+				  printf("[net] Battery sensor %d\n", batt);
+				#endif
+
+				 SENSORS_DEACTIVATE(battery_sensor);
+				 SENSORS_ACTIVATE(phidgets);
+
+				 packet_to_send.reserved[20] = (unsigned char) ((batt & 0xFF00) >> 8);
+				 packet_to_send.reserved[21] = (unsigned char) (batt & 0x00FF);
+		
+				#ifdef DEBUG_NET
+					debug_net_packet_content(&packet_to_send);
+				#endif
+	
+				/* Preparing "Packet" to send it through "rime". Building the 
+				   "rime_stream" using the information of "packet_to_send"   */
+				mount_packet(&packet_to_send, rime_stream);
+				packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
+	
+				/* "Packet" send to the "Basestation" */
+				sink_addr.u8[0] = SINK_ADDR1;
+				sink_addr.u8[1] = SINK_ADDR2;
+
+				#ifdef DEBUG_NET
+				  debug_net_sending_message("DATA (FORWARD)");
+				#endif
+		
+				/* Configuring type of message */
+				output_msg_type = DATA;
+	
+				mesh_send(&zoundtracker_conn, &sink_addr);
+	
+				/* Net Control Information */
+				num_msg_sended++;
+				
+				updateReadFile(&fmanNet);
+
     
 		    }
 
