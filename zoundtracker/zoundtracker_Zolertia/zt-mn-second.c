@@ -193,7 +193,7 @@ data_msg()
     uint16_t batt = battery_sensor.value(0);
     
     #ifdef DEBUG_NET
-      printf("[net] Battery sensor %d\n", batt);
+      debug_net_battery(batt);
     #endif
 
      SENSORS_DEACTIVATE(battery_sensor);
@@ -360,7 +360,7 @@ sent(struct mesh_conn *c)
     	ack_waiting = TRUE;
     
     #ifdef DEBUG_NET
-	  printf("[net]\n Sent message\n\n"); 
+	   debug_net_sent_message();
 	#endif
         
 }
@@ -676,7 +676,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 				uint16_t batt = battery_sensor.value(0);
 		
 				#ifdef DEBUG_NET
-				  printf("[net] Battery sensor %d\n", batt);
+				  debug_net_battery(batt);
 				#endif
 
 				 SENSORS_DEACTIVATE(battery_sensor);
@@ -787,7 +787,7 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
                     last_broadcast_id = packet_received.data[0];                
                     
                     #ifdef DEBUG_NET
-                	  printf("[net]\n New Broadcast burst\n\n");
+                	  debug_net_flooding_hello_bs();
                 	#endif
                 }
                 
@@ -801,7 +801,7 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
                     flooding_attempts++;
                 
                     #ifdef DEBUG_NET
-                	  printf("[net]\n Forwarding 'HELLO_BS' (flooding)\n\n");
+                	  debug_net_flooding_hello_bs();
                 	#endif
                 }
 
@@ -824,8 +824,7 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
     }
     else {
         #ifdef DEBUG_NET
-	      printf("[net]\n Already sending a message.");
-	      printf(" Message received discarded.\n\n");
+	      debug_net_message_received("discarded");
 		#endif
         
     }
@@ -929,10 +928,8 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     state = BLOCKED;
     
     #ifdef DEBUG_FILEMAN
-	  if(initOkLocal == TRUE) printf("---\n[file-man]\n Init File Manager Local OK\n---\n\n");
-      else printf("---\n[file-man]\n Init File Manager failed\n---\n\n");
-	  if(initOkNet == TRUE) printf("---\n[file-man]\n Init File Manager Net OK\n---\n\n");
-      else printf("---\n[file-man]\n Init File Manager failed\n---\n\n");
+	  debug_filesys_initOk(&fmanLocal,initOkLocal);
+	  debug_filesys_initOk(&fmanNet,initOkNet);
 	#endif
 
     #ifdef DEBUG_STATE
@@ -958,7 +955,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
         if (ev == PROCESS_EVENT_TIMER)
         {
             #ifdef DEBUG_EVENT
-			  debug_event_timer_expired();
+			  debug_event_current_event("Timer expired");
               printf("state = %d\n", state);
 			#endif
             
@@ -1060,13 +1057,13 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                     }
                     else if(output_msg_type == DATA_ACK)
                     {
-                    	printf("State: DATA SEND\n");
-                    	printf("Output message type: DATA ACK\n");
+                    	debug_state_current_state("DATA_SEND");
+                    	debug_net_output_message_type("DATA_ACK");
                     }
                     else if(output_msg_type == HELLO_ACK)
                     {
-                    	printf("State: DATA SEND\n");
-                    	printf("Output message type: HELLO ACK\n");
+                    	debug_state_current_state("DATA_SEND");
+                    	debug_net_output_message_type("HELLO_ACK");
                     }                    
                 }
             }       
@@ -1074,7 +1071,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
         else
 		{	
 			#ifdef DEBUG_EVENT
-			  printf("[event]\n Unknown event\n\n");  
+			  debug_event_current_event("Unknown event");  
 			#endif
 		}
         /* Reseting the timer. */ 
