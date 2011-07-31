@@ -302,27 +302,27 @@ send_packet_from_file(void)
     // packet from a file, and when a "DATA_ACK" or "POLL" message is 
     // received.
 
-	  int storedFiles = getStoredFiles(&fmanLocal);
+      int storedFiles = getStoredFiles(&fmanLocal);
 	
-	  next_packet = prepare_packet();
+      next_packet = prepare_packet();
 	      
-	  if (next_packet == TRUE)
-	  {              
-	      // Packet sending
-	      // packet_number++;
-	      data_msg();
+      if (next_packet == TRUE)
+      {              
+          // Packet sending
+          // packet_number++;
+          data_msg();
 	
-        #ifdef DEBUG_NET
-          debug_net_sending_WORKING_FILE(packet_number);
-        #endif
-	  }    
-	  else if (next_packet == FALSE) 
-	  {       
-	      sample_interval = 0;
-	      updateReadFile(&fmanLocal);
-	      storedFiles = getStoredFiles(&fmanLocal);
-	      if (storedFiles > 0) send_packet_from_file();
-	  }
+          #ifdef DEBUG_NET
+            debug_net_sending_WORKING_FILE(packet_number);
+          #endif
+      }    
+      else if (next_packet == FALSE) 
+      {       
+          sample_interval = 0;
+          updateReadFile(&fmanLocal);
+          storedFiles = getStoredFiles(&fmanLocal);
+          if (storedFiles > 0) send_packet_from_file();
+      }
 }
 
 //--------------------------------------------------------------------
@@ -368,8 +368,8 @@ timedout(struct mesh_conn *c)
     {
         if (output_msg_type == HELLO_MN)
         {
-	          // Resending "HELLO_MN" message
-	          hello_msg();
+            // Resending "HELLO_MN" message
+            hello_msg();
 	        
             #ifdef DEBUG_NET
               debug_net_timeout(HELLO_MN, 0);
@@ -379,10 +379,10 @@ timedout(struct mesh_conn *c)
         {
             // Resending "DATA" message.
             data_msg();
-        
+
             #ifdef DEBUG_NET
               debug_net_timeout(DATA, packet_number);
-  		      #endif
+            #endif
         }
     }
     else
@@ -451,8 +451,8 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         state = DATA_SEND;
         
         #ifdef DEBUG_STATE
-		      debug_state_current_state("DATA_SEND");
-		    #endif
+          debug_state_current_state("DATA_SEND");
+        #endif
 		
         if (packet_received.type == HELLO_ACK)
         {
@@ -464,7 +464,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             // Net Control Information
             num_msg_acked++;
 
-    		    #ifdef DEBUG_NET
+            #ifdef DEBUG_NET
               debug_net_message_received("HELLO_ACK");
             #endif        
         }
@@ -479,7 +479,6 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
               debug_net_message_received("DATA_ACK");
             #endif
 
-            
             // Trying to send the next packet           
             send_packet_from_file();        
         }
@@ -520,7 +519,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
               debug_net_sending_message("HELLO ACK");
             #endif
 
-        	  // Type of the last message sent
+            // Type of the last message sent
             output_msg_type = HELLO_ACK;
 
             mesh_send(&zoundtracker_conn, from);
@@ -591,8 +590,8 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         else 
         {
             #ifdef DEBUG_NET
-	            debug_net_message_received("incorrect");
-		        #endif
+              debug_net_message_received("incorrect");
+            #endif
         }
         
         storedFiles = getStoredFiles(&fmanLocal);
@@ -617,15 +616,15 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
                 // Type of the last message sent
                 output_msg_type = DATA;
 	
-	              mesh_send(&zoundtracker_conn, &sink_addr);
+                mesh_send(&zoundtracker_conn, &sink_addr);
 	
-	              // Net Control Information
-	              num_msg_sended++;*/
+                // Net Control Information
+                num_msg_sended++;*/
 	            
 	            
-	              // Modificar funcion data_msg() para permitir enviar 
-	              // mensajes del net filesystem!!!!!!!!!!!!!!!!!!!!!!
-	              SENSORS_DEACTIVATE(phidgets);
+                // Modificar funcion data_msg() para permitir enviar 
+                // mensajes del net filesystem!!!!!!!!!!!!!!!!!!!!!!
+                SENSORS_DEACTIVATE(phidgets);
 
                 Packet packet_to_send;
 				 
@@ -638,7 +637,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
                 memcpy(packet_to_send.data, read_buffer, DATA_SIZE);
                 packet_to_send.checksum = compute_checksum(&packet_to_send);
 
-				        // Net Control Information
+                // Net Control Information
                 packet_to_send.reserved[0] = (unsigned char)num_msg_sended;
                 packet_to_send.reserved[1] = (unsigned char)num_msg_acked;
 
@@ -1029,7 +1028,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
             #ifdef DEBUG_EVENT
               debug_event_current_event("Unknown event");  
             #endif
-		    }
+        }
         
         // Reseting the timer. 
         etimer_set(&control_timer, NUM_SECONDS_SAMPLE*CLOCK_SECOND);
