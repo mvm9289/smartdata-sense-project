@@ -133,22 +133,22 @@ hello_msg()
     // "rime_stream" using the information of "packet_to_send"
     mount_packet(&packet_to_send, rime_stream);
     packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
-	
-	  // Packet destination: "Basestation"
-	  sink_addr.u8[0] = SINK_ADDR1;
-	  sink_addr.u8[1] = SINK_ADDR2;
+
+    // Packet destination: "Basestation"
+    sink_addr.u8[0] = SINK_ADDR1;
+    sink_addr.u8[1] = SINK_ADDR2;
 
     #ifdef DEBUG_NET
-	    debug_net_sending_message("HELLO_MN");
+      debug_net_sending_message("HELLO_MN");
     #endif
 
-	  // Type of the last message sent
+    // Type of the last message sent
     output_msg_type = HELLO_MN;
 	
-	  mesh_send(&zoundtracker_conn, &sink_addr);
+    mesh_send(&zoundtracker_conn, &sink_addr);
 	
-	  // Net Control Information
-	  num_msg_sended++;
+    // Net Control Information
+    num_msg_sended++;
 }
 
 static void 
@@ -195,30 +195,30 @@ data_msg()
     packet_to_send.reserved[20] = (unsigned char) ((batt & 0xFF00) >> 8);
     packet_to_send.reserved[21] = (unsigned char) (batt & 0x00FF);
     
-	  #ifdef DEBUG_NET
+    #ifdef DEBUG_NET
       debug_net_packet_content(&packet_to_send);
-	  #endif
+    #endif
 	
     // Preparing packet to send it through "rime". Building the 
     // "rime_stream" using the information of "packet_to_send"
     mount_packet(&packet_to_send, rime_stream);
     packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
 	
-	  // Packet send to the "Basestation"
-	  sink_addr.u8[0] = SINK_ADDR1;
-	  sink_addr.u8[1] = SINK_ADDR2;
+    // Packet send to the "Basestation"
+    sink_addr.u8[0] = SINK_ADDR1;
+    sink_addr.u8[1] = SINK_ADDR2;
 
-	  #ifdef DEBUG_NET
-	    debug_net_sending_message("DATA");
-	  #endif
+    #ifdef DEBUG_NET
+      debug_net_sending_message("DATA");
+    #endif
     
-	  // Type of the last message sent
+    // Type of the last message sent
     output_msg_type = DATA;
 	
-	  mesh_send(&zoundtracker_conn, &sink_addr);
+    mesh_send(&zoundtracker_conn, &sink_addr);
 	
-	  // Net Control Information
-	  num_msg_sended++;
+    // Net Control Information
+    num_msg_sended++;
 }
 
 
@@ -232,7 +232,6 @@ static void ACK_msg(int type)
     ack_packet.counter = 0;
     ack_packet.checksum = compute_checksum(&ack_packet);
 }
-
 
 
 static unsigned char 
@@ -313,9 +312,9 @@ send_packet_from_file(void)
 	      // packet_number++;
 	      data_msg();
 	
-		    #ifdef DEBUG_NET
+        #ifdef DEBUG_NET
           debug_net_sending_WORKING_FILE(packet_number);
-		    #endif
+        #endif
 	  }    
 	  else if (next_packet == FALSE) 
 	  {       
@@ -346,8 +345,8 @@ sent(struct mesh_conn *c)
     	ack_waiting = TRUE;
     
     #ifdef DEBUG_NET
-	    debug_net_sent_message();
-	  #endif    
+      debug_net_sent_message();
+    #endif    
 }
 
 //----------------------------------------------------------------------
@@ -365,48 +364,48 @@ timedout(struct mesh_conn *c)
     // considered lost.
 
     attempts++;
-	  if (attempts < MAX_ATTEMPTS) 
-	  {
-	      if (output_msg_type == HELLO_MN)
-	      {
+    if (attempts < MAX_ATTEMPTS) 
+    {
+        if (output_msg_type == HELLO_MN)
+        {
 	          // Resending "HELLO_MN" message
 	          hello_msg();
 	        
-			      #ifdef DEBUG_NET
-			        debug_net_timeout(HELLO_MN, 0);
-			      #endif
-	      }
-	      else if (output_msg_type == DATA)
-	      {
-	          // Resending "DATA" message.
-	          data_msg();
+            #ifdef DEBUG_NET
+              debug_net_timeout(HELLO_MN, 0);
+            #endif
+        }
+        else if (output_msg_type == DATA)
+        {
+            // Resending "DATA" message.
+            data_msg();
         
             #ifdef DEBUG_NET
               debug_net_timeout(DATA, packet_number);
-			      #endif
+  		      #endif
         }
-	  }
-	  else
-	  {
-	      #ifdef DEBUG_NET
-		      debug_net_max_attempts();
-		    #endif
-	      if (output_msg_type == HELLO_MN)
-		    {	    
-		        #ifdef DEBUG_NET
-			        debug_net_message_lost(HELLO_MN,0);
-			      #endif
-	      }
-	      else if (output_msg_type == DATA)
+    }
+    else
+    {
+        #ifdef DEBUG_NET
+          debug_net_max_attempts();
+        #endif
+        if (output_msg_type == HELLO_MN)
+        {	    
+            #ifdef DEBUG_NET
+              debug_net_message_lost(HELLO_MN,0);
+            #endif
+        }
+        else if (output_msg_type == DATA)
         {	
             // Current sending message lost. Starting new sample period.
             sample_interval = 0;
             
             readSeek(&fmanLocal, START_POSITION);
         
-		        #ifdef DEBUG_NET
-			        debug_net_message_lost(DATA,packet_number);
-			      #endif
+            #ifdef DEBUG_NET
+              debug_net_message_lost(DATA,packet_number);
+            #endif
         }
                 
         // Message lost. Changing to "BLOCKED" from "DATA_SEND" state.  
@@ -414,10 +413,10 @@ timedout(struct mesh_conn *c)
         
         #ifdef DEBUG_STATE
           debug_state_current_state("BLOCKED");
-	      #endif
+        #endif
 
         attempts = 0;
-	  }
+    }
 }
 
 //--------------------------------------------------------------------
@@ -438,8 +437,8 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
     int storedFiles,i;
 
     #ifdef DEBUG_NET
-	    debug_net_message_received_connection("mesh");
-	  #endif
+      debug_net_message_received_connection("mesh");
+    #endif
            
     // Obtaining the packet and checking checksum.
     packet_received = unmount_packet(packetbuf_dataptr());
@@ -463,22 +462,22 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             valid_broadcast_id = last_broadcast_id;
             
             // Net Control Information
-	          num_msg_acked++;
+            num_msg_acked++;
 
     		    #ifdef DEBUG_NET
-    		      debug_net_message_received("HELLO_ACK");
-    		    #endif        
+              debug_net_message_received("HELLO_ACK");
+            #endif        
         }
         else if (packet_received.type == DATA_ACK)
         {	
             ack_waiting = FALSE;
 
             // Net Control Information
-	          num_msg_acked++;
+            num_msg_acked++;
 
-    		    #ifdef DEBUG_NET
-    		      debug_net_message_received("DATA_ACK");
-    		    #endif
+            #ifdef DEBUG_NET
+              debug_net_message_received("DATA_ACK");
+            #endif
 
             
             // Trying to send the next packet           
@@ -486,9 +485,9 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         }
         else if (packet_received.type == POLL)
         {
-    		    #ifdef DEBUG_NET
-    		      debug_net_message_received("POLL");
-    		    #endif
+            #ifdef DEBUG_NET
+              debug_net_message_received("POLL");
+            #endif
 
             if (prev_state == DATA_SEND)
             {
@@ -505,11 +504,11 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         }
         else if(packet_received.type == HELLO_MN)
         {
-        	  #ifdef DEBUG_NET
-        		  debug_net_message_received("HELLO_MN");        		
-        	  #endif
+            #ifdef DEBUG_NET
+              debug_net_message_received("HELLO_MN");        		
+            #endif
         	  
-        	  // Mounting ACK message
+            // Mounting ACK message
             ACK_msg(HELLO_ACK);
 
             // Preparing "Packet" to send it through "rime". Building 
@@ -518,13 +517,13 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
 	
             #ifdef DEBUG_NET
-        	    debug_net_sending_message("HELLO ACK");
+              debug_net_sending_message("HELLO ACK");
             #endif
 
         	  // Type of the last message sent
             output_msg_type = HELLO_ACK;
 
-        	  mesh_send(&zoundtracker_conn, from);
+            mesh_send(&zoundtracker_conn, from);
 
         }
         else if(packet_received.type == DATA)
@@ -574,7 +573,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
 	
             #ifdef DEBUG_NET
-            	debug_net_sending_message("DATA ACK");
+              debug_net_sending_message("DATA ACK");
             #endif
 
             // Type of the last message sent
@@ -607,15 +606,15 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
                 read(&fmanNet,read_buffer,DATA_SIZE);
                 // packetbuf_copyfrom((void *)read_buffer, PACKET_SIZE);
                
-	              // Packet send to the "Basestation"
-            	  /*sink_addr.u8[0] = SINK_ADDR1;
-            	  sink_addr.u8[1] = SINK_ADDR2;
+                // Packet send to the "Basestation"
+                /*sink_addr.u8[0] = SINK_ADDR1;
+                sink_addr.u8[1] = SINK_ADDR2;
 
-	              #ifdef DEBUG_NET
-	                debug_net_sending_message("DATA (FORWARD)");
-	              #endif
+                #ifdef DEBUG_NET
+                  debug_net_sending_message("DATA (FORWARD)");
+                #endif
                 
-	              // Type of the last message sent
+                // Type of the last message sent
                 output_msg_type = DATA;
 	
 	              mesh_send(&zoundtracker_conn, &sink_addr);
@@ -628,78 +627,78 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 	              // mensajes del net filesystem!!!!!!!!!!!!!!!!!!!!!!
 	              SENSORS_DEACTIVATE(phidgets);
 
-				        Packet packet_to_send;
+                Packet packet_to_send;
 				 
-				        // Packet construction.
-				        packet_to_send.addr1 = 30;
-				        packet_to_send.addr2 = 9;
-				        packet_to_send.type = DATA;
-				        packet_to_send.size = DATA_SIZE;    
-				        packet_to_send.counter = 0;
-				        memcpy(packet_to_send.data, read_buffer, DATA_SIZE);
-				        packet_to_send.checksum = compute_checksum(&packet_to_send);
-		
+                // Packet construction.
+                packet_to_send.addr1 = 30;
+                packet_to_send.addr2 = 9;
+                packet_to_send.type = DATA;
+                packet_to_send.size = DATA_SIZE;    
+                packet_to_send.counter = 0;
+                memcpy(packet_to_send.data, read_buffer, DATA_SIZE);
+                packet_to_send.checksum = compute_checksum(&packet_to_send);
+
 				        // Net Control Information
-				        packet_to_send.reserved[0] = (unsigned char)num_msg_sended;
-				        packet_to_send.reserved[1] = (unsigned char)num_msg_acked;
+                packet_to_send.reserved[0] = (unsigned char)num_msg_sended;
+                packet_to_send.reserved[1] = (unsigned char)num_msg_acked;
 
-				        // Adding battery sensor reading
-				        SENSORS_ACTIVATE(battery_sensor);
-				        uint16_t batt = battery_sensor.value(0);
+                // Adding battery sensor reading
+                SENSORS_ACTIVATE(battery_sensor);
+                uint16_t batt = battery_sensor.value(0);
 		
-			 	        #ifdef DEBUG_NET
-				          debug_net_battery(batt);
-				        #endif
+                #ifdef DEBUG_NET
+                  debug_net_battery(batt);
+                #endif
 
-				        SENSORS_DEACTIVATE(battery_sensor);
-				        SENSORS_ACTIVATE(phidgets);
+                SENSORS_DEACTIVATE(battery_sensor);
+                SENSORS_ACTIVATE(phidgets);
 
-				        packet_to_send.reserved[20] = (unsigned char) ((batt & 0xFF00) >> 8);
-				        packet_to_send.reserved[21] = (unsigned char) (batt & 0x00FF);
+                packet_to_send.reserved[20] = (unsigned char) ((batt & 0xFF00) >> 8);
+                packet_to_send.reserved[21] = (unsigned char) (batt & 0x00FF);
 		
-				        #ifdef DEBUG_NET
-					        debug_net_packet_content(&packet_to_send);
-				        #endif
+                #ifdef DEBUG_NET
+                  debug_net_packet_content(&packet_to_send);
+                #endif
 	
-				        // Preparing packet to send it through "rime". Building 
-				        // the "rime_stream" using the information of 
-				        // "packet_to_send".
-				        mount_packet(&packet_to_send, rime_stream);
-				        packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
+                // Preparing packet to send it through "rime". Building 
+                // the "rime_stream" using the information of 
+                // "packet_to_send".
+                mount_packet(&packet_to_send, rime_stream);
+                packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
 	
-				        // "Packet" send to the "Basestation"
-				        sink_addr.u8[0] = SINK_ADDR1;
-				        sink_addr.u8[1] = SINK_ADDR2;
+                // "Packet" send to the "Basestation"
+                sink_addr.u8[0] = SINK_ADDR1;
+                sink_addr.u8[1] = SINK_ADDR2;
 
-				        #ifdef DEBUG_NET
-				          debug_net_sending_message("DATA (FORWARD)");
-				        #endif
+                #ifdef DEBUG_NET
+                  debug_net_sending_message("DATA (FORWARD)");
+                #endif
 		
-				        // Type of the last message sent
-				        output_msg_type = DATA;
+                // Type of the last message sent
+                output_msg_type = DATA;
 	
-				        mesh_send(&zoundtracker_conn, &sink_addr);
+                mesh_send(&zoundtracker_conn, &sink_addr);
 	
-				        // Net Control Information
-				        num_msg_sended++;
+                // Net Control Information
+                num_msg_sended++;
 				
-				        updateReadFile(&fmanNet);
-		        }
+                updateReadFile(&fmanNet);
+            }
 
             // We're not pending for an 'ACK' message. Net work 
             // finished.
             state = BLOCKED;
             
             #ifdef DEBUG_STATE
-		          debug_state_current_state("BLOCKED");
-		        #endif
+              debug_state_current_state("BLOCKED");
+            #endif
         }
     }
     else 
     {
         #ifdef DEBUG_NET
-	        debug_net_incorrect_checksum();
-		    #endif
+          debug_net_incorrect_checksum();
+        #endif
     }
 }
 
@@ -725,8 +724,8 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
     // from the "Basestation".
     
     #ifdef DEBUG_NET
-	    debug_net_message_received_connection("broadcast");
-	  #endif
+      debug_net_message_received_connection("broadcast");
+    #endif
     
     if (state != DATA_SEND)
     {    
@@ -739,7 +738,7 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
             if (packet_received.type == HELLO_BS)
             {
                 #ifdef DEBUG_NET
-    			        debug_net_message_received("HELLO_BS");
+                  debug_net_message_received("HELLO_BS");
                 #endif
                 
                 // New Broadcast burst
@@ -751,8 +750,8 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
                     last_broadcast_id = packet_received.data[0];                
                     
                     #ifdef DEBUG_NET
-                	    debug_net_flooding_hello_bs();
-                	  #endif
+                      debug_net_flooding_hello_bs();
+                    #endif
                 }
                 
                 if (flooding_attempts < MAX_FLOODING_ATTEMPTS)
@@ -765,30 +764,30 @@ broadcast_received(struct broadcast_conn* c,const rimeaddr_t *from)
                     flooding_attempts++;
                 
                     #ifdef DEBUG_NET
-                	    debug_net_flooding_hello_bs();
-                	  #endif
+                      debug_net_flooding_hello_bs();
+                    #endif
                 }
             }
             else
             {
                 #ifdef DEBUG_NET
-    	            debug_net_message_received("incorrect");
-    		        #endif
+                  debug_net_message_received("incorrect");
+                #endif
             }
         }
         else 
         {
             // Incorrect checksum. Invalid message. 
             #ifdef DEBUG_NET
-			        debug_net_incorrect_checksum();
-			      #endif
+              debug_net_incorrect_checksum();
+            #endif
         }
     }
     else 
     {
         #ifdef DEBUG_NET
-	        debug_net_message_received("discarded");
-		    #endif
+          debug_net_message_received("discarded");
+        #endif
     }
 }
 
@@ -857,18 +856,18 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     
     // NET
     rimeaddr_t my_addr;
-	  my_addr.u8[0] = MY_ADDR1;
-	  my_addr.u8[1] = MY_ADDR2;
-	  rimeaddr_set_node_addr(&my_addr);
-	  mesh_open(&zoundtracker_conn, CHANNEL1, &zoundtracker_callbacks);                                             
-	  broadcast_open(&zoundtracker_broadcast_conn, CHANNEL2, 
-	  &zoundtracker_broadcast_callbacks);       
-	  output_msg_type = EMPTY;
-	  ack_waiting = FALSE;
-	  attempts = 0;
-	  valid_broadcast_id = (unsigned char)(rand() % 256);
-	  num_msg_sended = 0;
-	  num_msg_acked = 0;
+    my_addr.u8[0] = MY_ADDR1;
+    my_addr.u8[1] = MY_ADDR2;
+    rimeaddr_set_node_addr(&my_addr);
+    mesh_open(&zoundtracker_conn, CHANNEL1, &zoundtracker_callbacks);                                             
+    broadcast_open(&zoundtracker_broadcast_conn, CHANNEL2, 
+      &zoundtracker_broadcast_callbacks);       
+    output_msg_type = EMPTY;
+    ack_waiting = FALSE;
+    attempts = 0;
+    valid_broadcast_id = (unsigned char)(rand() % 256);
+    num_msg_sended = 0;
+    num_msg_acked = 0;
     packet_number = 1;
 	
     // CFS
@@ -889,21 +888,21 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     state = BLOCKED;
     
     #ifdef DEBUG_FILEMAN
-	    debug_filesys_initOk(&fmanLocal,initOkLocal);
-	    debug_filesys_initOk(&fmanNet,initOkNet);
-	  #endif
+      debug_filesys_initOk(&fmanLocal,initOkLocal);
+      debug_filesys_initOk(&fmanNet,initOkNet);
+    #endif
 
     #ifdef DEBUG_STATE
-	    debug_state_current_state("BLOCKED");
-	  #endif
+      debug_state_current_state("BLOCKED");
+    #endif
 	
     // Sending message ("HELLO_MN"). Changing to "DATA_SEND" from 
     // "BLOCKED" state.  
     state = DATA_SEND;    
     
     #ifdef DEBUG_STATE
-	    debug_state_current_state("DATA SEND");
-	  #endif
+      debug_state_current_state("DATA SEND");
+    #endif
     
     // Sending first "HELLO_MN" message.
     hello_msg();
@@ -914,9 +913,9 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
         if (ev == PROCESS_EVENT_TIMER)
         {
             #ifdef DEBUG_EVENT
-			        debug_event_current_event("Timer expired");
+              debug_event_current_event("Timer expired");
               printf("state = %d\n", state);
-			      #endif
+            #endif
             
             if (state == BLOCKED)
             {
@@ -925,15 +924,15 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                 state = DATA_COLLECT;
                 
                 #ifdef DEBUG_STATE
-				          debug_state_current_state("DATA COLLECT");
-				        #endif
+                  debug_state_current_state("DATA COLLECT");
+                #endif
                       
                 // 'sample_interval' starts on zero.
                 get_sensor_sample();
                 
                 #ifdef DEBUG_SENSOR
-				          debug_sensor_sample_measured(sample_interval);
-				        #endif
+                  debug_sensor_sample_measured(sample_interval);
+                #endif
                 
                 // Updating state.
                 sample_interval++;
@@ -942,7 +941,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                 {    
                     #ifdef DEBUG_NET
                       debug_net_info_net(num_msg_sended, num_msg_acked);
-					          #endif
+                    #endif
                 
                     // Sensor samples collected. Changing to 
                     // "DATA_SEND" from "DATA_COLLECT" state.
@@ -963,7 +962,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                     
                     #ifdef DEBUG_STATE
                       debug_state_current_state("BLOCKED");
-					          #endif
+                    #endif
                 }
             }
             else if (state == DATA_SEND)
@@ -973,8 +972,8 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                     if (output_msg_type == DATA)
                     {
                         #ifdef DEBUG_NET
-    					            debug_net_message_lost(DATA_ACK,0);
-    					          #endif
+                          debug_net_message_lost(DATA_ACK,0);
+                        #endif
                         
                         // ACK message lost.      
                         ack_waiting = FALSE;
@@ -987,49 +986,49 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                         // state.
                         state = BLOCKED;
     					
-    					          #ifdef DEBUG_STATE
+                        #ifdef DEBUG_STATE
                           debug_state_current_state("BLOCKED");
-    					          #endif
+                        #endif
                     }
                     else if (output_msg_type == HELLO_MN)
                     {
                         #ifdef DEBUG_NET
-    					            debug_net_message_lost(HELLO_ACK,0);
-    					          #endif
+                          debug_net_message_lost(HELLO_ACK,0);
+                        #endif
     					
-    					          ack_waiting = FALSE;
+                        ack_waiting = FALSE;
                         
                         // Returning to "BLOCKED" from "DATA_SEND" 
                         // state.
                         state = BLOCKED;
     					
-    					          #ifdef DEBUG_STATE
-    					            debug_state_current_state("BLOCKED");
-    					          #endif  
+                        #ifdef DEBUG_STATE
+                          debug_state_current_state("BLOCKED");
+                        #endif  
      
                     }
                     else if(output_msg_type == DATA_ACK)
                     {
                         #ifdef DEBUG_STATE
-                    	    debug_state_current_state("DATA_SEND");
-                    	    debug_net_output_message_type("DATA_ACK");
+                          debug_state_current_state("DATA_SEND");
+                          debug_net_output_message_type("DATA_ACK");
                         #endif
                     }
                     else if(output_msg_type == HELLO_ACK)
                     {
-                      #ifdef DEBUG_STATE
-                    	  debug_state_current_state("DATA_SEND");
-                    	  debug_net_output_message_type("HELLO_ACK");
-                      #endif
+                        #ifdef DEBUG_STATE
+                          debug_state_current_state("DATA_SEND");
+                          debug_net_output_message_type("HELLO_ACK");
+                        #endif
                     }                    
                 }
             }       
         }
         else
-		    {	
-			      #ifdef DEBUG_EVENT
-			        debug_event_current_event("Unknown event");  
-			      #endif
+        {	
+            #ifdef DEBUG_EVENT
+              debug_event_current_event("Unknown event");  
+            #endif
 		    }
         
         // Reseting the timer. 
