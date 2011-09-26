@@ -92,7 +92,8 @@ static unsigned char rime_stream[PACKET_SIZE], next_packet,
     last_broadcast_id, valid_broadcast_id, num_msg_sended, num_msg_acked;
 static unsigned short packet_checksum;
 static Packet packet_received, ack_packet;
-// static clock_time_t time_remaining;
+static unsigned char original_addr1, original_addr2;
+
 
 // Sensor
 static int sample_interval;
@@ -152,7 +153,7 @@ hello_msg()
 }
 
 static void 
-data_msg() 
+data_msg(int type) 
 {   
     // Function: This function builds and sends a "DATA" message to the 
     // "Basestation". In this message there's a set of sensor samples 
@@ -169,9 +170,17 @@ data_msg()
     Packet packet_to_send;
      
     // "Packet" construction
-    packet_to_send.addr1 = MY_ADDR1;
-    packet_to_send.addr2 = MY_ADDR2;
-    packet_to_send.type = DATA;
+    if(type == DATA)
+    {
+      packet_to_send.addr1 = MY_ADDR1;
+      packet_to_send.addr2 = MY_ADDR2;
+    }
+    else if(type == DATA_FORWARD)
+    {
+      packet_to_send.addr1 = original_addr1;
+      packet_to_send.addr2 = original_addr2;
+    }
+    packet_to_send.type = type;
     packet_to_send.size = DATA_SIZE;    
     packet_to_send.counter = (packet_number-1)*DATA_SIZE;
     memcpy(packet_to_send.data, read_buffer, read_bytes);
@@ -209,12 +218,18 @@ data_msg()
     sink_addr.u8[1] = SINK_ADDR2;
 
     #ifdef DEBUG_NET
-      debug_net_sending_message("DATA");
+      if(type == DATA)
+        debug_net_sending_message("DATA");
+      else if(type == DATA_FORWARD)
+        debug_net_sending_message("DATA FORWARD");      
     #endif
     
     // Type of the last message sent
-    output_msg_type = DATA;
-	
+      if(type == DATA)
+        output_msg_type = DATA;
+      else if(type == DATA_FORWARD)
+        output_msg_type = DATA_FORWARD;	
+
     mesh_send(&zoundtracker_conn, &sink_addr);
 	
     // Net Control Information
@@ -235,7 +250,7 @@ static void ACK_msg(int type)
 
 
 static unsigned char 
-prepare_packet(void)
+prepare_packet(int type)
 {
     // Function: This function reads one file from the Filesystem to 
     // get a set of sensor samples for the next packet to send.
@@ -250,11 +265,15 @@ prepare_packet(void)
     int pos;
     if (read_attempts > 0) 
     {
-        pos = readSeek(&fmanLocal, START_POSITION);
+        if(type == DATA)
+            pos = readSeek(&fmanLocal, START_POSITION);
+        else if(type == DATA_FORWARD)
+            pos = readSeek(&fmanNet, START_POSITION);
+
         if(pos == ERROR_INVALID_FD) 
         {
             ++read_attempts;
-            if(read_attempts < MAX_READ_ATTEMPTS)return prepare_packet();
+            if(read_attempts < MAX_READ_ATTEMPTS)return prepare_packet(type);
             else 
             {
                 read_attempts = 0;
@@ -267,7 +286,15 @@ prepare_packet(void)
         }
     }
     
-    read_bytes = read(&fmanLocal, read_buffer, DATA_SIZE);
+    if(type == DATA) 
+        read_bytes = read(&fmanLocal, read_buffer, DATA_SIZE);
+    else if(type == DATA_FORWARD)
+    {
+        read_bytes = read(&fmanNet, original_addr1, sizeof(unsigned char));
+        read_bytes = read(&fmanNet, original_addr2, sizeof(unsigned char));      
+        read_bytes = read(&fmanNet, read_buffer, DATA_SIZE);
+    }
+
     if (read_bytes > 0) 
     {
         read_attempts = 0;
@@ -281,7 +308,7 @@ prepare_packet(void)
     else if(read_bytes == ERROR_INVALID_FD) 
     {
         ++read_attempts;
-        if(read_attempts < MAX_READ_ATTEMPTS)return prepare_packet();
+        if(read_attempts < MAX_READ_ATTEMPTS)return prepare_packet(type);
         else 
         {
             read_attempts = 0;
@@ -293,7 +320,7 @@ prepare_packet(void)
 }
 
 static void 
-send_packet_from_file(void)
+send_packet_from_file(int type)
 {
     // Function: This function checks if there's sensor samples to 
     // send in the Filesystem and if so, sends a "DATA" message.
@@ -302,15 +329,19 @@ send_packet_from_file(void)
     // packet from a file, and when a "DATA_ACK" or "POLL" message is 
     // received.
 
-      int storedFiles = getStoredFiles(&fmanLocal);
-	
-      next_packet = prepare_packet();
+      int storedFiles;
+      if(type == DATA)
+         storedFiles = getStoredFiles(&fmanLocal);
+      else if(type == DATA_FORWARD)
+         storedFiles = getStoredFiles(&fmanNet);	
+
+      next_packet = prepare_packet(type);
 	      
       if (next_packet == TRUE)
       {              
           // Packet sending
           // packet_number++;
-          data_msg();
+          data_msg(type);
 	
           #ifdef DEBUG_NET
             debug_net_sending_WORKING_FILE(packet_number);
@@ -318,10 +349,19 @@ send_packet_from_file(void)
       }    
       else if (next_packet == FALSE) 
       {       
-          sample_interval = 0;
-          updateReadFile(&fmanLocal);
-          storedFiles = getStoredFiles(&fmanLocal);
-          if (storedFiles > 0) send_packet_from_file();
+          if(type == DATA) 
+          {
+              sample_interval = 0; //Se puede eliminar?
+              updateReadFile(&fmanLocal);
+              storedFiles = getStoredFiles(&fmanLocal);
+          }
+          else if(type == DATA_FORWARD)
+          {
+              updateReadFile(&fmanNet);
+              storedFiles = getStoredFiles(&fmanNet);
+
+          }
+          if (storedFiles > 0) send_packet_from_file(type);
       }
 }
 
@@ -341,8 +381,9 @@ sent(struct mesh_conn *c)
 
     // Checksum comprobation is needed on receiver
     attempts = 0;
-    if(output_msg_type == DATA || output_msg_type == HELLO_MN)
-    	ack_waiting = TRUE;
+    if(output_msg_type == DATA || output_msg_type == HELLO_MN || 
+        output_msg_type == DATA_FORWARD)
+    	    ack_waiting = TRUE;
     
     #ifdef DEBUG_NET
       debug_net_sent_message();
@@ -378,12 +419,22 @@ timedout(struct mesh_conn *c)
         else if (output_msg_type == DATA)
         {
             // Resending "DATA" message.
-            data_msg();
+            data_msg(DATA);
 
             #ifdef DEBUG_NET
               debug_net_timeout(DATA, packet_number);
             #endif
         }
+        else if (output_msg_type == DATA_FORWARD)
+        {
+            // Resending "DATA_FORWARD" message.
+            data_msg(DATA_FORWARD);
+
+            #ifdef DEBUG_NET
+              debug_net_timeout(DATA_FORWARD, packet_number);
+            #endif
+        }
+        
     }
     else
     {
@@ -405,6 +456,14 @@ timedout(struct mesh_conn *c)
         
             #ifdef DEBUG_NET
               debug_net_message_lost(DATA,packet_number);
+            #endif
+        }
+        else if (output_msg_type == DATA_FORWARD)
+        {	  
+            readSeek(&fmanNet, START_POSITION);
+        
+            #ifdef DEBUG_NET
+              debug_net_message_lost(DATA_FORWARD,packet_number);
             #endif
         }
                 
@@ -480,8 +539,23 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             #endif
 
             // Trying to send the next packet           
-            send_packet_from_file();        
+            send_packet_from_file(DATA);        
         }
+        else if (packet_received.type == DATA_FORWARD_ACK)
+        {	
+            ack_waiting = FALSE;
+
+            // Net Control Information
+            num_msg_acked++;
+
+            #ifdef DEBUG_NET
+              debug_net_message_received("DATA_FORWARD_ACK");
+            #endif
+
+            // Trying to send the next packet           
+            send_packet_from_file(DATA_FORWARD);        
+        }
+
         else if (packet_received.type == POLL)
         {
             #ifdef DEBUG_NET
@@ -492,13 +566,13 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             {
                 // "POLL" message on reply to a "DATA" message sent 
                 // and lost. Resending the last packet.
-                data_msg();
+                data_msg(output_msg_type);
             }
             else
             {
                 // "POLL" message advertisement. Node timestamp exceed. 
                 // Sending the stored files.
-                send_packet_from_file();
+                send_packet_from_file(DATA);
             }
         }
         else if(packet_received.type == HELLO_MN)
@@ -525,7 +599,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             mesh_send(&zoundtracker_conn, from);
 
         }
-        else if(packet_received.type == DATA)
+        else if(packet_received.type == DATA || packet_received.tyep == DATA_FORWARD)
         {
             // DATA message received. Resending to the SINK
 
@@ -562,30 +636,46 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
                 printf("             CHECKSUM: %d\n\n",
                         packet_received.checksum);
             #endif
-            
-            // Mounting ACK message
-            ACK_msg(DATA_ACK);
 
-            // Preparing "Packet" to send it through "rime". Building 
-            // the "rime_stream" using the information of "ack_packet"   
-            mount_packet(&ack_packet, rime_stream);
-            packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
-	
-            #ifdef DEBUG_NET
-              debug_net_sending_message("DATA ACK");
-            #endif
-
-            // Type of the last message sent
-            output_msg_type = DATA_ACK;
-	
-            mesh_send(&zoundtracker_conn, from);
-
-            // Saving the packet into the net filesystem
+            // Saving the packet into the net filesystem (original address and data)
+            i = write(&fmanNet, packet_received.addr1,sizeof(unsigned char));
+            i = write(&fmanNet, packet_received.addr2,sizeof(unsigned char));
             i = write(&fmanNet, packet_received.data,DATA_SIZE);
             printf("%d bytes written\n",i);
+
+            if(i == DATA_SIZE) 
+            {
+                // Mounting ACK message
+                if(packet_received.type == DATA) 
+                    ACK_msg(DATA_ACK);
+                else 
+                    ACK_msg(DATA_FORWARD_ACK);
+
+                // Preparing "Packet" to send it through "rime". Building 
+                // the "rime_stream" using the information of "ack_packet"   
+                mount_packet(&ack_packet, rime_stream);
+                packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
+	
+                #ifdef DEBUG_NET
+                  if(packet_received.type == DATA) 
+                    debug_net_sending_message("DATA ACK");
+                  else
+                    debug_net_sending_message("DATA FORWARD ACK");
+                #endif
+
+                // Type of the last message sent
+                if(packet_received.type == DATA) 
+                    output_msg_type = DATA_ACK;
+                else
+	                output_msg_type = DATA_FORWARD_ACK;
+
+                mesh_send(&zoundtracker_conn, from);
+
+                // Net Control Information
+                num_msg_sended++;
+            }
                 
-            // Net Control Information
-            num_msg_sended++;
+
         }
         else 
         {
@@ -594,96 +684,13 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             #endif
         }
         
-        storedFiles = getStoredFiles(&fmanLocal);
+        if(packet_received.type == DATA_ACK)
+            storedFiles = getStoredFiles(&fmanLocal);
+        else if(packet_received.type == DATA_FORWARD_ACK)
+            storedFiles = getStoredFiles(&fmanNet);
         
-        if ((ack_waiting == FALSE && storedFiles==0) || 
-             output_msg_type == DATA_ACK)
+        if (ack_waiting == FALSE && storedFiles==0)
         {
-            // Checking stored files to be send.
-            if(getStoredFiles(&fmanNet) > 0) 
-            {
-                read(&fmanNet,read_buffer,DATA_SIZE);
-                // packetbuf_copyfrom((void *)read_buffer, PACKET_SIZE);
-               
-                // Packet send to the "Basestation"
-                /*sink_addr.u8[0] = SINK_ADDR1;
-                sink_addr.u8[1] = SINK_ADDR2;
-
-                #ifdef DEBUG_NET
-                  debug_net_sending_message("DATA (FORWARD)");
-                #endif
-                
-                // Type of the last message sent
-                output_msg_type = DATA;
-	
-                mesh_send(&zoundtracker_conn, &sink_addr);
-	
-                // Net Control Information
-                num_msg_sended++;*/
-	            
-	            
-                // Modificar funcion data_msg() para permitir enviar 
-                // mensajes del net filesystem!!!!!!!!!!!!!!!!!!!!!!
-                SENSORS_DEACTIVATE(phidgets);
-
-                Packet packet_to_send;
-				 
-                // Packet construction.
-                packet_to_send.addr1 = 30;
-                packet_to_send.addr2 = 9;
-                packet_to_send.type = DATA;
-                packet_to_send.size = DATA_SIZE;    
-                packet_to_send.counter = 0;
-                memcpy(packet_to_send.data, read_buffer, DATA_SIZE);
-                packet_to_send.checksum = compute_checksum(&packet_to_send);
-
-                // Net Control Information
-                packet_to_send.reserved[0] = (unsigned char)num_msg_sended;
-                packet_to_send.reserved[1] = (unsigned char)num_msg_acked;
-
-                // Adding battery sensor reading
-                SENSORS_ACTIVATE(battery_sensor);
-                uint16_t batt = battery_sensor.value(0);
-		
-                #ifdef DEBUG_NET
-                  debug_net_battery(batt);
-                #endif
-
-                SENSORS_DEACTIVATE(battery_sensor);
-                SENSORS_ACTIVATE(phidgets);
-
-                packet_to_send.reserved[20] = (unsigned char) ((batt & 0xFF00) >> 8);
-                packet_to_send.reserved[21] = (unsigned char) (batt & 0x00FF);
-		
-                #ifdef DEBUG_NET
-                  debug_net_packet_content(&packet_to_send);
-                #endif
-	
-                // Preparing packet to send it through "rime". Building 
-                // the "rime_stream" using the information of 
-                // "packet_to_send".
-                mount_packet(&packet_to_send, rime_stream);
-                packetbuf_copyfrom((void *)rime_stream, PACKET_SIZE);
-	
-                // "Packet" send to the "Basestation"
-                sink_addr.u8[0] = SINK_ADDR1;
-                sink_addr.u8[1] = SINK_ADDR2;
-
-                #ifdef DEBUG_NET
-                  debug_net_sending_message("DATA (FORWARD)");
-                #endif
-		
-                // Type of the last message sent
-                output_msg_type = DATA;
-	
-                mesh_send(&zoundtracker_conn, &sink_addr);
-	
-                // Net Control Information
-                num_msg_sended++;
-				
-                updateReadFile(&fmanNet);
-            }
-
             // We're not pending for an 'ACK' message. Net work 
             // finished.
             state = BLOCKED;
@@ -875,7 +882,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     initOkLocal = FALSE;
     initOkNet = FALSE;
     initOkLocal = initFileManager(&fmanLocal, 'l', 10, 60);
-    initOkNet = initFileManager(&fmanNet, 'n', 1, 60);
+    initOkNet = initFileManager(&fmanNet, 'n', 3, 60);
     read_attempts = 0;
     write_attempts = 0;
     
@@ -938,6 +945,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
             
                 if (sample_interval == SEND_INTERVAL)
                 {    
+                    //Sending local files (fmanLocal)
                     #ifdef DEBUG_NET
                       debug_net_info_net(num_msg_sended, num_msg_acked);
                     #endif
@@ -950,8 +958,27 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                       debug_state_current_state("DATA SEND");	
                     #endif
                     
-                    send_packet_from_file();
+                    send_packet_from_file(DATA);
                     sample_interval = 0;                
+                }
+                else if(sample_interval == SEND_INTERVAL/2)
+                {
+                    //Sending net files (fmanNet)
+                                        #ifdef DEBUG_NET
+                      debug_net_info_net(num_msg_sended, num_msg_acked);
+                    #endif
+                
+                    // Sensor samples collected. Changing to 
+                    // "DATA_SEND" from "DATA_COLLECT" state.
+                    state = DATA_SEND;
+                    
+                    #ifdef DEBUG_STATE
+                      debug_state_current_state("DATA SEND");	
+                    #endif
+                    
+                    send_packet_from_file(DATA_FORWARD);
+
+                    
                 }
                 else
                 {

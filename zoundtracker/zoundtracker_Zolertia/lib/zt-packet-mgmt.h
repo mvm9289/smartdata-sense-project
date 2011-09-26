@@ -16,6 +16,8 @@
 #define HELLO_ACK 4
 #define DATA_ACK 5
 #define POLL 6
+#define DATA_FORWARD 7
+#define DATA_FORWARD_ACK 8
 #define PACKET_SIZE 64
 #define DATA_SIZE 40
 #define HEADER_SIZE 7
