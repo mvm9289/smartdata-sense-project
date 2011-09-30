@@ -9,10 +9,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "lib/zt-packet-mgmt.h"
+#include "LibPacketRIME/zt-packet-mgmt.h"
 
 #define ACCEL_SENS 0
-#include "lib/zt-sensor-lib.h"
+#include "LibSensors/zt-sensor-lib.h"
 
 
 ///////////////////////////////////////////////////////////////////////
