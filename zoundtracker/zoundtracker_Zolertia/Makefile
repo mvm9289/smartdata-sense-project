@@ -9,5 +9,5 @@ PROJECT_SOURCEFILES = i2cmaster.c  adxl345.c
 
 all: $(CONTIKI_PROJECT)
 
-CONTIKI = ../..
+CONTIKI = ../../../contiki-2.x
 include $(CONTIKI)/Makefile.include
