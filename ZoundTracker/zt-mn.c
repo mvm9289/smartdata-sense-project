@@ -10,9 +10,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "lib/zt-packet-mgmt.h"
-#include "lib/zt-sensor-lib.h"
-#include "lib/zt-filesys-lib.h"
+#include "LibPacketRIME/zt-packet-mgmt.h"
+#include "LibSensors/zt-sensor-lib.h"
+#include "LibFilesystem/zt-filesys-lib.h"
 
 /* ------------------------------------------------------------------ */
 
@@ -61,14 +61,15 @@
 /* ------------------------------------------------------------------ */
 
 /* CFS */
-static FileManager fmanLocal, fmanNet;
+static FileManager fmanLocal;
 static int write_bytes, read_bytes;
 static struct etimer control_timer;
 static unsigned char read_buffer[DATA_SIZE];
+static unsigned char write_buffer[DATA_SIZE];
 static char initOkLocal;
 static char initOkNet;
 static int read_attempts;
-static int read_attempts;
+static int write_attempts;
 
 /* NET */
 static int attempts, flooding_attempts, packet_number, ack_waiting,
@@ -83,8 +84,8 @@ static Packet packet_received;
 
 /* SENSORS */
 static SensorData current_sample;
-static SensorData aux_sample;
 static int sample_interval;
+static unsigned int index;
 
 /* State */
 static unsigned char state;
@@ -163,8 +164,8 @@ data_msg()
     packet_to_send.addr1 = MY_ADDR1;
     packet_to_send.addr2 = MY_ADDR2;
     packet_to_send.type = DATA;
-    packet_to_send.size = file_size;    
-    packet_to_send.counter = (packet_number-1)*PAYLOAD_SIZE;
+    packet_to_send.size = DATA_SIZE; 
+    packet_to_send.counter = (packet_number-1)*DATA_SIZE;
     memcpy(packet_to_send.data, read_buffer, read_bytes);
     packet_to_send.checksum = compute_checksum(&packet_to_send);
     
@@ -673,8 +674,7 @@ PROCESS_THREAD(ZoundTracker_MN_Process, ev, data)
     mesh_open(&zoundtracker_conn, CHANNEL1, &zoundtracker_callbacks);
     broadcast_open(&zoundtracker_broadcast_conn, CHANNEL2,
       &zoundtracker_broadcast_callbacks);       
-    input_msg_type = output_msg_type = EMPTY;
-    ack_timeout = 0;
+    output_msg_type = EMPTY;
     attempts = 0;
     valid_broadcast_id = (unsigned char)(rand() % 256);
     num_msg_sended = 0;

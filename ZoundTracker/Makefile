@@ -8,5 +8,5 @@ PROJECT_SOURCEFILES = i2cmaster.c adxl345.c tmp102.c battery-sensor.c
 
 all: $(CONTIKI_PROJECT)
 
-CONTIKI = ../..
+CONTIKI = ../../contiki-2.x
 include $(CONTIKI)/Makefile.include
