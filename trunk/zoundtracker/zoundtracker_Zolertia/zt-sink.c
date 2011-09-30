@@ -89,12 +89,13 @@ inline Packet hello_ack_packet()
     return helloACK;
 }
 
-inline Packet data_ack_packet()
+inline Packet data_ack_packet(unsigned int type)
 {
     Packet dataACK;
     dataACK.addr1 = SINK_ADDR1;
     dataACK.addr2 = SINK_ADDR2;
-    dataACK.type = DATA_ACK;
+    if (type == DATA) dataACK.type = DATA_ACK;
+    else if (type == DATA_FORWARD) dataACK.type = DATA_FORWARD_ACK;
     dataACK.size = 0;
     dataACK.counter = 0;
     dataACK.checksum = compute_checksum(&dataACK);
@@ -211,7 +212,7 @@ static void received(    struct mesh_conn *c,
                 recv_send_packet.reserved[4] = from->u8[0];
                 recv_send_packet.reserved[5] = from->u8[1];
             }
-            else if (recv_packet.type == DATA)
+            else if (recv_packet.type == DATA || recv_packet.type == DATA_FORWARD)
             {
                 rssi = cc2420_rssi();
                 recv_packet.reserved[2] = (char)(rssi>>8);
@@ -249,7 +250,7 @@ static void received(    struct mesh_conn *c,
                         putchar(recv_packet_buff[i]);
                 #endif
                 is_valid = 1;
-                recv_send_packet = data_ack_packet();
+                recv_send_packet = data_ack_packet(recv_packet.type);
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////
                 recv_send_packet.reserved[4] = from->u8[0];
                 recv_send_packet.reserved[5] = from->u8[1];
