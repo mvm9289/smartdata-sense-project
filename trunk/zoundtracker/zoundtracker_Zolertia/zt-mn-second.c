@@ -100,6 +100,7 @@ static int sample_interval;
 
 // State
 static unsigned char state;
+static unsigned char previous_state;
 
 //--------------------------------------------------------------------
 
@@ -262,9 +263,10 @@ prepare_packet(int type)
     // Return: The return value will be TRUE if 'read_bytes' is 
     // greater than 0, otherwise the returns FALSE
 
-    int pos;
+    
     if (read_attempts > 0) 
     {
+        int pos = -1;
         if(type == DATA)
             pos = readSeek(&fmanLocal, START_POSITION);
         else if(type == DATA_FORWARD)
@@ -290,8 +292,8 @@ prepare_packet(int type)
         read_bytes = read(&fmanLocal, read_buffer, DATA_SIZE);
     else if(type == DATA_FORWARD)
     {
-        read_bytes = read(&fmanNet, original_addr1, sizeof(unsigned char));
-        read_bytes = read(&fmanNet, original_addr2, sizeof(unsigned char));      
+        read_bytes = read(&fmanNet, &original_addr1, sizeof(unsigned char));
+        read_bytes = read(&fmanNet, &original_addr2, sizeof(unsigned char));      
         read_bytes = read(&fmanNet, read_buffer, DATA_SIZE);
     }
 
@@ -362,6 +364,12 @@ send_packet_from_file(int type)
 
           }
           if (storedFiles > 0) send_packet_from_file(type);
+          else if(type == DATA_FORWARD) 
+          {
+            printf("No hay paquetes del Net Filesystem por enviar\n\n");
+            previous_state = state;
+            state = BLOCKED;
+          }
       }
 }
 
@@ -384,7 +392,13 @@ sent(struct mesh_conn *c)
     if(output_msg_type == DATA || output_msg_type == HELLO_MN || 
         output_msg_type == DATA_FORWARD)
     	    ack_waiting = TRUE;
-    
+    else if (output_msg_type == DATA_ACK || output_msg_type == DATA_FORWARD_ACK)
+    {
+      unsigned char aux_state = previous_state;
+      previous_state = state;
+      state = aux_state;
+    }
+
     #ifdef DEBUG_NET
       debug_net_sent_message();
     #endif    
@@ -434,6 +448,14 @@ timedout(struct mesh_conn *c)
               debug_net_timeout(DATA_FORWARD, packet_number);
             #endif
         }
+        else if(output_msg_type == DATA_ACK || output_msg_type == DATA_FORWARD_ACK)
+        {
+          // Resending buffer info (ACK)
+           mesh_send(&zoundtracker_conn, from);
+           #ifdef DEBUG_NET
+              debug_net_timeout(DATA_FORWARD, packet_number);
+            #endif
+        }
         
     }
     else
@@ -468,6 +490,7 @@ timedout(struct mesh_conn *c)
         }
                 
         // Message lost. Changing to "BLOCKED" from "DATA_SEND" state.  
+        previous_state = state;
         state = BLOCKED;
         
         #ifdef DEBUG_STATE
@@ -492,7 +515,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
     // Context: This function is executed when a message is received 
     // through the mesh connection.
 
-    unsigned char prev_state = state;
+    //unsigned char prev_state = state;
     int storedFiles,i;
 
     #ifdef DEBUG_NET
@@ -507,6 +530,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
     {
         // Message received ("POLL/HELLO_ACK/DATA_ACK"). Changing to 
         // "DATA_SEND" from "DATA_SEND/BLOCKED/DATA_COLLECT" state. 
+        previous_state = state;
         state = DATA_SEND;
         
         #ifdef DEBUG_STATE
@@ -562,7 +586,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
               debug_net_message_received("POLL");
             #endif
 
-            if (prev_state == DATA_SEND)
+            if (previous_state == DATA_SEND)
             {
                 // "POLL" message on reply to a "DATA" message sent 
                 // and lost. Resending the last packet.
@@ -599,7 +623,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             mesh_send(&zoundtracker_conn, from);
 
         }
-        else if(packet_received.type == DATA || packet_received.tyep == DATA_FORWARD)
+        else if(packet_received.type == DATA || packet_received.type == DATA_FORWARD)
         {
             // DATA message received. Resending to the SINK
 
@@ -638,8 +662,8 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
             #endif
 
             // Saving the packet into the net filesystem (original address and data)
-            i = write(&fmanNet, packet_received.addr1,sizeof(unsigned char));
-            i = write(&fmanNet, packet_received.addr2,sizeof(unsigned char));
+            i = write(&fmanNet, &packet_received.addr1,sizeof(unsigned char));
+            i = write(&fmanNet, &packet_received.addr2,sizeof(unsigned char));
             i = write(&fmanNet, packet_received.data,DATA_SIZE);
             printf("%d bytes written\n",i);
 
@@ -663,6 +687,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
                     debug_net_sending_message("DATA FORWARD ACK");
                 #endif
 
+
                 // Type of the last message sent
                 if(packet_received.type == DATA) 
                     output_msg_type = DATA_ACK;
@@ -671,8 +696,11 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
 
                 mesh_send(&zoundtracker_conn, from);
 
+              
+
                 // Net Control Information
                 num_msg_sended++;
+
             }
                 
 
@@ -693,6 +721,7 @@ received(struct mesh_conn *c, const rimeaddr_t *from, uint8_t hops)
         {
             // We're not pending for an 'ACK' message. Net work 
             // finished.
+            previous_state = state;
             state = BLOCKED;
             
             #ifdef DEBUG_STATE
@@ -904,6 +933,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
 	
     // Sending message ("HELLO_MN"). Changing to "DATA_SEND" from 
     // "BLOCKED" state.  
+    previous_state = state;
     state = DATA_SEND;    
     
     #ifdef DEBUG_STATE
@@ -927,6 +957,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
             {
                 // Timer expired. Changing to "DATA_COLLECT" from 
                 // "BLOCKED" state.
+                previous_state = state;
                 state = DATA_COLLECT;
                 
                 #ifdef DEBUG_STATE
@@ -952,6 +983,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                 
                     // Sensor samples collected. Changing to 
                     // "DATA_SEND" from "DATA_COLLECT" state.
+                    previous_state = state;
                     state = DATA_SEND;
                     
                     #ifdef DEBUG_STATE
@@ -964,16 +996,17 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                 else if(sample_interval == SEND_INTERVAL/2)
                 {
                     //Sending net files (fmanNet)
-                                        #ifdef DEBUG_NET
+                    #ifdef DEBUG_NET
                       debug_net_info_net(num_msg_sended, num_msg_acked);
                     #endif
                 
                     // Sensor samples collected. Changing to 
                     // "DATA_SEND" from "DATA_COLLECT" state.
+                    previous_state = state;
                     state = DATA_SEND;
                     
                     #ifdef DEBUG_STATE
-                      debug_state_current_state("DATA SEND");	
+                      debug_state_current_state("DATA FORWARD SEND");	
                     #endif
                     
                     send_packet_from_file(DATA_FORWARD);
@@ -984,6 +1017,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                 {
                     // Collecting sensor samples. Changing 
                     // to "BLOCKED" from "DATA_COLLECT" state.
+                    previous_state = state;
                     state = BLOCKED;
                     
                     #ifdef DEBUG_STATE
@@ -1010,6 +1044,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                         
                         // Returning to "BLOCKED" from "DATA_SEND" 
                         // state.
+                        previous_state = state;
                         state = BLOCKED;
     					
                         #ifdef DEBUG_STATE
@@ -1026,6 +1061,7 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
                         
                         // Returning to "BLOCKED" from "DATA_SEND" 
                         // state.
+                        previous_state = state;
                         state = BLOCKED;
     					
                         #ifdef DEBUG_STATE
