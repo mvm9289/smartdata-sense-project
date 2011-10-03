@@ -30,7 +30,7 @@
 #define HELLO_SENDS 1
 
 #ifdef DEBUG_MODE
-#define DEBUG_STATES
+#define DEBUG_STATE
 #define DEBUG_NET
 #endif
 
@@ -522,7 +522,7 @@ PROCESS_THREAD(    zoundtracker_sink_process, ev, data    )
             ///////////////////// Hello state /////////////////////////
             if (state == HELLO_STATE)
             {
-                #if defined(DEBUG_STATES) || defined(DEBUG_NET)
+                #if defined(DEBUG_STATE) || defined(DEBUG_NET)
                     printf("             HELLO_STATE: ");
                     printf("Sending hello packet\n\n");
                 #endif
@@ -547,7 +547,7 @@ PROCESS_THREAD(    zoundtracker_sink_process, ev, data    )
             ///////////////////// Wait state //////////////////////////
             else if (state == WAIT_STATE)
             {
-                #ifdef DEBUG_STATES
+                #ifdef DEBUG_STATE
                     printf("             WAIT_STATE: ");
                     printf("Waiting for anything happens\n\n");
                 #endif
@@ -575,7 +575,7 @@ PROCESS_THREAD(    zoundtracker_sink_process, ev, data    )
             //////////////////// Update state /////////////////////////
             else if (state == UPDATE_STATE)
             {
-                #ifdef DEBUG_STATES
+                #ifdef DEBUG_STATE
                     printf("             UPDATE_STATE: ");
                     printf("Updating timestamp for all nodes\n\n");
                 #endif
@@ -590,7 +590,7 @@ PROCESS_THREAD(    zoundtracker_sink_process, ev, data    )
             ////////////////////// Test state /////////////////////////
             else if (state == TEST_STATE)
             {
-                #ifdef DEBUG_STATES
+                #ifdef DEBUG_STATE
                     printf("             TEST_STATE: ");
                     printf("Testing if some node need to be ");
                     printf("polled\n\n");
@@ -608,7 +608,7 @@ PROCESS_THREAD(    zoundtracker_sink_process, ev, data    )
             ////////////////////// Poll state /////////////////////////
             else if (state == POLL_STATE)
             {
-                #ifdef DEBUG_STATES
+                #ifdef DEBUG_STATE
                     printf("             POLL_STATE: ");
                     printf("Polling all nodes that has been ");
                     printf("timedout\n\n");
@@ -679,7 +679,7 @@ PROCESS_THREAD(    zoundtracker_sink_process, ev, data    )
             
             else
             {
-                #ifdef DEBUG_STATES
+                #ifdef DEBUG_STATE
                     printf("             UNKNOWN STATE\n\n");
                 #endif
             }
