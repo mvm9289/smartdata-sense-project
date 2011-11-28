@@ -48,7 +48,7 @@
 #endif
 
 // CFS
-#define NUM_SECONDS_SAMPLE 60  // Default 60 (1 sample/min)
+#define NUM_SECONDS_SAMPLE 20  // Default 60 (1 sample/min)
 #define MAX_WRITE_ATTEMPTS 5
 
 // Sensor
@@ -57,6 +57,7 @@
 // State
 #define BLOCKED 1
 #define DATA_COLLECT 2
+#define NET_RECEIVED 3
 
 
 //--------------------------------------------------------------------
@@ -73,7 +74,7 @@ static int write_attempts;
 
 // State
 static unsigned char state;
-
+static int tics;
 
 // Sensor
 void 
@@ -152,7 +153,8 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
     SENSORS_ACTIVATE(phidgets);
 
     // State
-    state = BLOCKED;  
+    state = BLOCKED; 
+    tics = 0; 
 
     #ifdef DEBUG_STATE
       debug_state_current_state("BLOCKED");
@@ -177,19 +179,39 @@ PROCESS_THREAD(example_zoundt_mote_process, ev, data) {
         PROCESS_WAIT_EVENT();
         if (ev == PROCESS_EVENT_TIMER)
         {
-           state = DATA_COLLECT;
-           #ifdef DEBUG_STATE
-              debug_state_current_state("DATA COLLECT");
-           #endif
-                  
-           // 'sample_interval' starts on zero.
-           get_sensor_sample();
-            
-           #ifdef DEBUG_SENSOR
-             debug_sensor_sample_measured(sample_interval);
-           #endif
+          tics++;
+ 
+          state = NET_RECEIVED;
+          #ifdef DEBUG_STATE
+                debug_state_current_state("DATA COLLECT");
+          #endif
+          //comprobar si hay algun paquete de datos en la cola received
+          //del modulo de red. En caso afirmativo, almacenar en fmanNet
 
-           //updateNet();
+          state = BLOCKED;
+          #ifdef DEBUG_STATE
+            debug_state_current_state("BLOCKED");
+          #endif
+
+           if(tics == 3)
+           {
+             state = DATA_COLLECT;
+             #ifdef DEBUG_STATE
+                debug_state_current_state("DATA COLLECT");
+             #endif
+                    
+             // 'sample_interval' starts on zero.
+             get_sensor_sample();
+              
+             #ifdef DEBUG_SENSOR
+               debug_sensor_sample_measured(sample_interval);
+             #endif
+
+             //updateNet();
+
+             tics = 0;
+          }
+
 
         }
         else
